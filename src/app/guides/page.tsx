@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, Suspense } from 'react'
 import Link from 'next/link'
 import { useSearchParams } from 'next/navigation'
 import { createClient } from '@/lib/supabase/client'
@@ -46,7 +46,7 @@ interface Category {
   description: string
 }
 
-export default function GuidesPage() {
+function GuidesPageContent() {
   const [guides, setGuides] = useState<Guide[]>([])
   const [categories, setCategories] = useState<Category[]>([])
   const [loading, setLoading] = useState(true)
@@ -391,5 +391,17 @@ export default function GuidesPage() {
         </div>
       </section>
     </div>
+  )
+}
+
+export default function GuidesPage() {
+  return (
+    <Suspense fallback={
+      <div className="min-h-screen bg-slate-50 flex items-center justify-center">
+        <Loader2 className="w-12 h-12 text-emerald-600 animate-spin" />
+      </div>
+    }>
+      <GuidesPageContent />
+    </Suspense>
   )
 }
