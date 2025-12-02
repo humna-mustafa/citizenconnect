@@ -1,0 +1,257 @@
+﻿FULL REQUIREMENT DOCUMENT
+Website: CitizenConnect
+________________
+
+
+Website Colours
+* Primary Green (#009950): Main buttons, highlights – friendly, trustworthy, modern.
+
+* Background / Secondary (#F8F9FA): Soft off-white for readability, clean look.
+
+* Accent / Hover (#27AE60): Lively, positive actions, hover effects.
+
+* Text Color (#333333): Neutral, highly readable against background.
+
+________________
+
+
+1. SYSTEM OVERVIEW
+A unified platform for Pakistani citizens to:
+   * Access step-by-step instructions to resolve local issues
+
+   * Connect with blood donors and recipients
+
+   * Request emergency help and guidance
+
+   * Provide donations to verified causes
+
+   * Engage with the community: comment, share experiences, upvote helpful guides
+
+Core Values: Transparency, Community Engagement, Empowerment, Social Responsibility
+________________
+
+
+2. CORE MODULES (TOP LEVEL)
+      1. User Account System (Login, Signup, Roles)
+
+      2. Issue Guidance System (Step-by-step instructions)
+
+      3. Community Interaction Module (Comments, Sharing, Upvotes/Likes)
+
+      4. Blood Donor & Recipient Module
+
+      5. Emergency Help Module
+
+      6. Donation Module
+
+      7. Volunteer Guidance Module
+
+      8. Public Transparency Dashboard (Community stats)
+
+      9. Admin Panel (Website management)
+
+      10. Notification System
+
+      11. Search + Filtering System
+
+      12. AI Module (Optional: categorize issues automatically)
+
+________________
+
+
+3. DETAILED FEATURE BREAKDOWN
+A. Authentication System
+A1. User Registration
+         * Name, Phone number (OTP optional), Email, Password, City
+
+         * Role Selection: Citizen, Blood Donor, Volunteer
+
+A2. Login
+            * Email/phone + password
+
+A3. Forgot Password
+               * Reset link via SMS/email
+
+A4. User Profile
+                  * Personal info edit
+
+                  * Profile photo
+
+                  * Badge display (Donor/Volunteer/Verified Contributor)
+
+                  * Track contributed tips, guides, and comments
+
+________________
+
+
+B. Homepage (Landing Page)
+B1. Header
+                     * Logo
+
+                     * Navigation Menu: Home, Issue Guides, Blood Bank, Donations, Volunteers, Dashboard, About Us, Contact, Login/Signup
+
+B2. Hero Section
+                        * Website purpose summary: “Step-by-step solutions for local issues”
+
+                        * Search bar: “Find guide by issue or category”
+
+                        * Quick buttons: Most common guides, Emergency Help, Find Blood Donor
+
+B3. Live Stats Section
+                           * Total guides available
+
+                           * Active volunteers
+
+                           * Registered blood donors
+
+                           * Donations contributed
+
+B4. Popular Categories
+                              * Roads & Transport
+
+                              * Sewerage & Water
+
+                              * Electricity & Gas
+
+                              * Health
+
+                              * Education
+
+                              * Social Causes
+
+________________
+
+
+C. Issue Guidance System
+C1. Guide Page
+                                 * Issue title
+
+                                 * Problem explanation
+
+                                 * Step-by-step instructions
+
+                                 * Required documents/forms
+
+                                 * Relevant emails, WhatsApp numbers, or online portals
+
+                                 * Timeline expectations
+
+                                 * Community engagement: Comments, sharing experience, upvotes/likes, citizen tips
+
+C2. AI Auto Categorization (Optional)
+                                    * Suggest category or similar issues
+
+________________
+
+
+D. Community Interaction Module
+                                       * Citizens can comment on guides
+
+                                       * Share their personal experiences and tips
+
+                                       * Thumbs up / like helpful guides or comments
+
+                                       * Upvote guides to highlight importance or usefulness
+
+                                       * Users can suggest improvements for guides
+
+                                       * Optional rating system for guides (1–5 stars)
+
+________________
+
+
+E. Blood Donor & Recipient Module
+E1. Donor Registration
+                                          * Blood group, City, Availability, Contact
+
+E2. Find Donors
+                                             * Filters: Blood group, City, Urgency level
+
+                                             * Contact donor button
+
+E3. Urgent Broadcast
+                                                * Notify nearby donors of emergency needs
+
+________________
+
+
+F. Emergency Help Module
+                                                   * Step-by-step guidance for emergencies (Medical, Accident, Fire, Natural Disaster)
+
+                                                   * Emergency checklist and preparation tips
+
+                                                   * Contact lists of community volunteers or NGO support
+
+________________
+
+
+G. Donation Module
+G1. Donation Categories
+                                                      * Medical cases, Education, Food, Orphan support, Disaster relief
+
+G2. Transparent Cases
+                                                         * Verified case details, photos, and documents
+
+G3. Payment Integration
+                                                            * JazzCash, Easypaisa, Bank transfer
+
+G4. Tracking
+                                                               * Donor sees how funds are used (optional, if NGO provides updates)
+
+________________
+
+
+H. Volunteer Guidance Module
+                                                                  * Sign-up: Skills, Area, Availability
+
+                                                                  * Guidance on how to help community issues
+
+                                                                  * Volunteer discussion threads and tips
+
+________________
+
+
+I. Public Transparency Dashboard
+                                                                     * Open Data: Available guides, Donations, Blood donors, Volunteer stats
+
+                                                                     * Rankings: Most active contributors, Most upvoted guides
+
+________________
+
+
+J. Notification System
+                                                                        * Alerts for new guides, updated guides, donation opportunities, volunteer activities
+
+________________
+
+
+K. Footer
+                                                                           * About
+
+                                                                           * FAQ
+
+                                                                           * Contact
+
+                                                                           * Privacy
+
+                                                                           * Terms
+
+                                                                           * Social links
+
+________________
+
+
+L. Backend Requirements
+L1. Databases
+                                                                              * Users, Guides, Donations, Blood Donors, Volunteers, Comments, Media uploads
+
+L2. APIs
+                                                                                 * Search API
+
+                                                                                 * Email/Contact links
+
+                                                                                 * Payment API
+
+                                                                                 * Optional Map API
+
+                                                                                    *
