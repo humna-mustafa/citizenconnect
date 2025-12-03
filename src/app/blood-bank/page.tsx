@@ -257,8 +257,8 @@ export default function BloodBankPage() {
             {/* Quick Stats */}
             <div className="grid grid-cols-3 gap-6 max-w-2xl mx-auto">
               {[
-                { value: '500+', label: 'Registered Donors' },
-                { value: '150+', label: 'Lives Saved' },
+                { value: '10+', label: 'Registered Donors' },
+                { value: '5+', label: 'Lives Saved' },
                 { value: '24/7', label: 'Available' },
               ].map((stat, index) => (
                 <div key={index} className="bg-white/5 backdrop-blur-md rounded-2xl p-6 border border-white/10 hover:bg-white/10 transition-all">

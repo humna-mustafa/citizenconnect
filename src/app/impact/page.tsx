@@ -388,7 +388,7 @@ export default function ImpactPage() {
                       <Calendar className="w-5 h-5 text-emerald-600" />
                       <div>
                         <p className="font-medium text-foreground">Semester</p>
-                        <p className="text-sm text-muted-foreground">Fall 2024</p>
+                        <p className="text-sm text-muted-foreground">Fall 2025</p>
                       </div>
                     </div>
                   </div>

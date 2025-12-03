@@ -1,6 +1,10 @@
+'use client'
+
+import { useState } from 'react'
 import Link from 'next/link'
 import Image from 'next/image'
-import { Facebook, Twitter, Instagram, Linkedin, Send } from 'lucide-react'
+import { Facebook, Twitter, Instagram, Linkedin, Send, CheckCircle2, Loader2 } from 'lucide-react'
+import { toast } from 'sonner'
 
 const footerLinks = {
   company: [
@@ -17,8 +21,8 @@ const footerLinks = {
   ],
   community: [
     { name: 'Volunteer', href: '/volunteers' },
-    { name: 'Become a Donor', href: '/blood-bank/register' },
-    { name: 'Submit a Guide', href: '/guides/submit' },
+    { name: 'Become a Donor', href: '/blood-bank' },
+    { name: 'Submit a Guide', href: '/guides' },
     { name: 'Community Forum', href: '/community' },
   ],
   legal: [
@@ -30,13 +34,36 @@ const footerLinks = {
 }
 
 const socialLinks = [
-  { name: 'Facebook', href: '#', icon: Facebook },
-  { name: 'Twitter', href: '#', icon: Twitter },
-  { name: 'Instagram', href: '#', icon: Instagram },
-  { name: 'LinkedIn', href: '#', icon: Linkedin },
+  { name: 'Facebook', href: 'https://facebook.com', icon: Facebook },
+  { name: 'Twitter', href: 'https://twitter.com', icon: Twitter },
+  { name: 'Instagram', href: 'https://instagram.com', icon: Instagram },
+  { name: 'LinkedIn', href: 'https://linkedin.com', icon: Linkedin },
 ]
 
 export default function Footer() {
+  const [email, setEmail] = useState('')
+  const [isSubscribing, setIsSubscribing] = useState(false)
+
+  const handleNewsletterSubmit = async (e: React.FormEvent) => {
+    e.preventDefault()
+    if (!email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+      toast.error('Please enter a valid email address')
+      return
+    }
+    
+    setIsSubscribing(true)
+    
+    // Simulate API call
+    await new Promise(resolve => setTimeout(resolve, 1000))
+    
+    toast.success('Thank you for subscribing!', {
+      description: 'You will receive updates on new guides and community activities.',
+      icon: <CheckCircle2 className="w-5 h-5 text-emerald-500" />
+    })
+    setEmail('')
+    setIsSubscribing(false)
+  }
+
   return (
     <footer className="bg-slate-900 text-slate-200">
       {/* Main Footer */}
@@ -69,6 +96,8 @@ export default function Footer() {
                 <a
                   key={social.name}
                   href={social.href}
+                  target="_blank"
+                  rel="noopener noreferrer"
                   className="w-10 h-10 bg-white/5 rounded-lg flex items-center justify-center hover:bg-primary hover:text-white transition-all duration-300"
                   aria-label={social.name}
                 >
@@ -139,20 +168,29 @@ export default function Footer() {
               <h3 className="text-xl font-semibold text-white mb-2">Subscribe to our Newsletter</h3>
               <p className="text-slate-400">Get the latest updates on new guides and community activities.</p>
             </div>
-            <form className="flex gap-3 w-full md:w-auto">
+            <form onSubmit={handleNewsletterSubmit} className="flex gap-3 w-full md:w-auto">
               <div className="relative flex-1 md:w-72">
                 <input
                   type="email"
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
                   placeholder="Enter your email"
                   className="w-full px-4 py-3 bg-white/5 border border-white/10 rounded-lg text-white placeholder-slate-500 focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary transition-all"
                 />
               </div>
               <button
                 type="submit"
-                className="px-6 py-3 bg-primary text-white rounded-lg font-semibold hover:bg-primary/90 transition-all flex items-center gap-2"
+                disabled={isSubscribing}
+                className="px-6 py-3 bg-primary text-white rounded-lg font-semibold hover:bg-primary/90 transition-all flex items-center gap-2 disabled:opacity-50"
               >
-                Subscribe
-                <Send className="w-4 h-4" />
+                {isSubscribing ? (
+                  <Loader2 className="w-4 h-4 animate-spin" />
+                ) : (
+                  <>
+                    Subscribe
+                    <Send className="w-4 h-4" />
+                  </>
+                )}
               </button>
             </form>
           </div>

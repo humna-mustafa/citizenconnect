@@ -8,7 +8,7 @@ const features = [
     icon: Heart,
     href: '/blood-bank',
     color: 'text-destructive bg-destructive/10',
-    stats: '500+ Donors'
+    stats: '10+ Donors'
   },
   {
     title: 'Emergency Help',
@@ -24,7 +24,7 @@ const features = [
     icon: Coins,
     href: '/donations',
     color: 'text-amber-500 bg-amber-500/10',
-    stats: 'PKR 2.5M+ Raised'
+    stats: 'PKR 100K+ Raised'
   },
   {
     title: 'Become a Volunteer',
@@ -32,7 +32,7 @@ const features = [
     icon: Users,
     href: '/volunteers',
     color: 'text-primary bg-primary/10',
-    stats: '200+ Volunteers'
+    stats: '15+ Volunteers'
   }
 ]
 

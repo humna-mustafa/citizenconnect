@@ -1,0 +1,393 @@
+CITIZENCONNECT WEBSITE - COMPLETE BUG FIX & ENHANCEMENT PROMPT
+PROJECT CONTEXT
+* Website: CitizenConnect - Civic Platform for Pakistani Citizens
+* URL: https://citizenconnect-rho.vercel.app/
+* Tech Stack: Next.js, React, TypeScript, Tailwind CSS, Supabase
+* Purpose: Civics semester project (Fall 2025) for COMSATS University
+
+SECTION A: AUTHENTICATION FIXES
+A1. Signup Page (/auth/signup)
+Fix 1: Terms & Conditions Checkbox Not Working
+plaintext
+- Checkbox click does not update form state
+- Form not submits  when checkbox is unchecked
+- Fix: Add proper onChange handler and form validation
+- Block form submission if checkbox is false
+- Show error message: "Please accept Terms of Service to continue"
+Fix 2: Password Visibility Toggle Missing
+plaintext
+- Add eye icon button inside both Password and Confirm Password fields
+- On click, toggle input type between "password" and "text"
+- Use eye icon when hidden, eye-slash icon when visible
+- Add aria-label for accessibility
+Fix 3: Password Strength Indicator Missing
+plaintext
+- Add password strength meter below password field
+- Show strength levels: Weak (red), Medium (yellow), Strong (green)
+- Check criteria: min 8 chars, uppercase, lowercase, number, special char
+- Display checkmarks for met criteria
+Fix 4: Confirm Password Match Validation Missing
+plaintext
+- Validate that Password and Confirm Password match in real-time
+- Show inline error: "Passwords do not match" if different
+- Disable submit button until passwords match
+Fix 5: Phone Number Validation Missing
+plaintext
+- Validate Pakistani phone format: 03XX-XXXXXXX or +92 3XX XXXXXXX
+- Add input mask for consistent formatting
+- Show error: "Enter valid Pakistani phone number"
+Fix 6: Email Validation Incomplete
+plaintext
+- Add regex validation: /^[^\s@]+@[^\s@]+\.[^\s@]+$/
+- Validate on blur and form submit
+- Show error: "Enter a valid email address"
+A2. Login Page (/auth/login)
+Fix 7: Password Visibility Toggle Missing
+plaintext
+- Same implementation as signup page
+- Add eye icon toggle for password field
+Fix 8: Social Auth Buttons Not Working
+plaintext
+- "Continue with Google" button is non-functional
+- "Continue with Facebook" button is non-functional
+- Either implement OAuth 2.0 authentication OR remove these buttons entirely
+
+SECTION B: HOMEPAGE FIXES (/)
+Fix 9: Search Dropdown Z-Index Issue
+plaintext
+- Popular searches dropdown appears BEHIND action buttons
+- Set dropdown container z-index to 50 or higher
+- Ensure proper stacking context with position: relative on parent
+Fix 10: Hero Section Enhancement
+plaintext
+- Replace static graphics with 3D animated elements
+- Add Lottie or Framer Motion animations
+- Implement glassmorphism effect on info cards
+- Maintain brand colors: #009950 (primary), #27AE60 (accent)
+Fix 11: "Empowering Pakistani Citizens" Box Alignment
+plaintext
+- Text box is positioned too high
+- Add proper vertical spacing (min padding-top: 60px)
+- Ensure responsive alignment on all breakpoints
+Fix 12: Hero Text Content Update
+plaintext
+Current text is too narrow in scope.
+Replace:
+"Step-by-Step Solutions for Local Issues..."
+With most suitable text  for website .
+Fix 13: City Names Section UI Improvement
+plaintext
+Current: Plain text list (Karachi, Lahore, Islamabad...)
+Fix: Wrap each city in styled card with:
+- White background (#FFFFFF)
+- Border: 1px solid #E5E7EB
+- Border-radius: 12px
+- Box-shadow: 0 2px 8px rgba(0,0,0,0.08)
+- Hover effect with subtle scale transform
+Fix 14: Statistics Update (CRITICAL)
+plaintext
+Current stats are unrealistic for semester project.
+Update ALL statistics across the website to:
+- Blood Donors: "10+" (was 500+)
+- Active Volunteers: "15+" (was 200+)
+- Donations Raised: "PKR 100,000+" (was PKR 2.5M)
+
+Apply to: Homepage, Impact page, Dashboard, About page
+Fix 15: Newsletter Subscribe Button Not Working
+plaintext
+- Subscribe button has no functionality
+- Implement email collection (store in database)
+- Validate email format before submission
+- Show success popup: "Thank you for subscribing!"
+- Handle duplicate emails gracefully
+Fix 16: Social Media Footer Links Not Working
+plaintext
+- Social media icons in footer are not clickable/linked
+- Either link to actual social profiles OR remove if not applicable
+Fix 17: "Submit a Guide" Button Misdirection
+plaintext
+- Button redirects to wrong page
+- Create proper guide submission form with fields:
+  - Title, Category, Content (rich text), Images, External Links
+- Show confirmation popup after successful submission
+
+SECTION C: GUIDES PAGE FIXES (/guides)
+Fix 18: Search Bar Not Working
+plaintext
+- Search button does not trigger search
+- Text typed appears in WHITE color (invisible)
+- No cursor/caret visible when clicking
+Fix:
+- Implement search filter logic
+- Set input text color to #333333
+- Add proper focus states with visible caret
+- Add search debounce (300ms delay)
+Fix 19: Sort Buttons Not Working
+plaintext
+- "Top Rated", "Newest", "Most Viewed" buttons don't sort results
+- Implement actual sorting logic for each option
+- Show visual indicator for active sort option
+Fix 20: All Guides Have Same Content
+plaintext
+- Every guide shows identical placeholder content
+- Create unique, accurate content for each guide category:
+  - Roads: Pothole reporting, traffic challan, license renewal
+  - Water: WASA complaint, water supply issues
+  - Electricity: LESCO/WAPDA complaint, new connection
+  - Health: Hospital guide, Sehat Card registration
+  - Education: School admission, HEC services
+- Include correct external links to official Pakistani government websites
+Guide Article Pages (/guides/[slug])
+Fix 21: Share Buttons Not Working
+plaintext
+- Share icons (Facebook, Twitter, WhatsApp, Copy) are non-functional
+- Implement Web Share API for mobile
+- Add fallback copy-to-clipboard functionality
+- Make each social share button functional
+Fix 22: Comment Thumbs Up Not Working
+plaintext
+- "Helpful" button doesn't increment count
+- Add click handler to update count
+- Store vote state to prevent duplicate votes
+- Update UI immediately (optimistic update)
+Fix 23: Comment Dates Show 2024
+plaintext
+- Update all comment dates to 2025
+- If dynamic, ensure proper date formatting
+Fix 24: Print Styles Missing
+plaintext
+- Add @media print CSS rules
+- Hide navigation, footer, sidebar when printing
+- Ensure proper page breaks
+- Display URLs for links
+
+SECTION D: BLOOD BANK FIXES (/blood-bank)
+Fix 25: "Post Request" Button Not Working
+plaintext
+- Button has no functionality
+- Create blood request form:
+  - Patient name, Blood group, Units needed
+  - Hospital name & location, Contact number, Urgency level
+- Show confirmation popup after submission
+Fix 26: Donor Registration 404 Error
+plaintext
+URL: /blood-bank/register returns 404
+Create donor registration page with:
+- Full name, Blood group, City, Phone number
+- Last donation date, Availability status
+- Health declaration checkbox
+- Success confirmation after registration
+Fix 27: Add Sample Donor Data
+plaintext
+Add 5-8 dummy Pakistani donor profiles:
+- Ahmed Khan, O+, Lahore, Available
+- Fatima Ali, A-, Karachi, Available
+- Muhammad Hassan, B+, Islamabad, Available
+- Ayesha Malik, AB+, Rawalpindi, Available
+- Usman Raza, O-, Faisalabad, Available
+Fix 28: Empty State Improvement
+plaintext
+Current: "No donors found" with basic text
+Improve: Add illustration, helpful message, styled action button
+
+SECTION E: DONATIONS PAGE FIXES (/donations)
+Fix 29: Infinite Loading State
+plaintext
+- Page shows "Loading..." forever with no campaigns
+- Fix loading logic, add timeout handling
+- Show proper empty state if no campaigns exist
+Fix 30: "Start a Campaign" Button Not Working
+plaintext
+- Button at /donations/create is non-functional
+- Create campaign creation form:
+  - Title, Description, Target amount, Category
+  - Beneficiary details, Supporting documents
+  - Bank account/JazzCash/Easypaisa details
+- Show success confirmation
+Fix 31: "How Donations Work" Section Dark Background
+plaintext
+- In light mode, section has black background merging with footer
+- Change section background to light color (#F8F9FA)
+- Keep only footer in dark mode
+Fix 32: Add Sample Donation Campaigns
+plaintext
+Add 7-8 dummy Pakistani campaigns:
+- Heart surgery for child (PKR 50,000 goal)
+- School supplies for flood victims (PKR 15,000)
+- Ramadan ration distribution (PKR 30,000)
+- Dialysis support for elderly (PKR 25,000)
+- Education fund for orphans (PKR 20,000)
+Fix 33: Replace "Cause" Terminology
+plaintext
+Replace all instances of "Cause" with clearer terms:
+- "Support a Cause" ? "Support a Campaign"
+- "Donate to Causes" ? "Support Verified Campaigns"
+- "Verified Cases" ? "Verified Fundraisers"
+
+SECTION F: EMERGENCY PAGE FIXES (/emergency)
+Fix 34: Add Complete Emergency Numbers
+plaintext
+Add all Pakistan emergency numbers by category:
+
+Police & Security:
+- Police: 15
+- Motorway Police: 130
+- Rangers: 1101
+
+Medical:
+- Rescue: 1122 (Punjab), 115 (Edhi)
+
+Fire: 16
+
+Utilities:
+- WAPDA: 118
+- Sui Gas: 1199
+- WASA Lahore: 1334
+
+Women/Child:
+- Women Helpline: 1099
+- Child Protection: 1121
+Fix 35: Add More NGO Contacts
+plaintext
+Add verified organizations:
+- Al-Khidmat Foundation
+- JDC Foundation
+- Chippa Foundation
+- Alamgir Welfare Trust
+Include correct phone numbers
+
+SECTION G: VOLUNTEERS PAGE FIXES (/volunteers)
+Fix 36: Add Sample Volunteer Data
+plaintext
+Add 3-5 dummy Pakistani volunteers:
+- Ali Ahmed, Lahore, Skills: First Aid, Teaching
+- Sara Khan, Islamabad, Skills: Counseling, Event Management
+- Hassan Raza, Karachi, Skills: Medical Assistance
+- Zainab Fatima, Multan, Skills: Tutoring, Translation
+
+SECTION H: IMPACT PAGE FIXES (/impact)
+Fix 37: Semester Year Wrong
+plaintext
+Current: "Fall 2024"
+Change to: "Fall 2025"
+Fix 38: Academic Context Section UI
+plaintext
+- Poor text/font colors, bad visual hierarchy
+- Improve contrast ratios (WCAG AA compliant)
+- Apply consistent brand colors
+- Add proper card styling
+Fix 39: Statistics Show Zero
+plaintext
+- Some stats display "0" or "..."
+- Replace with consistent pilot numbers matching homepage
+
+SECTION I: ABOUT PAGE FIXES (/about)
+Fix 40: Timeline Year Wrong
+plaintext
+Current: All entries show "2024"
+Change all to: "2025"
+
+SECTION J: CONTACT PAGE FIXES (/contact)
+Fix 41: Email Address Wrong
+plaintext
+Current: support@citizenconnect.pk
+Change to: citizenconnectpk@gmail.com (or actual email)
+Fix 42: Social Media Links Not Working
+plaintext
+- Social buttons below "Follow Us" are non-functional
+- Link to actual profiles or remove
+Fix 43: Contact Form Not Working
+plaintext
+- "Send Message" button has no functionality
+- Implement form submission (email service or database)
+- Show confirmation popup: "Message sent successfully!"
+- Clear form after submission
+- Add input validation
+Fix 44: Map Shows Wrong Location
+plaintext
+- Map not pinned to correct location
+- Pin to: COMSATS University Islamabad, Lahore Campus
+- Coordinates: 31.4035° N, 74.2100° E
+
+SECTION K: 404 ERROR PAGES (Create Missing Pages)
+Fix 45: Create Missing Pages
+plaintext
+These URLs return 404 - create them:
+1. /faq - FAQ page with common questions
+2. /privacy - Privacy Policy page
+3. /terms - Terms of Service page
+4. /cookies - Cookie Policy page
+5. /blood-bank/register - Donor registration form
+Fix 46: Custom 404 Page
+plaintext
+Create styled 404.tsx page with:
+- CitizenConnect branding
+- "Page Not Found" message
+- Navigation back to home
+- Search suggestion
+- Quick links to main sections
+
+SECTION L: GLOBAL FIXES (Apply Across All Pages)
+Fix 47: Form Double Submit Prevention
+plaintext
+All forms should:
+- Disable submit button after click
+- Show loading spinner during submission
+- Re-enable on error/completion
+Fix 48: Loading Skeleton States
+plaintext
+Replace "Loading..." text with:
+- Skeleton loader components
+- Animated placeholders
+- Proper loading indicators
+Fix 49: Pagination Implementation
+plaintext
+Add pagination to list pages:
+- /guides - paginate guide cards
+- /blood-bank - paginate donor list
+- /donations - paginate campaigns
+- 10-20 items per page
+- Page navigation controls
+Fix 50: Required Field Indicators
+plaintext
+- Add asterisk (*) to all required form fields
+- Add legend: "* Required fields"
+- Be consistent across all forms
+Fix 51: Input Autofocus
+plaintext
+- Add autoFocus to first input field on:
+  - Login page (email field)
+  - Signup page (name field)
+  - Contact page (name field)
+  - Search bars
+
+PRIORITY ORDER FOR IMPLEMENTATION
+?? CRITICAL (Fix First)
+1. Terms checkbox not working (A1)
+2. Password visibility toggle (A1, A2)
+3. 404 pages - create missing pages (K)
+4. Search bar not working (C)
+5. Statistics update to realistic numbers (B)
+6. Year update 2024 ? 2025 (all pages)
+?? HIGH PRIORITY
+7. Form validations (email, phone, password match)
+8. Social auth buttons (fix or remove)
+9. Empty states and loading fixes
+10. Button functionality (Submit Guide, Post Request, Start Campaign)
+11. Search dropdown z-index
+12. Contact form working
+?? MEDIUM PRIORITY
+13. Unique guide content
+14. Sample data (donors, volunteers, campaigns)
+15. Share buttons working
+16. Comment thumbs up working
+17. Newsletter subscribe
+?? LOW PRIORITY
+18. UI enhancements (hero section, city cards)
+19. Pagination
+20. Print styles
+21. Search debounce
+22. Password strength indicator
+
+END OF PROMPT - IMPLEMENT FIXES IN PRIORITY ORDER
+

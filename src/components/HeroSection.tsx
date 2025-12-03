@@ -25,16 +25,16 @@ export default function HeroSection() {
             </div>
             
             <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold text-foreground leading-tight mb-6 animate-in fade-in slide-in-from-bottom-5 delay-100">
-              Step-by-Step
-              <span className="block text-primary">Solutions</span>
+              Your Complete Guide to
+              <span className="block text-primary">Civic Services</span>
               <span className="block text-3xl md:text-4xl lg:text-5xl font-semibold text-muted-foreground mt-2">
-                for Local Issues
+                in Pakistan
               </span>
             </h1>
             
             <p className="text-lg md:text-xl text-muted-foreground mb-8 max-w-xl mx-auto lg:mx-0 animate-in fade-in slide-in-from-bottom-6 delay-200">
-              Access guides for civic issues, connect with blood donors, request emergency help, 
-              and contribute to verified causes. Together, we build stronger communities.
+              Navigate government services with ease. Access step-by-step guides, connect with blood donors, 
+              find emergency help, and support verified campaigns. Building stronger communities together.
             </p>
 
             {/* Search Bar */}
@@ -133,10 +133,13 @@ export default function HeroSection() {
           <p className="text-center text-muted-foreground mb-8 text-sm font-medium uppercase tracking-wider">
             Trusted by citizens across Pakistan
           </p>
-          <div className="flex flex-wrap justify-center items-center gap-8 md:gap-16 opacity-60">
+          <div className="flex flex-wrap justify-center items-center gap-4 md:gap-6">
             {['Karachi', 'Lahore', 'Islamabad', 'Peshawar', 'Quetta', 'Multan'].map((city) => (
-              <div key={city} className="text-xl font-bold text-foreground">
-                {city}
+              <div 
+                key={city} 
+                className="px-6 py-3 bg-card border border-border rounded-xl shadow-sm hover:shadow-md hover:border-primary/30 hover:scale-105 transition-all duration-300 cursor-default"
+              >
+                <span className="text-lg font-bold text-foreground">{city}</span>
               </div>
             ))}
           </div>

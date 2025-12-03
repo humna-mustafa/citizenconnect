@@ -264,7 +264,7 @@ export default function VolunteersPage() {
           <div className="max-w-3xl mx-auto text-center text-white">
             <div className="inline-flex items-center gap-2 px-4 py-2 bg-white/10 rounded-full text-sm font-medium mb-6 backdrop-blur-sm border border-white/10">
               <Handshake className="w-4 h-4 text-emerald-400" />
-              <span>Join 1,000+ Active Volunteers</span>
+              <span>Join 15+ Active Volunteers</span>
             </div>
             <h1 className="text-4xl md:text-5xl font-bold mb-6 leading-tight">
               Volunteer Network

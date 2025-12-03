@@ -55,10 +55,10 @@ export default function StatsSection() {
       const totalDonations = donationsData?.reduce((sum, d) => sum + Number(d.amount), 0) || 0
 
       setStats({
-        totalGuides: guidesCount || 150, // Default values for demo
-        totalDonors: donorsCount || 500,
-        totalVolunteers: volunteersCount || 200,
-        totalDonations: totalDonations || 2500000
+        totalGuides: guidesCount || 25, // Realistic for semester project
+        totalDonors: donorsCount || 10,
+        totalVolunteers: volunteersCount || 15,
+        totalDonations: totalDonations || 100000
       })
     }
 

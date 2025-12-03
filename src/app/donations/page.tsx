@@ -238,8 +238,8 @@ export default function DonationsPage() {
             {/* Stats */}
             <div className="grid grid-cols-3 gap-6 max-w-2xl mx-auto">
               {[
-                { value: 'PKR 50M+', label: 'Total Raised' },
-                { value: '500+', label: 'Lives Impacted' },
+                { value: 'PKR 100K+', label: 'Total Raised' },
+                { value: '15+', label: 'Lives Impacted' },
                 { value: '100%', label: 'Verified Cases' },
               ].map((stat, index) => (
                 <div key={index} className="bg-white/5 backdrop-blur-md rounded-2xl p-6 border border-white/10 hover:bg-white/10 transition-all">

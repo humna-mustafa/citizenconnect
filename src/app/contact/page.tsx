@@ -4,6 +4,7 @@ import { useState } from 'react'
 import Link from 'next/link'
 import dynamic from 'next/dynamic'
 import { createClient } from '@/lib/supabase/client'
+import { toast } from 'sonner'
 import { 
   Mail, 
   Phone, 
@@ -43,10 +44,13 @@ export default function ContactPage() {
     const { error } = await createContactMessage(formData)
     
     if (error) {
-      alert('Error sending message. Please try again.')
+      toast.error('Error sending message', {
+        description: 'Please try again later.'
+      })
       console.error(error)
     } else {
       setSubmitted(true)
+      toast.success('Message sent successfully!')
     }
     
     setLoading(false)
@@ -96,10 +100,10 @@ export default function ContactPage() {
           <div className="space-y-6">
             {/* Quick Contact Cards */}
             {[
-              { icon: Mail, title: 'Email', value: 'support@citizenconnect.pk', link: 'mailto:support@citizenconnect.pk' },
+              { icon: Mail, title: 'Email', value: 'citizenconnect.team@gmail.com', link: 'mailto:citizenconnect.team@gmail.com' },
               { icon: Phone, title: 'Phone', value: '+92 300 1234567', link: 'tel:+923001234567' },
-              { icon: MapPin, title: 'Location', value: 'Lahore, Pakistan', link: '#' },
-              { icon: Clock, title: 'Working Hours', value: 'Mon-Fri: 9AM - 6PM', link: '#' },
+              { icon: MapPin, title: 'Location', value: 'COMSATS University, Islamabad', link: '#' },
+              { icon: Clock, title: 'Working Hours', value: 'Mon-Fri: 9AM - 5PM', link: '#' },
             ].map((item, index) => (
               <a
                 key={index}
@@ -274,13 +278,13 @@ export default function ContactPage() {
               markers={[
                 {
                   id: 'office',
-                  position: [31.5204, 74.3587] as [number, number],
-                  title: 'CitizenConnect HQ',
-                  description: 'Lahore, Punjab, Pakistan'
+                  position: [33.6844, 73.0479] as [number, number],
+                  title: 'CitizenConnect - COMSATS University',
+                  description: 'Islamabad, Pakistan'
                 }
               ]}
               zoom={12}
-              center={[31.5204, 74.3587] as [number, number]}
+              center={[33.6844, 73.0479] as [number, number]}
             />
           </div>
         </div>

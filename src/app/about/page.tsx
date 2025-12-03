@@ -57,10 +57,10 @@ export default function AboutPage() {
   ]
 
   const milestones = [
-    { year: '2024', title: 'Project Initiated', desc: 'CitizenConnect conceptualized as Civics & Community Engagement project' },
-    { year: '2024', title: 'Development Phase', desc: 'Built complete platform with Next.js, Supabase, and modern technologies' },
-    { year: '2024', title: 'Feature Complete', desc: 'Implemented all core modules: Guides, Blood Bank, Donations, Volunteers' },
-    { year: '2024', title: 'Project Submission', desc: 'Presented to Prof. Ayesha Aqeel as semester project' },
+    { year: '2025', title: 'Project Initiated', desc: 'CitizenConnect conceptualized as Civics & Community Engagement project' },
+    { year: '2025', title: 'Development Phase', desc: 'Built complete platform with Next.js, Supabase, and modern technologies' },
+    { year: '2025', title: 'Feature Complete', desc: 'Implemented all core modules: Guides, Blood Bank, Donations, Volunteers' },
+    { year: '2025', title: 'Project Submission', desc: 'Presented to Prof. Ayesha Aqeel as semester project' },
   ]
 
   return (
@@ -122,10 +122,10 @@ export default function AboutPage() {
             </div>
             <div className="grid grid-cols-2 gap-6">
               {[
-                { icon: BookOpen, title: '150+', desc: 'Step-by-step Guides' },
-                { icon: Droplets, title: '2,500+', desc: 'Blood Donors' },
-                { icon: Users, title: '1,000+', desc: 'Active Volunteers' },
-                { icon: Heart, title: 'PKR 50M+', desc: 'Donations Facilitated' },
+                { icon: BookOpen, title: '20+', desc: 'Step-by-step Guides' },
+                { icon: Droplets, title: '10+', desc: 'Blood Donors' },
+                { icon: Users, title: '15+', desc: 'Active Volunteers' },
+                { icon: Heart, title: 'PKR 100K+', desc: 'Donations Facilitated' },
               ].map((stat, index) => (
                 <div key={index} className="bg-card border border-border rounded-2xl p-6 text-center hover:shadow-lg transition-all group">
                   <div className="w-12 h-12 bg-primary/10 rounded-xl flex items-center justify-center mx-auto mb-4 group-hover:bg-primary group-hover:text-primary-foreground transition-colors text-primary">
