@@ -123,9 +123,9 @@ export default function ProfilePage() {
           ])
           // Demo contributions
           setContributions([
-            { id: '1', type: 'donation', title: 'Flood Relief Fund', description: 'Donated Rs. 5,000', date: '2025-02-15', color: 'text-green-500', created_at: '2025-02-15' },
-            { id: '2', type: 'blood', title: 'Blood Donation', description: 'Donated at Mayo Hospital', date: '2025-02-20', color: 'text-red-500', created_at: '2025-02-20' },
-            { id: '3', type: 'volunteer', title: 'Community Cleanup', description: 'Participated in cleanup drive', date: '2025-02-25', color: 'text-blue-500', created_at: '2025-02-25' },
+            { id: '1', type: 'donation', title: 'Flood Relief Fund', description: 'Donated Rs. 5,000', date: '2025-02-15', color: 'bg-green-100 text-green-600', icon: Heart, created_at: '2025-02-15' },
+            { id: '2', type: 'blood', title: 'Blood Donation', description: 'Donated at Mayo Hospital', date: '2025-02-20', color: 'bg-red-100 text-red-600', icon: Droplets, created_at: '2025-02-20' },
+            { id: '3', type: 'volunteer', title: 'Community Cleanup', description: 'Participated in cleanup drive', date: '2025-02-25', color: 'bg-blue-100 text-blue-600', icon: Handshake, created_at: '2025-02-25' },
           ])
           setLoading(false)
           return
