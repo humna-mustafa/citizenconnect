@@ -11,13 +11,16 @@ interface StatsData {
   totalDonations: number
 }
 
+// Default fallback values
+const DEFAULT_STATS: StatsData = {
+  totalGuides: 25,
+  totalDonors: 10,
+  totalVolunteers: 15,
+  totalDonations: 150000
+}
+
 export default function StatsSection() {
-  const [stats, setStats] = useState<StatsData>({
-    totalGuides: 0,
-    totalDonors: 0,
-    totalVolunteers: 0,
-    totalDonations: 0
-  })
+  const [stats, setStats] = useState<StatsData>(DEFAULT_STATS)
   const [animatedStats, setAnimatedStats] = useState<StatsData>({
     totalGuides: 0,
     totalDonors: 0,
@@ -25,6 +28,7 @@ export default function StatsSection() {
     totalDonations: 0
   })
   const [isVisible, setIsVisible] = useState(false)
+  const [dataLoaded, setDataLoaded] = useState(false)
   const supabase = createClient()
 
   useEffect(() => {
@@ -57,20 +61,17 @@ export default function StatsSection() {
 
         // Use actual counts or meaningful fallbacks for demo
         setStats({
-          totalGuides: guidesCount !== null && guidesCount > 0 ? guidesCount : 25,
-          totalDonors: donorsCount !== null && donorsCount > 0 ? donorsCount : 10,
-          totalVolunteers: volunteersCount !== null && volunteersCount > 0 ? volunteersCount : 15,
-          totalDonations: totalDonations > 0 ? totalDonations : 150000
+          totalGuides: guidesCount !== null && guidesCount > 0 ? guidesCount : DEFAULT_STATS.totalGuides,
+          totalDonors: donorsCount !== null && donorsCount > 0 ? donorsCount : DEFAULT_STATS.totalDonors,
+          totalVolunteers: volunteersCount !== null && volunteersCount > 0 ? volunteersCount : DEFAULT_STATS.totalVolunteers,
+          totalDonations: totalDonations > 0 ? totalDonations : DEFAULT_STATS.totalDonations
         })
+        setDataLoaded(true)
       } catch (error) {
         console.error('Error fetching stats:', error)
         // Fallback to demo values
-        setStats({
-          totalGuides: 25,
-          totalDonors: 10,
-          totalVolunteers: 15,
-          totalDonations: 150000
-        })
+        setStats(DEFAULT_STATS)
+        setDataLoaded(true)
       }
     }
 
@@ -94,7 +95,8 @@ export default function StatsSection() {
   }, [])
 
   useEffect(() => {
-    if (!isVisible) return
+    // Only animate when both visible AND data is loaded
+    if (!isVisible || !dataLoaded) return
 
     const duration = 2000
     const steps = 60
@@ -120,7 +122,7 @@ export default function StatsSection() {
     }, interval)
 
     return () => clearInterval(timer)
-  }, [isVisible, stats])
+  }, [isVisible, dataLoaded, stats])
 
   const statItems = [
     {
