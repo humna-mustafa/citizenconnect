@@ -23,22 +23,35 @@ export async function getGuides(options?: {
 }) {
   const supabase = createClient()
   
-  let query = supabase
-    .from('guides')
-    .select(`
-      *,
-      categories(name, slug, icon),
-      profiles(full_name)
-    `)
-    .eq('is_published', true)
+  try {
+    // If category filter is specified, first get the category ID
+    let categoryId: string | null = null
+    if (options?.category) {
+      const { data: categoryData } = await supabase
+        .from('categories')
+        .select('id')
+        .eq('slug', options.category)
+        .single()
+      
+      categoryId = categoryData?.id || null
+    }
 
-  if (options?.category) {
-    query = query.eq('categories.slug', options.category)
-  }
+    let query = supabase
+      .from('guides')
+      .select(`
+        *,
+        categories(name, slug, icon),
+        profiles(full_name)
+      `)
+      .eq('is_published', true)
 
-  if (options?.search) {
-    query = query.or(`title.ilike.%${options.search}%,problem_explanation.ilike.%${options.search}%`)
-  }
+    if (categoryId) {
+      query = query.eq('category_id', categoryId)
+    }
+
+    if (options?.search) {
+      query = query.or(`title.ilike.%${options.search}%,problem_explanation.ilike.%${options.search}%`)
+    }
 
   if (options?.sort === 'popular') {
     query = query.order('views_count', { ascending: false })
@@ -50,13 +63,17 @@ export async function getGuides(options?: {
     query = query.order('created_at', { ascending: false })
   }
 
-  if (options?.limit) {
-    query = query.limit(options.limit)
+    if (options?.limit) {
+      query = query.limit(options.limit)
+    }
+
+    const { data, error } = await query
+
+    return { data, error }
+  } catch (error) {
+    console.error('Error in getGuides:', error)
+    return { data: null, error }
   }
-
-  const { data, error } = await query
-
-  return { data, error }
 }
 
 export async function getGuideBySlug(slug: string) {

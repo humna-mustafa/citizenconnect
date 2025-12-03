@@ -95,16 +95,25 @@ function GuidesPageContent() {
         limit: 20
       })
       
-      if (data) {
+      if (error) {
+        console.error('Error fetching guides:', error)
+        // Fallback to demo guides on error
+        setGuides([])
+      } else if (data && data.length > 0) {
         // Map the data to match the interface
         const mappedData = data.map((guide: any) => ({
           ...guide,
           category: guide.categories // Map 'categories' from join to 'category' prop
         }))
         setGuides(mappedData)
+      } else {
+        // No data found, will use demo guides
+        setGuides([])
       }
     } catch (error) {
       console.error('Error fetching guides:', error)
+      // Fallback to demo guides on error
+      setGuides([])
     } finally {
       setLoading(false)
     }
