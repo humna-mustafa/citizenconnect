@@ -9,6 +9,26 @@ export async function middleware(request: NextRequest) {
   if (!supabaseUrl || !supabaseKey || supabaseUrl.includes('placeholder') || !supabaseUrl.startsWith('https://')) {
     return NextResponse.next()
   }
+
+  // Demo mode bypass for testing protected routes
+  // Check for demo_session cookie or query param
+  const demoMode = request.cookies.get('demo_mode')?.value === 'true' || 
+                   request.nextUrl.searchParams.get('demo') === 'true'
+  
+  if (demoMode) {
+    // Set demo mode cookie if accessed via query param
+    if (request.nextUrl.searchParams.get('demo') === 'true') {
+      const response = NextResponse.next()
+      response.cookies.set('demo_mode', 'true', { 
+        path: '/', 
+        maxAge: 60 * 60 * 24, // 24 hours
+        sameSite: 'lax'
+      })
+      return response
+    }
+    // Allow access to protected routes in demo mode
+    return NextResponse.next()
+  }
   
   return await updateSession(request)
 }

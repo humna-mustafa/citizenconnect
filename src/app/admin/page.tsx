@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import { createClient } from '@/lib/supabase/client'
+import { isDemoMode, DEMO_USER } from '@/lib/demo-user'
 import { toast } from 'sonner'
 import type { User } from '@supabase/supabase-js'
 import {
@@ -213,6 +214,15 @@ export default function AdminPage() {
 
   useEffect(() => {
     const checkAdmin = async () => {
+      // Check for demo mode first
+      if (isDemoMode()) {
+        setUser(DEMO_USER as unknown as User)
+        setIsAdmin(true)
+        fetchDashboardData()
+        setLoading(false)
+        return
+      }
+
       const { data: { user } } = await supabase.auth.getUser()
       
       if (!user) {

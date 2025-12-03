@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import { createClient } from '@/lib/supabase/client'
+import { isDemoMode, DEMO_USER, DEMO_PROFILE, disableDemoMode } from '@/lib/demo-user'
 import type { User } from '@supabase/supabase-js'
 import { 
   User as UserIcon, 
@@ -21,7 +22,8 @@ import {
   X,
   BookOpen,
   Handshake,
-  Loader2
+  Loader2,
+  AlertTriangle
 } from 'lucide-react'
 
 interface Profile {
@@ -91,8 +93,43 @@ export default function ProfilePage() {
     'guide_creator': { id: 'guide_creator', name: 'Guide Creator', description: 'Published a helpful guide', icon: BookOpen, color: 'text-blue-500 bg-blue-50' },
   }
 
+  const [isDemo, setIsDemo] = useState(false)
+
   useEffect(() => {
     const getUser = async () => {
+      // Check for demo mode first
+      if (isDemoMode()) {
+        setIsDemo(true)
+        setUser(DEMO_USER as unknown as User)
+        setProfile(DEMO_PROFILE as Profile)
+        setFormData({
+          full_name: DEMO_PROFILE.full_name || '',
+          phone: DEMO_PROFILE.phone || '',
+          city: DEMO_PROFILE.city || '',
+          blood_group: '',
+        })
+        // Demo stats
+        setStats({
+          donations: 5,
+          bloodDonations: 3,
+          volunteerTasks: 8,
+          guides: 2
+        })
+        // Demo badges
+        setBadges([
+          { ...BADGE_DEFINITIONS['first_donation'], earned_at: '2025-01-15' },
+          { ...BADGE_DEFINITIONS['blood_hero'], earned_at: '2025-02-20' },
+        ])
+        // Demo contributions
+        setContributions([
+          { id: '1', type: 'donation', title: 'Flood Relief Fund', description: 'Donated Rs. 5,000', date: '2025-02-15', color: 'text-green-500', created_at: '2025-02-15' },
+          { id: '2', type: 'blood', title: 'Blood Donation', description: 'Donated at Mayo Hospital', date: '2025-02-20', color: 'text-red-500', created_at: '2025-02-20' },
+          { id: '3', type: 'volunteer', title: 'Community Cleanup', description: 'Participated in cleanup drive', date: '2025-02-25', color: 'text-blue-500', created_at: '2025-02-25' },
+        ])
+        setLoading(false)
+        return
+      }
+
       const { data: { user } } = await supabase.auth.getUser()
       
       if (!user) {
