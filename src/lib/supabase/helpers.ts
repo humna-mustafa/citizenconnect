@@ -139,13 +139,43 @@ export async function getBloodDonors(filters?: {
 }) {
   const supabase = createClient()
   
-  const { data, error } = await supabase
-    .rpc('get_filtered_blood_donors', {
-      blood_group_filter: filters?.bloodGroup || null,
-      city_filter: filters?.city || null
-    })
+  // Query blood_donors directly with optional profile join
+  let query = supabase
+    .from('blood_donors')
+    .select(`
+      id,
+      user_id,
+      blood_group,
+      city,
+      area,
+      contact_phone,
+      last_donation_date,
+      donation_count,
+      is_available,
+      profiles (
+        full_name,
+        avatar_url
+      )
+    `)
+    .eq('is_available', true)
+  
+  if (filters?.bloodGroup) {
+    query = query.eq('blood_group', filters.bloodGroup)
+  }
+  if (filters?.city) {
+    query = query.eq('city', filters.city)
+  }
+  
+  const { data, error } = await query.order('donation_count', { ascending: false })
+  
+  // Transform data to include full_name from profile or fallback
+  const transformedData = data?.map((donor: any) => ({
+    ...donor,
+    full_name: donor.profiles?.full_name || 'Anonymous Donor',
+    avatar_url: donor.profiles?.avatar_url || null
+  }))
 
-  return { data, error }
+  return { data: transformedData, error }
 }
 
 export async function createBloodRequest(requestData: Partial<BloodRequest>) {
