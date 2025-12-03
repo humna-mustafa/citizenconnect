@@ -97,37 +97,41 @@ export default function ProfilePage() {
 
   useEffect(() => {
     const getUser = async () => {
-      // Check for demo mode first
-      if (isDemoMode()) {
-        setIsDemo(true)
-        setUser(DEMO_USER as unknown as User)
-        setProfile(DEMO_PROFILE as unknown as Profile)
-        setFormData({
-          full_name: DEMO_PROFILE.full_name || '',
-          phone: DEMO_PROFILE.phone || '',
-          city: DEMO_PROFILE.city || '',
-          blood_group: DEMO_PROFILE.blood_group || '',
-        })
-        // Demo stats
-        setStats({
-          donations: 5,
-          bloodDonations: 3,
-          volunteerTasks: 8,
-          guides: 2
-        })
-        // Demo badges
-        setBadges([
-          { ...BADGE_DEFINITIONS['first_donation'], earned_at: '2025-01-15' },
-          { ...BADGE_DEFINITIONS['blood_hero'], earned_at: '2025-02-20' },
-        ])
-        // Demo contributions
-        setContributions([
-          { id: '1', type: 'donation', title: 'Flood Relief Fund', description: 'Donated Rs. 5,000', date: '2025-02-15', color: 'text-green-500', created_at: '2025-02-15' },
-          { id: '2', type: 'blood', title: 'Blood Donation', description: 'Donated at Mayo Hospital', date: '2025-02-20', color: 'text-red-500', created_at: '2025-02-20' },
-          { id: '3', type: 'volunteer', title: 'Community Cleanup', description: 'Participated in cleanup drive', date: '2025-02-25', color: 'text-blue-500', created_at: '2025-02-25' },
-        ])
-        setLoading(false)
-        return
+      try {
+        // Check for demo mode first
+        if (isDemoMode()) {
+          setIsDemo(true)
+          setUser(DEMO_USER as unknown as User)
+          setProfile(DEMO_PROFILE as unknown as Profile)
+          setFormData({
+            full_name: DEMO_PROFILE.full_name || '',
+            phone: DEMO_PROFILE.phone || '',
+            city: DEMO_PROFILE.city || '',
+            blood_group: DEMO_PROFILE.blood_group || '',
+          })
+          // Demo stats
+          setStats({
+            donations: 5,
+            bloodDonations: 3,
+            volunteerTasks: 8,
+            guides: 2
+          })
+          // Demo badges
+          setBadges([
+            { id: 'first_donation', name: 'First Donation', description: 'Made your first donation', icon: Heart, color: 'text-pink-500 bg-pink-50', earned_at: '2025-01-15' },
+            { id: 'blood_hero', name: 'Blood Hero', description: 'Donated blood 3 times', icon: Droplets, color: 'text-red-500 bg-red-50', earned_at: '2025-02-20' },
+          ])
+          // Demo contributions
+          setContributions([
+            { id: '1', type: 'donation', title: 'Flood Relief Fund', description: 'Donated Rs. 5,000', date: '2025-02-15', color: 'text-green-500', created_at: '2025-02-15' },
+            { id: '2', type: 'blood', title: 'Blood Donation', description: 'Donated at Mayo Hospital', date: '2025-02-20', color: 'text-red-500', created_at: '2025-02-20' },
+            { id: '3', type: 'volunteer', title: 'Community Cleanup', description: 'Participated in cleanup drive', date: '2025-02-25', color: 'text-blue-500', created_at: '2025-02-25' },
+          ])
+          setLoading(false)
+          return
+        }
+      } catch (error) {
+        console.error('Error setting up demo mode:', error)
       }
 
       const { data: { user } } = await supabase.auth.getUser()
