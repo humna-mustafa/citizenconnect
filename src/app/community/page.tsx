@@ -12,15 +12,22 @@ import {
 
 interface CommunityIssue {
   id: string
+  ticket_number: string
   title: string
   description: string
-  category: string
+  category_id: string | null
+  category: {
+    name: string
+    slug: string
+  } | null
+  city: string
+  area: string | null
+  address: string | null
   priority: 'low' | 'medium' | 'high' | 'urgent'
   status: 'open' | 'assigned' | 'in_progress' | 'resolved' | 'closed'
-  location: { lat: number; lng: number; address?: string } | null
   images: string[]
-  upvotes_count: number
-  responses_count: number
+  upvotes: number
+  views_count: number
   created_at: string
   reporter: {
     full_name: string | null
@@ -44,6 +51,8 @@ interface Mentor {
     avatar_url: string | null
   }
 }
+
+// Using community_contributors table instead of mentors
 
 const categoryColors: Record<string, string> = {
   infrastructure: 'bg-orange-100 text-orange-700',
@@ -139,9 +148,9 @@ export default function CommunityPage() {
         .eq('status', 'resolved')
 
       const { count: mentorsCount } = await supabase
-        .from('mentors')
+        .from('community_contributors')
         .select('*', { count: 'exact', head: true })
-        .eq('is_verified', true)
+        .in('role', ['mentor', 'senior_mentor'])
 
       setStats({
         total: total || 0,
@@ -161,12 +170,22 @@ export default function CommunityPage() {
         .from('community_issues')
         .select(`
           *,
+          category:issue_categories(name, slug),
           reporter:profiles!community_issues_reporter_id_fkey(full_name, avatar_url),
           assigned_mentor:profiles!community_issues_assigned_mentor_id_fkey(full_name, avatar_url)
         `)
 
       if (selectedCategory) {
-        query = query.eq('category', selectedCategory)
+        // Query by category slug
+        const { data: categoryData } = await supabase
+          .from('issue_categories')
+          .select('id')
+          .eq('slug', selectedCategory)
+          .single()
+        
+        if (categoryData) {
+          query = query.eq('category_id', categoryData.id)
+        }
       }
       if (selectedStatus) {
         query = query.eq('status', selectedStatus)
@@ -179,9 +198,9 @@ export default function CommunityPage() {
       if (sortBy === 'recent') {
         query = query.order('created_at', { ascending: false })
       } else if (sortBy === 'upvotes') {
-        query = query.order('upvotes_count', { ascending: false })
+        query = query.order('upvotes', { ascending: false })
       } else if (sortBy === 'responses') {
-        query = query.order('responses_count', { ascending: false })
+        query = query.order('views_count', { ascending: false })
       }
 
       const { data, error } = await query.limit(50)
@@ -199,12 +218,12 @@ export default function CommunityPage() {
   const fetchMentors = async () => {
     try {
       const { data, error } = await supabase
-        .from('mentors')
+        .from('community_contributors')
         .select(`
           *,
           profiles(full_name, avatar_url)
         `)
-        .eq('is_verified', true)
+        .in('role', ['mentor', 'senior_mentor'])
         .eq('is_available', true)
         .order('issues_resolved', { ascending: false })
         .limit(5)
@@ -245,7 +264,7 @@ export default function CommunityPage() {
         // Update local count
         setIssues(prev => prev.map(issue => 
           issue.id === issueId 
-            ? { ...issue, upvotes_count: issue.upvotes_count - 1 }
+            ? { ...issue, upvotes: issue.upvotes - 1 }
             : issue
         ))
       } else {
@@ -259,7 +278,7 @@ export default function CommunityPage() {
         // Update local count
         setIssues(prev => prev.map(issue => 
           issue.id === issueId 
-            ? { ...issue, upvotes_count: issue.upvotes_count + 1 }
+            ? { ...issue, upvotes: issue.upvotes + 1 }
             : issue
         ))
       }
@@ -535,15 +554,15 @@ export default function CommunityPage() {
                           <span className={`text-sm font-bold ${
                             upvotedIssues.has(issue.id) ? 'text-emerald-600' : 'text-slate-500'
                           }`}>
-                            {issue.upvotes_count}
+                            {issue.upvotes}
                           </span>
                         </div>
 
                         {/* Content */}
                         <div className="flex-1 min-w-0">
                           <div className="flex flex-wrap items-center gap-2 mb-2">
-                            <span className={`px-2 py-1 rounded-full text-xs font-medium ${categoryColors[issue.category] || categoryColors.other}`}>
-                              {issue.category}
+                            <span className={`px-2 py-1 rounded-full text-xs font-medium ${categoryColors[issue.category?.slug || 'other'] || categoryColors.other}`}>
+                              {issue.category?.name || 'Other'}
                             </span>
                             <span className={`px-2 py-1 rounded-full text-xs font-medium ${priorityColors[issue.priority]}`}>
                               {issue.priority}
@@ -572,15 +591,15 @@ export default function CommunityPage() {
                               <Clock className="w-4 h-4" />
                               {formatTimeAgo(issue.created_at)}
                             </div>
-                            {issue.location?.address && (
+                            {(issue.address || issue.area || issue.city) && (
                               <div className="flex items-center gap-1">
                                 <MapPin className="w-4 h-4" />
-                                {issue.location.address}
+                                {issue.address || issue.area || issue.city}
                               </div>
                             )}
                             <div className="flex items-center gap-1">
-                              <MessageCircle className="w-4 h-4" />
-                              {issue.responses_count} responses
+                              <Eye className="w-4 h-4" />
+                              {issue.views_count} views
                             </div>
                           </div>
 
