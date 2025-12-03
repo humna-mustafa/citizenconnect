@@ -101,12 +101,12 @@ export default function ProfilePage() {
       if (isDemoMode()) {
         setIsDemo(true)
         setUser(DEMO_USER as unknown as User)
-        setProfile(DEMO_PROFILE as Profile)
+        setProfile(DEMO_PROFILE as unknown as Profile)
         setFormData({
           full_name: DEMO_PROFILE.full_name || '',
           phone: DEMO_PROFILE.phone || '',
           city: DEMO_PROFILE.city || '',
-          blood_group: '',
+          blood_group: DEMO_PROFILE.blood_group || '',
         })
         // Demo stats
         setStats({

@@ -19,6 +19,7 @@ export const DEMO_PROFILE = {
   city: 'Lahore',
   role: 'citizen',
   avatar_url: undefined,
+  blood_group: 'O+',
   bio: 'This is a demo account for testing CitizenConnect features.',
   is_verified: true,
   created_at: '2025-01-01T00:00:00Z',
