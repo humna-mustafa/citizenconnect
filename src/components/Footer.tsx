@@ -5,9 +5,9 @@ import { Facebook, Twitter, Instagram, Linkedin, Send } from 'lucide-react'
 const footerLinks = {
   company: [
     { name: 'About Us', href: '/about' },
-    { name: 'Our Mission', href: '/about#mission' },
+    { name: 'Our Impact', href: '/impact' },
     { name: 'Team', href: '/about#team' },
-    { name: 'Careers', href: '/careers' },
+    { name: 'Contact', href: '/contact' },
   ],
   resources: [
     { name: 'Issue Guides', href: '/guides' },
@@ -170,6 +170,18 @@ export default function Footer() {
                 <path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/>
               </svg>
               for Pakistan
+            </p>
+          </div>
+          
+          {/* Academic Credit */}
+          <div className="mt-4 pt-4 border-t border-white/5 text-center">
+            <p className="text-slate-600 text-xs">
+              <span className="text-emerald-500 font-medium">BS Software Engineering Semester Project</span> | 
+              Civics and Community Engagement | Supervised by <span className="text-slate-400">Prof. Ayesha Aqeel</span>
+            </p>
+            <p className="text-slate-600 text-xs mt-1">
+              Developed by: <span className="text-emerald-400 font-medium">Humna Mustafa (FA25-BSE-051)</span> | 
+              Laiba Khalid (FA25-BSE-057) | Amna Tayyaba (FA25-BSE-148) | Moiza Raseed (FA25-BSE-176)
             </p>
           </div>
         </div>

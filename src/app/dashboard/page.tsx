@@ -3,7 +3,7 @@
 import { useState, useEffect } from 'react'
 import Link from 'next/link'
 import { createClient } from '@/lib/supabase/client'
-import { getDashboardStats, getTopContributors } from '@/lib/supabase/helpers'
+import { getDashboardStats, getTopContributors, getDonationStats } from '@/lib/supabase/helpers'
 import { formatDistanceToNow } from 'date-fns'
 import { 
   BookOpen, 
@@ -52,6 +52,17 @@ interface RecentActivity {
   color: string
 }
 
+interface MonthlyDonation {
+  month: string
+  amount: number
+}
+
+interface CategoryDistribution {
+  name: string
+  percentage: number
+  color: string
+}
+
 export default function DashboardPage() {
   const [loading, setLoading] = useState(true)
   const [stats, setStats] = useState<DashboardStats>({
@@ -65,8 +76,36 @@ export default function DashboardPage() {
   
   const [topContributors, setTopContributors] = useState<TopContributor[]>([])
   const [recentActivities, setRecentActivities] = useState<RecentActivity[]>([])
+  const [monthlyDonations, setMonthlyDonations] = useState<MonthlyDonation[]>([])
+  const [categoryDistribution, setCategoryDistribution] = useState<CategoryDistribution[]>([])
   const [selectedTimeframe, setSelectedTimeframe] = useState('month')
   const supabase = createClient()
+
+  // Default chart data as fallback
+  const defaultMonthlyDonations: MonthlyDonation[] = [
+    { month: 'Jan', amount: 0 },
+    { month: 'Feb', amount: 0 },
+    { month: 'Mar', amount: 0 },
+    { month: 'Apr', amount: 0 },
+    { month: 'May', amount: 0 },
+    { month: 'Jun', amount: 0 },
+    { month: 'Jul', amount: 0 },
+    { month: 'Aug', amount: 0 },
+    { month: 'Sep', amount: 0 },
+    { month: 'Oct', amount: 0 },
+    { month: 'Nov', amount: 0 },
+    { month: 'Dec', amount: 0 },
+  ]
+
+  const categoryColors: Record<string, string> = {
+    'Medical': 'bg-red-500',
+    'Education': 'bg-blue-500',
+    'Flood Relief': 'bg-cyan-500',
+    'Food': 'bg-orange-500',
+    'Orphanage': 'bg-purple-500',
+    'Shelter': 'bg-green-500',
+    'Other': 'bg-slate-500',
+  }
 
   useEffect(() => {
     const fetchData = async () => {
@@ -80,14 +119,13 @@ export default function DashboardPage() {
             totalDonors: statsData.total_blood_donors || 0,
             totalVolunteers: statsData.total_volunteers || 0,
             totalDonations: statsData.total_donations || 0,
-            totalDonationAmount: statsData.total_donations || 0, // Assuming amount is same for now
-            totalUsersHelped: statsData.total_users || 0, // Proxy metric
+            totalDonationAmount: statsData.total_donation_amount || 0,
+            totalUsersHelped: statsData.total_users || 0,
           })
 
           // Process Recent Activity
           const activities: RecentActivity[] = []
           
-          // Add recent guides
           if (statsData.recent_guides) {
             statsData.recent_guides.forEach((guide: any) => {
               activities.push({
@@ -101,7 +139,6 @@ export default function DashboardPage() {
             })
           }
 
-          // Add recent blood requests
           if (statsData.recent_blood_requests) {
             statsData.recent_blood_requests.forEach((req: any) => {
               activities.push({
@@ -115,8 +152,6 @@ export default function DashboardPage() {
             })
           }
 
-          // Sort by timestamp (newest first) - simplified since we're mixing sources
-          // In a real app, we'd parse dates properly
           setRecentActivities(activities.slice(0, 5))
         }
 
@@ -127,16 +162,51 @@ export default function DashboardPage() {
           const formattedContributors = contributorsData.map((c: any, index: number) => ({
             id: c.user_id,
             name: c.full_name || 'Anonymous',
-            type: 'contributor', // Generic type based on aggregate
+            type: 'contributor',
             contributions: c.total_contributions,
             badge: index === 0 ? '🥇' : index === 1 ? '🥈' : index === 2 ? '🥉' : '⭐',
-            city: 'Pakistan' // We'd need to fetch city from profile if not in view
+            city: c.city || 'Pakistan'
           }))
           setTopContributors(formattedContributors)
         }
 
+        // Fetch Donation Stats for charts
+        const { monthlyStats, categoryStats, error: donationStatsError } = await getDonationStats()
+        
+        if (monthlyStats && monthlyStats.length > 0) {
+          const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec']
+          const chartData = months.map((month, index) => {
+            const stat = monthlyStats.find((s: any) => s.month === index + 1)
+            return {
+              month,
+              amount: stat?.total_amount || 0
+            }
+          })
+          setMonthlyDonations(chartData)
+        } else {
+          setMonthlyDonations(defaultMonthlyDonations)
+        }
+
+        if (categoryStats && categoryStats.length > 0) {
+          const total = categoryStats.reduce((sum: number, cat: any) => sum + (cat.count || 0), 0)
+          const catData = categoryStats.map((cat: any) => ({
+            name: cat.category_name || 'Other',
+            percentage: total > 0 ? Math.round((cat.count / total) * 100) : 0,
+            color: categoryColors[cat.category_name] || 'bg-slate-500'
+          }))
+          setCategoryDistribution(catData)
+        } else {
+          // Default category distribution
+          setCategoryDistribution([
+            { name: 'Medical', percentage: 0, color: 'bg-red-500' },
+            { name: 'Education', percentage: 0, color: 'bg-blue-500' },
+            { name: 'Other', percentage: 0, color: 'bg-slate-500' },
+          ])
+        }
+
       } catch (error) {
         console.error('Error fetching dashboard data:', error)
+        setMonthlyDonations(defaultMonthlyDonations)
       } finally {
         setLoading(false)
       }
@@ -173,6 +243,18 @@ export default function DashboardPage() {
           setRecentActivities(prev => [newActivity, ...prev.slice(0, 4)])
         }
       })
+      .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'donations' }, (payload) => {
+        const newDonation = payload.new as any
+        const newActivity: RecentActivity = {
+          id: `donation-${newDonation.id}`,
+          type: 'donation',
+          description: `New donation of PKR ${newDonation.amount?.toLocaleString() || 0}`,
+          timestamp: 'Just now',
+          icon: Heart,
+          color: 'text-pink-500 bg-pink-50'
+        }
+        setRecentActivities(prev => [newActivity, ...prev.slice(0, 4)])
+      })
       .subscribe()
 
     return () => {
@@ -180,31 +262,7 @@ export default function DashboardPage() {
     }
   }, [supabase])
 
-  // Simulated chart data
-  const monthlyDonations = [
-    { month: 'Jan', amount: 4200000 },
-    { month: 'Feb', amount: 3800000 },
-    { month: 'Mar', amount: 5100000 },
-    { month: 'Apr', amount: 4700000 },
-    { month: 'May', amount: 5500000 },
-    { month: 'Jun', amount: 6200000 },
-    { month: 'Jul', amount: 5200000 },
-    { month: 'Aug', amount: 6100000 },
-    { month: 'Sep', amount: 5800000 },
-    { month: 'Oct', amount: 6400000 },
-    { month: 'Nov', amount: 5900000 },
-    { month: 'Dec', amount: 7200000 },
-  ]
-  
-  const maxDonation = Math.max(...monthlyDonations.map(d => d.amount))
-
-  const categoryDistribution = [
-    { name: 'Medical', percentage: 35, color: 'bg-red-500' },
-    { name: 'Education', percentage: 25, color: 'bg-blue-500' },
-    { name: 'Flood Relief', percentage: 20, color: 'bg-cyan-500' },
-    { name: 'Food', percentage: 12, color: 'bg-orange-500' },
-    { name: 'Other', percentage: 8, color: 'bg-slate-500' },
-  ]
+  const maxDonation = Math.max(...monthlyDonations.map(d => d.amount), 1)
 
   const formatCurrency = (amount: number) => {
     if (amount >= 10000000) {

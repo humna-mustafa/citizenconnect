@@ -2,6 +2,7 @@
 
 import { useState } from 'react'
 import Link from 'next/link'
+import dynamic from 'next/dynamic'
 import { createClient } from '@/lib/supabase/client'
 import { 
   Mail, 
@@ -17,6 +18,11 @@ import {
   CheckCircle2, 
   AlertCircle 
 } from 'lucide-react'
+
+const Map = dynamic(() => import('@/components/Map'), { 
+  ssr: false,
+  loading: () => <div className="h-80 w-full bg-muted animate-pulse rounded-xl flex items-center justify-center text-muted-foreground">Loading Map...</div>
+})
 
 export default function ContactPage() {
   const [formData, setFormData] = useState({
@@ -264,13 +270,18 @@ export default function ContactPage() {
         <div className="container mx-auto px-4">
           <h2 className="text-2xl font-bold text-foreground mb-6 text-center">Find Us</h2>
           <div className="bg-card border border-border rounded-3xl shadow-sm overflow-hidden">
-            <div className="h-80 bg-muted flex items-center justify-center">
-              <div className="text-center">
-                <MapPin className="w-16 h-16 text-muted-foreground mx-auto mb-4" />
-                <p className="text-foreground font-medium">Interactive Map Coming Soon</p>
-                <p className="text-sm text-muted-foreground">Lahore, Punjab, Pakistan</p>
-              </div>
-            </div>
+            <Map 
+              markers={[
+                {
+                  id: 'office',
+                  position: [31.5204, 74.3587] as [number, number],
+                  title: 'CitizenConnect HQ',
+                  description: 'Lahore, Punjab, Pakistan'
+                }
+              ]}
+              zoom={12}
+              center={[31.5204, 74.3587] as [number, number]}
+            />
           </div>
         </div>
       </section>

@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import { createClient } from '@/lib/supabase/client'
+import { toast } from 'sonner'
 import type { User } from '@supabase/supabase-js'
 import {
   LayoutDashboard,
@@ -26,7 +27,10 @@ import {
   Edit2,
   Trash2,
   Shield,
-  Bell
+  Bell,
+  Save,
+  Loader2,
+  RefreshCw
 } from 'lucide-react'
 import { formatDistanceToNow } from 'date-fns'
 
@@ -55,6 +59,7 @@ interface UserProfile {
 interface Guide {
   id: string
   title: string
+  slug: string
   category_id: string
   is_published: boolean
   author_id: string
@@ -62,6 +67,67 @@ interface Guide {
   views_count: number
   categories?: {
     name: string
+  }
+}
+
+interface BloodDonorAdmin {
+  id: string
+  user_id: string
+  blood_group: string
+  city: string
+  area: string | null
+  is_available: boolean
+  contact_phone: string
+  donation_count: number
+  created_at: string
+  profiles?: {
+    full_name: string
+    email: string
+  }
+}
+
+interface VolunteerAdmin {
+  id: string
+  user_id: string
+  city: string
+  skills: string[]
+  availability: string
+  is_active: boolean
+  tasks_completed: number
+  created_at: string
+  profiles?: {
+    full_name: string
+    email: string
+  }
+}
+
+interface DonationCaseAdmin {
+  id: string
+  title: string
+  description: string
+  goal_amount: number
+  raised_amount: number
+  is_active: boolean
+  is_verified: boolean
+  created_at: string
+  donation_categories?: {
+    name: string
+  }
+}
+
+interface DonationAdmin {
+  id: string
+  amount: number
+  payment_method: string
+  status: string
+  is_anonymous: boolean
+  donor_name: string | null
+  created_at: string
+  donation_cases?: {
+    title: string
+  }
+  profiles?: {
+    full_name: string
   }
 }
 
@@ -86,6 +152,22 @@ export default function AdminPage() {
 
   const [users, setUsers] = useState<UserProfile[]>([])
   const [guides, setGuides] = useState<Guide[]>([])
+  const [bloodDonors, setBloodDonors] = useState<BloodDonorAdmin[]>([])
+  const [volunteers, setVolunteers] = useState<VolunteerAdmin[]>([])
+  const [donationCases, setDonationCases] = useState<DonationCaseAdmin[]>([])
+  const [donations, setDonations] = useState<DonationAdmin[]>([])
+  const [searchQuery, setSearchQuery] = useState('')
+  const [refreshing, setRefreshing] = useState(false)
+  
+  // Modal states
+  const [showGuideModal, setShowGuideModal] = useState(false)
+  const [editingGuide, setEditingGuide] = useState<Guide | null>(null)
+  const [guideForm, setGuideForm] = useState({
+    title: '',
+    slug: '',
+    problem_explanation: '',
+    is_published: false
+  })
 
   const supabase = createClient()
   const router = useRouter()
@@ -122,27 +204,251 @@ export default function AdminPage() {
   }, [router, supabase])
 
   const fetchDashboardData = async () => {
-    // Fetch stats
-    const { data: statsData, error: statsError } = await supabase.rpc('get_dashboard_stats')
-    if (statsData) setStats(statsData)
-    if (statsError) console.error('Error fetching stats:', statsError)
+    setRefreshing(true)
+    try {
+      // Fetch stats
+      const { data: statsData, error: statsError } = await supabase.rpc('get_dashboard_stats')
+      if (statsData) setStats(statsData)
+      if (statsError) console.error('Error fetching stats:', statsError)
 
-    // Fetch users
-    const { data: usersData } = await supabase
-      .from('profiles')
-      .select('*')
-      .order('created_at', { ascending: false })
-      .limit(20)
-    if (usersData) setUsers(usersData)
+      // Fetch users
+      const { data: usersData } = await supabase
+        .from('profiles')
+        .select('*')
+        .order('created_at', { ascending: false })
+        .limit(50)
+      if (usersData) setUsers(usersData)
 
-    // Fetch guides
-    const { data: guidesData } = await supabase
-      .from('guides')
-      .select('*, categories(name)')
-      .order('created_at', { ascending: false })
-      .limit(20)
-    if (guidesData) setGuides(guidesData)
+      // Fetch guides
+      const { data: guidesData } = await supabase
+        .from('guides')
+        .select('*, categories(name)')
+        .order('created_at', { ascending: false })
+        .limit(50)
+      if (guidesData) setGuides(guidesData)
+
+      // Fetch blood donors
+      const { data: donorsData } = await supabase
+        .from('blood_donors')
+        .select('*, profiles(full_name, email)')
+        .order('created_at', { ascending: false })
+        .limit(50)
+      if (donorsData) setBloodDonors(donorsData)
+
+      // Fetch volunteers
+      const { data: volunteersData } = await supabase
+        .from('volunteers')
+        .select('*, profiles(full_name, email)')
+        .order('created_at', { ascending: false })
+        .limit(50)
+      if (volunteersData) setVolunteers(volunteersData)
+
+      // Fetch donation cases
+      const { data: casesData } = await supabase
+        .from('donation_cases')
+        .select('*, donation_categories(name)')
+        .order('created_at', { ascending: false })
+        .limit(50)
+      if (casesData) setDonationCases(casesData)
+
+      // Fetch donations
+      const { data: donationsData } = await supabase
+        .from('donations')
+        .select('*, donation_cases(title), profiles(full_name)')
+        .order('created_at', { ascending: false })
+        .limit(50)
+      if (donationsData) setDonations(donationsData)
+    } catch (error) {
+      console.error('Error fetching data:', error)
+    } finally {
+      setRefreshing(false)
+    }
   }
+
+  // CRUD Operations
+  const handleDeleteUser = async (userId: string) => {
+    if (!confirm('Are you sure you want to delete this user?')) return
+    
+    const { error } = await supabase.from('profiles').delete().eq('id', userId)
+    if (error) {
+      toast.error('Failed to delete user', { description: error.message })
+    } else {
+      toast.success('User deleted successfully')
+      setUsers(users.filter(u => u.id !== userId))
+    }
+  }
+
+  const handleVerifyUser = async (userId: string, verified: boolean) => {
+    const { error } = await supabase
+      .from('profiles')
+      .update({ is_verified: verified })
+      .eq('id', userId)
+    
+    if (error) {
+      toast.error('Failed to update user', { description: error.message })
+    } else {
+      toast.success(verified ? 'User verified' : 'User unverified')
+      setUsers(users.map(u => u.id === userId ? { ...u, is_verified: verified } : u))
+    }
+  }
+
+  const handleChangeRole = async (userId: string, role: string) => {
+    const { error } = await supabase
+      .from('profiles')
+      .update({ role })
+      .eq('id', userId)
+    
+    if (error) {
+      toast.error('Failed to update role', { description: error.message })
+    } else {
+      toast.success('Role updated successfully')
+      setUsers(users.map(u => u.id === userId ? { ...u, role } : u))
+    }
+  }
+
+  const handleToggleGuidePublish = async (guideId: string, publish: boolean) => {
+    const { error } = await supabase
+      .from('guides')
+      .update({ is_published: publish })
+      .eq('id', guideId)
+    
+    if (error) {
+      toast.error('Failed to update guide', { description: error.message })
+    } else {
+      toast.success(publish ? 'Guide published' : 'Guide unpublished')
+      setGuides(guides.map(g => g.id === guideId ? { ...g, is_published: publish } : g))
+    }
+  }
+
+  const handleDeleteGuide = async (guideId: string) => {
+    if (!confirm('Are you sure you want to delete this guide?')) return
+    
+    const { error } = await supabase.from('guides').delete().eq('id', guideId)
+    if (error) {
+      toast.error('Failed to delete guide', { description: error.message })
+    } else {
+      toast.success('Guide deleted successfully')
+      setGuides(guides.filter(g => g.id !== guideId))
+    }
+  }
+
+  const handleToggleDonorAvailability = async (donorId: string, available: boolean) => {
+    const { error } = await supabase
+      .from('blood_donors')
+      .update({ is_available: available })
+      .eq('id', donorId)
+    
+    if (error) {
+      toast.error('Failed to update donor', { description: error.message })
+    } else {
+      toast.success(available ? 'Donor marked available' : 'Donor marked unavailable')
+      setBloodDonors(bloodDonors.map(d => d.id === donorId ? { ...d, is_available: available } : d))
+    }
+  }
+
+  const handleDeleteDonor = async (donorId: string) => {
+    if (!confirm('Are you sure you want to remove this donor?')) return
+    
+    const { error } = await supabase.from('blood_donors').delete().eq('id', donorId)
+    if (error) {
+      toast.error('Failed to delete donor', { description: error.message })
+    } else {
+      toast.success('Donor removed successfully')
+      setBloodDonors(bloodDonors.filter(d => d.id !== donorId))
+    }
+  }
+
+  const handleToggleVolunteerStatus = async (volunteerId: string, active: boolean) => {
+    const { error } = await supabase
+      .from('volunteers')
+      .update({ is_active: active })
+      .eq('id', volunteerId)
+    
+    if (error) {
+      toast.error('Failed to update volunteer', { description: error.message })
+    } else {
+      toast.success(active ? 'Volunteer activated' : 'Volunteer deactivated')
+      setVolunteers(volunteers.map(v => v.id === volunteerId ? { ...v, is_active: active } : v))
+    }
+  }
+
+  const handleDeleteVolunteer = async (volunteerId: string) => {
+    if (!confirm('Are you sure you want to remove this volunteer?')) return
+    
+    const { error } = await supabase.from('volunteers').delete().eq('id', volunteerId)
+    if (error) {
+      toast.error('Failed to delete volunteer', { description: error.message })
+    } else {
+      toast.success('Volunteer removed successfully')
+      setVolunteers(volunteers.filter(v => v.id !== volunteerId))
+    }
+  }
+
+  const handleToggleCaseStatus = async (caseId: string, active: boolean) => {
+    const { error } = await supabase
+      .from('donation_cases')
+      .update({ is_active: active })
+      .eq('id', caseId)
+    
+    if (error) {
+      toast.error('Failed to update case', { description: error.message })
+    } else {
+      toast.success(active ? 'Case activated' : 'Case deactivated')
+      setDonationCases(donationCases.map(c => c.id === caseId ? { ...c, is_active: active } : c))
+    }
+  }
+
+  const handleVerifyCase = async (caseId: string, verified: boolean) => {
+    const { error } = await supabase
+      .from('donation_cases')
+      .update({ is_verified: verified })
+      .eq('id', caseId)
+    
+    if (error) {
+      toast.error('Failed to update case', { description: error.message })
+    } else {
+      toast.success(verified ? 'Case verified' : 'Case unverified')
+      setDonationCases(donationCases.map(c => c.id === caseId ? { ...c, is_verified: verified } : c))
+    }
+  }
+
+  const handleDeleteCase = async (caseId: string) => {
+    if (!confirm('Are you sure you want to delete this donation case?')) return
+    
+    const { error } = await supabase.from('donation_cases').delete().eq('id', caseId)
+    if (error) {
+      toast.error('Failed to delete case', { description: error.message })
+    } else {
+      toast.success('Case deleted successfully')
+      setDonationCases(donationCases.filter(c => c.id !== caseId))
+    }
+  }
+
+  // Filter functions
+  const filteredUsers = users.filter(u => 
+    u.full_name?.toLowerCase().includes(searchQuery.toLowerCase()) ||
+    u.email?.toLowerCase().includes(searchQuery.toLowerCase()) ||
+    u.city?.toLowerCase().includes(searchQuery.toLowerCase())
+  )
+
+  const filteredGuides = guides.filter(g =>
+    g.title?.toLowerCase().includes(searchQuery.toLowerCase())
+  )
+
+  const filteredDonors = bloodDonors.filter(d =>
+    d.profiles?.full_name?.toLowerCase().includes(searchQuery.toLowerCase()) ||
+    d.city?.toLowerCase().includes(searchQuery.toLowerCase()) ||
+    d.blood_group?.toLowerCase().includes(searchQuery.toLowerCase())
+  )
+
+  const filteredVolunteers = volunteers.filter(v =>
+    v.profiles?.full_name?.toLowerCase().includes(searchQuery.toLowerCase()) ||
+    v.city?.toLowerCase().includes(searchQuery.toLowerCase())
+  )
+
+  const filteredCases = donationCases.filter(c =>
+    c.title?.toLowerCase().includes(searchQuery.toLowerCase())
+  )
 
   const handleSignOut = async () => {
     await supabase.auth.signOut()
@@ -261,6 +567,13 @@ export default function AdminPage() {
             <h2 className="text-xl font-bold text-slate-800 capitalize">{activeTab}</h2>
           </div>
           <div className="flex items-center gap-4">
+            <button 
+              onClick={() => fetchDashboardData()}
+              disabled={refreshing}
+              className="p-2 text-slate-400 hover:bg-slate-100 rounded-full transition-colors"
+            >
+              <RefreshCw className={`w-5 h-5 ${refreshing ? 'animate-spin' : ''}`} />
+            </button>
             <button className="p-2 text-slate-400 hover:bg-slate-100 rounded-full transition-colors relative">
               <Bell className="w-5 h-5" />
               <span className="absolute top-2 right-2 w-2 h-2 bg-red-500 rounded-full border-2 border-white"></span>
@@ -357,13 +670,13 @@ export default function AdminPage() {
                     <input
                       type="text"
                       placeholder="Search users..."
+                      value={searchQuery}
+                      onChange={(e) => setSearchQuery(e.target.value)}
                       className="w-full pl-10 pr-4 py-2.5 rounded-xl border border-slate-200 focus:border-emerald-500 focus:ring-2 focus:ring-emerald-500/20 outline-none"
                     />
                   </div>
-                  <button className="p-2.5 border border-slate-200 rounded-xl hover:bg-slate-50 text-slate-600">
-                    <Filter className="w-5 h-5" />
-                  </button>
                 </div>
+                <p className="text-sm text-slate-500">{filteredUsers.length} users found</p>
               </div>
 
               <div className="bg-white rounded-2xl shadow-sm border border-slate-100 overflow-hidden">
@@ -380,12 +693,12 @@ export default function AdminPage() {
                       </tr>
                     </thead>
                     <tbody className="divide-y divide-slate-100">
-                      {users.map((u) => (
+                      {filteredUsers.map((u) => (
                         <tr key={u.id} className="hover:bg-slate-50 transition-colors">
                           <td className="py-4 px-6">
                             <div className="flex items-center gap-3">
                               <div className="w-10 h-10 bg-emerald-100 text-emerald-700 rounded-full flex items-center justify-center font-bold">
-                                {u.full_name?.[0] || u.email[0]}
+                                {u.full_name?.[0] || u.email?.[0] || '?'}
                               </div>
                               <div>
                                 <p className="font-bold text-slate-900">{u.full_name || 'Unnamed'}</p>
@@ -394,37 +707,50 @@ export default function AdminPage() {
                             </div>
                           </td>
                           <td className="py-4 px-6">
-                            <span className={`px-3 py-1 rounded-full text-xs font-bold uppercase tracking-wide ${
-                              u.role === 'admin' ? 'bg-purple-100 text-purple-700' :
-                              u.role === 'donor' ? 'bg-red-100 text-red-700' :
-                              u.role === 'volunteer' ? 'bg-emerald-100 text-emerald-700' :
-                              'bg-blue-100 text-blue-700'
-                            }`}>
-                              {u.role}
-                            </span>
+                            <select
+                              value={u.role}
+                              onChange={(e) => handleChangeRole(u.id, e.target.value)}
+                              className={`px-3 py-1 rounded-full text-xs font-bold uppercase tracking-wide border-0 cursor-pointer ${
+                                u.role === 'admin' ? 'bg-purple-100 text-purple-700' :
+                                u.role === 'donor' ? 'bg-red-100 text-red-700' :
+                                u.role === 'volunteer' ? 'bg-emerald-100 text-emerald-700' :
+                                'bg-blue-100 text-blue-700'
+                              }`}
+                            >
+                              <option value="citizen">Citizen</option>
+                              <option value="donor">Donor</option>
+                              <option value="volunteer">Volunteer</option>
+                              <option value="admin">Admin</option>
+                            </select>
                           </td>
                           <td className="py-4 px-6 text-slate-600">{u.city || '-'}</td>
                           <td className="py-4 px-6">
-                            <span className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold ${
-                              u.is_verified ? 'bg-emerald-100 text-emerald-700' : 'bg-orange-100 text-orange-700'
-                            }`}>
+                            <button
+                              onClick={() => handleVerifyUser(u.id, !u.is_verified)}
+                              className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold cursor-pointer hover:opacity-80 ${
+                                u.is_verified ? 'bg-emerald-100 text-emerald-700' : 'bg-orange-100 text-orange-700'
+                              }`}
+                            >
                               <span className={`w-1.5 h-1.5 rounded-full ${u.is_verified ? 'bg-emerald-500' : 'bg-orange-500'}`}></span>
                               {u.is_verified ? 'Verified' : 'Pending'}
-                            </span>
+                            </button>
                           </td>
                           <td className="py-4 px-6 text-slate-500 text-sm">
                             {new Date(u.created_at).toLocaleDateString()}
                           </td>
                           <td className="py-4 px-6 text-right">
                             <div className="flex items-center justify-end gap-2">
-                              <button className="p-2 text-slate-400 hover:text-emerald-600 hover:bg-emerald-50 rounded-lg transition-colors">
-                                <Edit2 className="w-4 h-4" />
+                              <button 
+                                onClick={() => handleDeleteUser(u.id)}
+                                className="p-2 text-slate-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition-colors"
+                              >
+                                <Trash2 className="w-4 h-4" />
                               </button>
                             </div>
                           </td>
                         </tr>
                       ))}
-                      {users.length === 0 && (
+                      {filteredUsers.length === 0 && (
                         <tr>
                           <td colSpan={6} className="text-center py-8 text-slate-500">No users found</td>
                         </tr>
@@ -445,13 +771,12 @@ export default function AdminPage() {
                   <input
                     type="text"
                     placeholder="Search guides..."
+                    value={searchQuery}
+                    onChange={(e) => setSearchQuery(e.target.value)}
                     className="w-full pl-10 pr-4 py-2.5 rounded-xl border border-slate-200 focus:border-emerald-500 focus:ring-2 focus:ring-emerald-500/20 outline-none"
                   />
                 </div>
-                <button className="px-4 py-2.5 bg-emerald-600 text-white font-bold rounded-xl hover:bg-emerald-700 transition-all flex items-center gap-2 shadow-lg shadow-emerald-600/20">
-                  <Plus className="w-5 h-5" />
-                  Create Guide
-                </button>
+                <p className="text-sm text-slate-500 ml-4">{filteredGuides.length} guides</p>
               </div>
 
               <div className="bg-white rounded-2xl shadow-sm border border-slate-100 overflow-hidden">
@@ -461,16 +786,18 @@ export default function AdminPage() {
                       <tr>
                         <th className="text-left py-4 px-6 text-sm text-slate-500 font-semibold">Title</th>
                         <th className="text-left py-4 px-6 text-sm text-slate-500 font-semibold">Category</th>
+                        <th className="text-left py-4 px-6 text-sm text-slate-500 font-semibold">Views</th>
                         <th className="text-left py-4 px-6 text-sm text-slate-500 font-semibold">Status</th>
                         <th className="text-left py-4 px-6 text-sm text-slate-500 font-semibold">Created</th>
                         <th className="text-right py-4 px-6 text-sm text-slate-500 font-semibold">Actions</th>
                       </tr>
                     </thead>
                     <tbody className="divide-y divide-slate-100">
-                      {guides.map((guide) => (
+                      {filteredGuides.map((guide) => (
                         <tr key={guide.id} className="hover:bg-slate-50 transition-colors">
                           <td className="py-4 px-6">
                             <p className="font-bold text-slate-900">{guide.title}</p>
+                            <p className="text-xs text-slate-400">{guide.slug}</p>
                           </td>
                           <td className="py-4 px-6">
                             <span className="px-3 py-1 bg-slate-100 text-slate-600 rounded-full text-xs font-bold uppercase tracking-wide">
@@ -478,36 +805,48 @@ export default function AdminPage() {
                             </span>
                           </td>
                           <td className="py-4 px-6">
-                            <span className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold ${
-                              guide.is_published ? 'bg-emerald-100 text-emerald-700' : 'bg-slate-100 text-slate-700'
-                            }`}>
+                            <span className="flex items-center gap-1 text-slate-600">
+                              <Eye className="w-4 h-4" /> {guide.views_count || 0}
+                            </span>
+                          </td>
+                          <td className="py-4 px-6">
+                            <button
+                              onClick={() => handleToggleGuidePublish(guide.id, !guide.is_published)}
+                              className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold cursor-pointer hover:opacity-80 ${
+                                guide.is_published ? 'bg-emerald-100 text-emerald-700' : 'bg-slate-100 text-slate-700'
+                              }`}
+                            >
                               <span className={`w-1.5 h-1.5 rounded-full ${
                                 guide.is_published ? 'bg-emerald-500' : 'bg-slate-500'
                               }`}></span>
                               {guide.is_published ? 'Published' : 'Draft'}
-                            </span>
+                            </button>
                           </td>
                           <td className="py-4 px-6 text-slate-500 text-sm">
                             {new Date(guide.created_at).toLocaleDateString()}
                           </td>
                           <td className="py-4 px-6 text-right">
                             <div className="flex items-center justify-end gap-2">
-                              <button className="p-2 text-slate-400 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition-colors">
+                              <a 
+                                href={`/guides/${guide.slug}`}
+                                target="_blank"
+                                className="p-2 text-slate-400 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition-colors"
+                              >
                                 <Eye className="w-4 h-4" />
-                              </button>
-                              <button className="p-2 text-slate-400 hover:text-emerald-600 hover:bg-emerald-50 rounded-lg transition-colors">
-                                <Edit2 className="w-4 h-4" />
-                              </button>
-                              <button className="p-2 text-slate-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition-colors">
+                              </a>
+                              <button 
+                                onClick={() => handleDeleteGuide(guide.id)}
+                                className="p-2 text-slate-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition-colors"
+                              >
                                 <Trash2 className="w-4 h-4" />
                               </button>
                             </div>
                           </td>
                         </tr>
                       ))}
-                      {guides.length === 0 && (
+                      {filteredGuides.length === 0 && (
                         <tr>
-                          <td colSpan={5} className="text-center py-8 text-slate-500">No guides found</td>
+                          <td colSpan={6} className="text-center py-8 text-slate-500">No guides found</td>
                         </tr>
                       )}
                     </tbody>
@@ -517,14 +856,510 @@ export default function AdminPage() {
             </div>
           )}
 
-          {/* Placeholder for other tabs */}
-          {['donations', 'donors', 'volunteers', 'reports', 'settings'].includes(activeTab) && (
-            <div className="flex flex-col items-center justify-center py-20 text-center">
-              <div className="w-24 h-24 bg-slate-100 rounded-full flex items-center justify-center mb-6">
-                <Settings className="w-12 h-12 text-slate-300" />
+          {/* Donations Tab */}
+          {activeTab === 'donations' && (
+            <div className="space-y-6">
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
+                <div className="bg-white rounded-2xl shadow-sm p-5 border border-slate-100">
+                  <div className="flex items-center gap-3">
+                    <div className="w-12 h-12 bg-pink-100 text-pink-600 rounded-xl flex items-center justify-center">
+                      <Heart className="w-6 h-6" />
+                    </div>
+                    <div>
+                      <p className="text-2xl font-bold text-slate-900">PKR {donations.reduce((sum, d) => sum + (d.amount || 0), 0).toLocaleString()}</p>
+                      <p className="text-sm text-slate-500">Total Donations</p>
+                    </div>
+                  </div>
+                </div>
+                <div className="bg-white rounded-2xl shadow-sm p-5 border border-slate-100">
+                  <div className="flex items-center gap-3">
+                    <div className="w-12 h-12 bg-emerald-100 text-emerald-600 rounded-xl flex items-center justify-center">
+                      <CheckCircle2 className="w-6 h-6" />
+                    </div>
+                    <div>
+                      <p className="text-2xl font-bold text-slate-900">{donationCases.filter(c => c.is_active).length}</p>
+                      <p className="text-sm text-slate-500">Active Cases</p>
+                    </div>
+                  </div>
+                </div>
+                <div className="bg-white rounded-2xl shadow-sm p-5 border border-slate-100">
+                  <div className="flex items-center gap-3">
+                    <div className="w-12 h-12 bg-blue-100 text-blue-600 rounded-xl flex items-center justify-center">
+                      <Users className="w-6 h-6" />
+                    </div>
+                    <div>
+                      <p className="text-2xl font-bold text-slate-900">{donations.length}</p>
+                      <p className="text-sm text-slate-500">Total Transactions</p>
+                    </div>
+                  </div>
+                </div>
               </div>
-              <h2 className="text-2xl font-bold text-slate-900 mb-2 capitalize">{activeTab} Management</h2>
-              <p className="text-slate-500 max-w-md">This section is currently under development. Check back later for updates.</p>
+
+              <h3 className="font-bold text-slate-900 text-lg">Donation Cases</h3>
+              <div className="bg-white rounded-2xl shadow-sm border border-slate-100 overflow-hidden">
+                <div className="overflow-x-auto">
+                  <table className="w-full">
+                    <thead className="bg-slate-50">
+                      <tr>
+                        <th className="text-left py-4 px-6 text-sm text-slate-500 font-semibold">Case</th>
+                        <th className="text-left py-4 px-6 text-sm text-slate-500 font-semibold">Category</th>
+                        <th className="text-left py-4 px-6 text-sm text-slate-500 font-semibold">Progress</th>
+                        <th className="text-left py-4 px-6 text-sm text-slate-500 font-semibold">Status</th>
+                        <th className="text-left py-4 px-6 text-sm text-slate-500 font-semibold">Verified</th>
+                        <th className="text-right py-4 px-6 text-sm text-slate-500 font-semibold">Actions</th>
+                      </tr>
+                    </thead>
+                    <tbody className="divide-y divide-slate-100">
+                      {filteredCases.map((c) => (
+                        <tr key={c.id} className="hover:bg-slate-50 transition-colors">
+                          <td className="py-4 px-6">
+                            <p className="font-bold text-slate-900">{c.title}</p>
+                            <p className="text-xs text-slate-500 truncate max-w-xs">{c.description}</p>
+                          </td>
+                          <td className="py-4 px-6">
+                            <span className="px-3 py-1 bg-slate-100 text-slate-600 rounded-full text-xs font-bold">
+                              {c.donation_categories?.name || 'General'}
+                            </span>
+                          </td>
+                          <td className="py-4 px-6">
+                            <div className="w-32">
+                              <div className="flex justify-between text-xs mb-1">
+                                <span className="font-bold text-slate-900">PKR {(c.raised_amount || 0).toLocaleString()}</span>
+                                <span className="text-slate-500">/ {(c.goal_amount || 0).toLocaleString()}</span>
+                              </div>
+                              <div className="h-2 bg-slate-100 rounded-full overflow-hidden">
+                                <div 
+                                  className="h-full bg-emerald-500 rounded-full"
+                                  style={{ width: `${Math.min(((c.raised_amount || 0) / (c.goal_amount || 1)) * 100, 100)}%` }}
+                                />
+                              </div>
+                            </div>
+                          </td>
+                          <td className="py-4 px-6">
+                            <button
+                              onClick={() => handleToggleCaseStatus(c.id, !c.is_active)}
+                              className={`px-3 py-1 rounded-full text-xs font-bold cursor-pointer hover:opacity-80 ${
+                                c.is_active ? 'bg-emerald-100 text-emerald-700' : 'bg-slate-100 text-slate-600'
+                              }`}
+                            >
+                              {c.is_active ? 'Active' : 'Inactive'}
+                            </button>
+                          </td>
+                          <td className="py-4 px-6">
+                            <button
+                              onClick={() => handleVerifyCase(c.id, !c.is_verified)}
+                              className={`px-3 py-1 rounded-full text-xs font-bold cursor-pointer hover:opacity-80 ${
+                                c.is_verified ? 'bg-blue-100 text-blue-700' : 'bg-orange-100 text-orange-600'
+                              }`}
+                            >
+                              {c.is_verified ? 'Verified' : 'Unverified'}
+                            </button>
+                          </td>
+                          <td className="py-4 px-6 text-right">
+                            <button 
+                              onClick={() => handleDeleteCase(c.id)}
+                              className="p-2 text-slate-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition-colors"
+                            >
+                              <Trash2 className="w-4 h-4" />
+                            </button>
+                          </td>
+                        </tr>
+                      ))}
+                      {filteredCases.length === 0 && (
+                        <tr>
+                          <td colSpan={6} className="text-center py-8 text-slate-500">No donation cases found</td>
+                        </tr>
+                      )}
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+
+              <h3 className="font-bold text-slate-900 text-lg mt-8">Recent Donations</h3>
+              <div className="bg-white rounded-2xl shadow-sm border border-slate-100 overflow-hidden">
+                <div className="overflow-x-auto">
+                  <table className="w-full">
+                    <thead className="bg-slate-50">
+                      <tr>
+                        <th className="text-left py-4 px-6 text-sm text-slate-500 font-semibold">Donor</th>
+                        <th className="text-left py-4 px-6 text-sm text-slate-500 font-semibold">Case</th>
+                        <th className="text-left py-4 px-6 text-sm text-slate-500 font-semibold">Amount</th>
+                        <th className="text-left py-4 px-6 text-sm text-slate-500 font-semibold">Method</th>
+                        <th className="text-left py-4 px-6 text-sm text-slate-500 font-semibold">Status</th>
+                        <th className="text-left py-4 px-6 text-sm text-slate-500 font-semibold">Date</th>
+                      </tr>
+                    </thead>
+                    <tbody className="divide-y divide-slate-100">
+                      {donations.slice(0, 10).map((d) => (
+                        <tr key={d.id} className="hover:bg-slate-50 transition-colors">
+                          <td className="py-4 px-6">
+                            <p className="font-bold text-slate-900">
+                              {d.is_anonymous ? 'Anonymous' : (d.profiles?.full_name || d.donor_name || 'Unknown')}
+                            </p>
+                          </td>
+                          <td className="py-4 px-6 text-slate-600">{d.donation_cases?.title || '-'}</td>
+                          <td className="py-4 px-6 font-bold text-emerald-600">PKR {(d.amount || 0).toLocaleString()}</td>
+                          <td className="py-4 px-6 text-slate-600 capitalize">{d.payment_method || '-'}</td>
+                          <td className="py-4 px-6">
+                            <span className={`px-3 py-1 rounded-full text-xs font-bold ${
+                              d.status === 'completed' ? 'bg-emerald-100 text-emerald-700' :
+                              d.status === 'pending' ? 'bg-yellow-100 text-yellow-700' :
+                              'bg-red-100 text-red-700'
+                            }`}>
+                              {d.status}
+                            </span>
+                          </td>
+                          <td className="py-4 px-6 text-slate-500 text-sm">
+                            {new Date(d.created_at).toLocaleDateString()}
+                          </td>
+                        </tr>
+                      ))}
+                      {donations.length === 0 && (
+                        <tr>
+                          <td colSpan={6} className="text-center py-8 text-slate-500">No donations found</td>
+                        </tr>
+                      )}
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+            </div>
+          )}
+
+          {/* Blood Donors Tab */}
+          {activeTab === 'donors' && (
+            <div className="space-y-6">
+              <div className="flex justify-between items-center">
+                <div className="relative flex-1 max-w-md">
+                  <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-400" />
+                  <input
+                    type="text"
+                    placeholder="Search donors by name, city, blood group..."
+                    value={searchQuery}
+                    onChange={(e) => setSearchQuery(e.target.value)}
+                    className="w-full pl-10 pr-4 py-2.5 rounded-xl border border-slate-200 focus:border-emerald-500 focus:ring-2 focus:ring-emerald-500/20 outline-none"
+                  />
+                </div>
+                <p className="text-sm text-slate-500 ml-4">{filteredDonors.length} donors</p>
+              </div>
+
+              <div className="bg-white rounded-2xl shadow-sm border border-slate-100 overflow-hidden">
+                <div className="overflow-x-auto">
+                  <table className="w-full">
+                    <thead className="bg-slate-50">
+                      <tr>
+                        <th className="text-left py-4 px-6 text-sm text-slate-500 font-semibold">Donor</th>
+                        <th className="text-left py-4 px-6 text-sm text-slate-500 font-semibold">Blood Group</th>
+                        <th className="text-left py-4 px-6 text-sm text-slate-500 font-semibold">Location</th>
+                        <th className="text-left py-4 px-6 text-sm text-slate-500 font-semibold">Contact</th>
+                        <th className="text-left py-4 px-6 text-sm text-slate-500 font-semibold">Donations</th>
+                        <th className="text-left py-4 px-6 text-sm text-slate-500 font-semibold">Status</th>
+                        <th className="text-right py-4 px-6 text-sm text-slate-500 font-semibold">Actions</th>
+                      </tr>
+                    </thead>
+                    <tbody className="divide-y divide-slate-100">
+                      {filteredDonors.map((donor) => (
+                        <tr key={donor.id} className="hover:bg-slate-50 transition-colors">
+                          <td className="py-4 px-6">
+                            <div className="flex items-center gap-3">
+                              <div className="w-10 h-10 bg-red-100 text-red-700 rounded-full flex items-center justify-center font-bold">
+                                {donor.profiles?.full_name?.[0] || '?'}
+                              </div>
+                              <div>
+                                <p className="font-bold text-slate-900">{donor.profiles?.full_name || 'Unknown'}</p>
+                                <p className="text-sm text-slate-500">{donor.profiles?.email}</p>
+                              </div>
+                            </div>
+                          </td>
+                          <td className="py-4 px-6">
+                            <span className="px-3 py-1 bg-red-100 text-red-700 rounded-full text-sm font-bold">
+                              {donor.blood_group}
+                            </span>
+                          </td>
+                          <td className="py-4 px-6 text-slate-600">
+                            {donor.city}{donor.area ? `, ${donor.area}` : ''}
+                          </td>
+                          <td className="py-4 px-6 text-slate-600">{donor.contact_phone}</td>
+                          <td className="py-4 px-6">
+                            <span className="px-3 py-1 bg-slate-100 text-slate-700 rounded-full text-sm font-bold">
+                              {donor.donation_count || 0} times
+                            </span>
+                          </td>
+                          <td className="py-4 px-6">
+                            <button
+                              onClick={() => handleToggleDonorAvailability(donor.id, !donor.is_available)}
+                              className={`px-3 py-1 rounded-full text-xs font-bold cursor-pointer hover:opacity-80 ${
+                                donor.is_available ? 'bg-emerald-100 text-emerald-700' : 'bg-slate-100 text-slate-600'
+                              }`}
+                            >
+                              {donor.is_available ? 'Available' : 'Unavailable'}
+                            </button>
+                          </td>
+                          <td className="py-4 px-6 text-right">
+                            <button 
+                              onClick={() => handleDeleteDonor(donor.id)}
+                              className="p-2 text-slate-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition-colors"
+                            >
+                              <Trash2 className="w-4 h-4" />
+                            </button>
+                          </td>
+                        </tr>
+                      ))}
+                      {filteredDonors.length === 0 && (
+                        <tr>
+                          <td colSpan={7} className="text-center py-8 text-slate-500">No blood donors found</td>
+                        </tr>
+                      )}
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+            </div>
+          )}
+
+          {/* Volunteers Tab */}
+          {activeTab === 'volunteers' && (
+            <div className="space-y-6">
+              <div className="flex justify-between items-center">
+                <div className="relative flex-1 max-w-md">
+                  <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-400" />
+                  <input
+                    type="text"
+                    placeholder="Search volunteers..."
+                    value={searchQuery}
+                    onChange={(e) => setSearchQuery(e.target.value)}
+                    className="w-full pl-10 pr-4 py-2.5 rounded-xl border border-slate-200 focus:border-emerald-500 focus:ring-2 focus:ring-emerald-500/20 outline-none"
+                  />
+                </div>
+                <p className="text-sm text-slate-500 ml-4">{filteredVolunteers.length} volunteers</p>
+              </div>
+
+              <div className="bg-white rounded-2xl shadow-sm border border-slate-100 overflow-hidden">
+                <div className="overflow-x-auto">
+                  <table className="w-full">
+                    <thead className="bg-slate-50">
+                      <tr>
+                        <th className="text-left py-4 px-6 text-sm text-slate-500 font-semibold">Volunteer</th>
+                        <th className="text-left py-4 px-6 text-sm text-slate-500 font-semibold">City</th>
+                        <th className="text-left py-4 px-6 text-sm text-slate-500 font-semibold">Skills</th>
+                        <th className="text-left py-4 px-6 text-sm text-slate-500 font-semibold">Availability</th>
+                        <th className="text-left py-4 px-6 text-sm text-slate-500 font-semibold">Tasks</th>
+                        <th className="text-left py-4 px-6 text-sm text-slate-500 font-semibold">Status</th>
+                        <th className="text-right py-4 px-6 text-sm text-slate-500 font-semibold">Actions</th>
+                      </tr>
+                    </thead>
+                    <tbody className="divide-y divide-slate-100">
+                      {filteredVolunteers.map((volunteer) => (
+                        <tr key={volunteer.id} className="hover:bg-slate-50 transition-colors">
+                          <td className="py-4 px-6">
+                            <div className="flex items-center gap-3">
+                              <div className="w-10 h-10 bg-emerald-100 text-emerald-700 rounded-full flex items-center justify-center font-bold">
+                                {volunteer.profiles?.full_name?.[0] || '?'}
+                              </div>
+                              <div>
+                                <p className="font-bold text-slate-900">{volunteer.profiles?.full_name || 'Unknown'}</p>
+                                <p className="text-sm text-slate-500">{volunteer.profiles?.email}</p>
+                              </div>
+                            </div>
+                          </td>
+                          <td className="py-4 px-6 text-slate-600">{volunteer.city}</td>
+                          <td className="py-4 px-6">
+                            <div className="flex flex-wrap gap-1 max-w-xs">
+                              {(volunteer.skills || []).slice(0, 3).map((skill, i) => (
+                                <span key={i} className="px-2 py-0.5 bg-blue-100 text-blue-700 rounded text-xs font-medium">
+                                  {skill}
+                                </span>
+                              ))}
+                              {(volunteer.skills || []).length > 3 && (
+                                <span className="px-2 py-0.5 bg-slate-100 text-slate-600 rounded text-xs">
+                                  +{volunteer.skills!.length - 3}
+                                </span>
+                              )}
+                            </div>
+                          </td>
+                          <td className="py-4 px-6 text-slate-600 capitalize">{volunteer.availability || '-'}</td>
+                          <td className="py-4 px-6">
+                            <span className="px-3 py-1 bg-slate-100 text-slate-700 rounded-full text-sm font-bold">
+                              {volunteer.tasks_completed || 0}
+                            </span>
+                          </td>
+                          <td className="py-4 px-6">
+                            <button
+                              onClick={() => handleToggleVolunteerStatus(volunteer.id, !volunteer.is_active)}
+                              className={`px-3 py-1 rounded-full text-xs font-bold cursor-pointer hover:opacity-80 ${
+                                volunteer.is_active ? 'bg-emerald-100 text-emerald-700' : 'bg-slate-100 text-slate-600'
+                              }`}
+                            >
+                              {volunteer.is_active ? 'Active' : 'Inactive'}
+                            </button>
+                          </td>
+                          <td className="py-4 px-6 text-right">
+                            <button 
+                              onClick={() => handleDeleteVolunteer(volunteer.id)}
+                              className="p-2 text-slate-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition-colors"
+                            >
+                              <Trash2 className="w-4 h-4" />
+                            </button>
+                          </td>
+                        </tr>
+                      ))}
+                      {filteredVolunteers.length === 0 && (
+                        <tr>
+                          <td colSpan={7} className="text-center py-8 text-slate-500">No volunteers found</td>
+                        </tr>
+                      )}
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+            </div>
+          )}
+
+          {/* Reports Tab */}
+          {activeTab === 'reports' && (
+            <div className="space-y-6">
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+                <div className="bg-white rounded-2xl shadow-sm p-6 border border-slate-100">
+                  <h3 className="text-sm text-slate-500 font-medium mb-2">Total Users</h3>
+                  <p className="text-3xl font-bold text-slate-900">{stats.total_users}</p>
+                  <p className="text-sm text-emerald-600 mt-2">↑ Active community</p>
+                </div>
+                <div className="bg-white rounded-2xl shadow-sm p-6 border border-slate-100">
+                  <h3 className="text-sm text-slate-500 font-medium mb-2">Blood Donors</h3>
+                  <p className="text-3xl font-bold text-slate-900">{stats.total_blood_donors}</p>
+                  <p className="text-sm text-red-600 mt-2">❤️ Lives saved</p>
+                </div>
+                <div className="bg-white rounded-2xl shadow-sm p-6 border border-slate-100">
+                  <h3 className="text-sm text-slate-500 font-medium mb-2">Volunteers</h3>
+                  <p className="text-3xl font-bold text-slate-900">{stats.total_volunteers}</p>
+                  <p className="text-sm text-emerald-600 mt-2">🤝 Helping hands</p>
+                </div>
+                <div className="bg-white rounded-2xl shadow-sm p-6 border border-slate-100">
+                  <h3 className="text-sm text-slate-500 font-medium mb-2">Total Guides</h3>
+                  <p className="text-3xl font-bold text-slate-900">{stats.total_guides}</p>
+                  <p className="text-sm text-blue-600 mt-2">📚 Knowledge shared</p>
+                </div>
+              </div>
+
+              <div className="grid lg:grid-cols-2 gap-6">
+                <div className="bg-white rounded-2xl shadow-sm p-6 border border-slate-100">
+                  <h3 className="font-bold text-slate-900 mb-4">Platform Overview</h3>
+                  <div className="space-y-4">
+                    <div className="flex justify-between items-center p-3 bg-slate-50 rounded-xl">
+                      <span className="text-slate-600">Active Blood Requests</span>
+                      <span className="font-bold text-orange-600">{stats.active_blood_requests}</span>
+                    </div>
+                    <div className="flex justify-between items-center p-3 bg-slate-50 rounded-xl">
+                      <span className="text-slate-600">Donation Cases</span>
+                      <span className="font-bold text-pink-600">{stats.total_donation_cases}</span>
+                    </div>
+                    <div className="flex justify-between items-center p-3 bg-slate-50 rounded-xl">
+                      <span className="text-slate-600">Total Donations Made</span>
+                      <span className="font-bold text-emerald-600">{stats.total_donations}</span>
+                    </div>
+                    <div className="flex justify-between items-center p-3 bg-slate-50 rounded-xl">
+                      <span className="text-slate-600">Published Guides</span>
+                      <span className="font-bold text-blue-600">{guides.filter(g => g.is_published).length}</span>
+                    </div>
+                  </div>
+                </div>
+
+                <div className="bg-white rounded-2xl shadow-sm p-6 border border-slate-100">
+                  <h3 className="font-bold text-slate-900 mb-4">User Distribution</h3>
+                  <div className="space-y-4">
+                    {['citizen', 'donor', 'volunteer', 'admin'].map(role => {
+                      const count = users.filter(u => u.role === role).length
+                      const percentage = users.length > 0 ? (count / users.length * 100).toFixed(1) : 0
+                      return (
+                        <div key={role} className="space-y-2">
+                          <div className="flex justify-between text-sm">
+                            <span className="capitalize text-slate-600">{role}s</span>
+                            <span className="font-bold text-slate-900">{count} ({percentage}%)</span>
+                          </div>
+                          <div className="h-2 bg-slate-100 rounded-full overflow-hidden">
+                            <div 
+                              className={`h-full rounded-full ${
+                                role === 'admin' ? 'bg-purple-500' :
+                                role === 'donor' ? 'bg-red-500' :
+                                role === 'volunteer' ? 'bg-emerald-500' :
+                                'bg-blue-500'
+                              }`}
+                              style={{ width: `${percentage}%` }}
+                            />
+                          </div>
+                        </div>
+                      )
+                    })}
+                  </div>
+                </div>
+              </div>
+            </div>
+          )}
+
+          {/* Settings Tab */}
+          {activeTab === 'settings' && (
+            <div className="max-w-2xl space-y-6">
+              <div className="bg-white rounded-2xl shadow-sm p-6 border border-slate-100">
+                <h3 className="font-bold text-slate-900 mb-4">Admin Account</h3>
+                <div className="space-y-4">
+                  <div>
+                    <label className="block text-sm font-medium text-slate-700 mb-1">Email</label>
+                    <input
+                      type="email"
+                      value={user?.email || ''}
+                      disabled
+                      className="w-full px-4 py-2.5 rounded-xl border border-slate-200 bg-slate-50 text-slate-500"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-slate-700 mb-1">Role</label>
+                    <input
+                      type="text"
+                      value="Administrator"
+                      disabled
+                      className="w-full px-4 py-2.5 rounded-xl border border-slate-200 bg-slate-50 text-slate-500"
+                    />
+                  </div>
+                </div>
+              </div>
+
+              <div className="bg-white rounded-2xl shadow-sm p-6 border border-slate-100">
+                <h3 className="font-bold text-slate-900 mb-4">Quick Actions</h3>
+                <div className="space-y-3">
+                  <button 
+                    onClick={() => fetchDashboardData()}
+                    className="w-full flex items-center justify-between p-4 bg-slate-50 hover:bg-slate-100 rounded-xl transition-colors"
+                  >
+                    <span className="font-medium text-slate-700">Refresh All Data</span>
+                    <RefreshCw className={`w-5 h-5 text-slate-400 ${refreshing ? 'animate-spin' : ''}`} />
+                  </button>
+                  <button 
+                    onClick={handleSignOut}
+                    className="w-full flex items-center justify-between p-4 bg-red-50 hover:bg-red-100 rounded-xl transition-colors"
+                  >
+                    <span className="font-medium text-red-700">Sign Out</span>
+                    <LogOut className="w-5 h-5 text-red-400" />
+                  </button>
+                </div>
+              </div>
+
+              <div className="bg-white rounded-2xl shadow-sm p-6 border border-slate-100">
+                <h3 className="font-bold text-slate-900 mb-4">System Info</h3>
+                <div className="space-y-2 text-sm">
+                  <div className="flex justify-between py-2 border-b border-slate-100">
+                    <span className="text-slate-500">Platform</span>
+                    <span className="font-medium text-slate-900">CitizenConnect</span>
+                  </div>
+                  <div className="flex justify-between py-2 border-b border-slate-100">
+                    <span className="text-slate-500">Version</span>
+                    <span className="font-medium text-slate-900">1.0.0</span>
+                  </div>
+                  <div className="flex justify-between py-2">
+                    <span className="text-slate-500">Database</span>
+                    <span className="font-medium text-emerald-600">Connected</span>
+                  </div>
+                </div>
+              </div>
             </div>
           )}
         </main>

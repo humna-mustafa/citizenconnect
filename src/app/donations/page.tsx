@@ -3,7 +3,7 @@
 import { useState, useEffect } from 'react'
 import Link from 'next/link'
 import { createClient } from '@/lib/supabase/client'
-import { getDonationCases } from '@/lib/supabase/helpers'
+import { getDonationCases, createDonation } from '@/lib/supabase/helpers'
 import { toast } from 'sonner'
 import { 
   Heart, 
@@ -22,7 +22,8 @@ import {
   Wallet, 
   X,
   ChevronDown,
-  ArrowRight
+  ArrowRight,
+  Loader2
 } from 'lucide-react'
 
 interface DonationCase {
@@ -69,98 +70,9 @@ const urgencyLabels = {
   low: 'Normal',
 }
 
-// Sample data for demonstration
-const sampleCases: DonationCase[] = [
-  {
-    id: '1',
-    title: 'Heart Surgery for 5-Year-Old Ahmed',
-    description: 'Ahmed needs urgent heart surgery. His family cannot afford the treatment. Help save this young life.',
-    category: 'medical',
-    goal_amount: 500000,
-    raised_amount: 350000,
-    beneficiary_name: 'Ahmed Ali',
-    city: 'Lahore',
-    urgency: 'critical',
-    status: 'active',
-    verification_status: 'verified',
-    created_at: '2024-01-15',
-    image_url: '/images/donation-medical.jpg'
-  },
-  {
-    id: '2',
-    title: 'Scholarship for 50 Students in Sindh',
-    description: 'Help provide quality education to deserving students from underprivileged families in rural Sindh.',
-    category: 'education',
-    goal_amount: 300000,
-    raised_amount: 180000,
-    beneficiary_name: 'Various Students',
-    city: 'Hyderabad',
-    urgency: 'high',
-    status: 'active',
-    verification_status: 'verified',
-    created_at: '2024-01-10',
-  },
-  {
-    id: '3',
-    title: 'Flood Relief - Rebuild Homes in Balochistan',
-    description: 'Recent floods destroyed 200+ homes. Help families rebuild their lives and shelter.',
-    category: 'flood_relief',
-    goal_amount: 2000000,
-    raised_amount: 850000,
-    beneficiary_name: 'Flood Victims',
-    city: 'Quetta',
-    urgency: 'critical',
-    status: 'active',
-    verification_status: 'verified',
-    created_at: '2024-01-05',
-  },
-  {
-    id: '4',
-    title: 'Monthly Ration for 100 Families',
-    description: 'Provide monthly food supplies to families struggling with poverty in Karachi slums.',
-    category: 'food',
-    goal_amount: 200000,
-    raised_amount: 120000,
-    beneficiary_name: 'Multiple Families',
-    city: 'Karachi',
-    urgency: 'high',
-    status: 'active',
-    verification_status: 'verified',
-    created_at: '2024-01-20',
-  },
-  {
-    id: '5',
-    title: 'Support Dar-ul-Atfal Orphanage',
-    description: 'Help provide education, meals, and care for 75 orphan children at Dar-ul-Atfal.',
-    category: 'orphanage',
-    goal_amount: 400000,
-    raised_amount: 280000,
-    beneficiary_name: 'Orphan Children',
-    city: 'Peshawar',
-    urgency: 'medium',
-    status: 'active',
-    verification_status: 'verified',
-    created_at: '2024-01-12',
-  },
-  {
-    id: '6',
-    title: 'Build Shelter for Homeless in Islamabad',
-    description: 'Construct a shelter home to provide warmth and safety for homeless individuals during winter.',
-    category: 'shelter',
-    goal_amount: 800000,
-    raised_amount: 400000,
-    beneficiary_name: 'Homeless Community',
-    city: 'Islamabad',
-    urgency: 'medium',
-    status: 'active',
-    verification_status: 'verified',
-    created_at: '2024-01-08',
-  },
-]
-
 export default function DonationsPage() {
-  const [cases, setCases] = useState<DonationCase[]>(sampleCases)
-  const [filteredCases, setFilteredCases] = useState<DonationCase[]>(sampleCases)
+  const [cases, setCases] = useState<DonationCase[]>([])
+  const [filteredCases, setFilteredCases] = useState<DonationCase[]>([])
   const [selectedCategory, setSelectedCategory] = useState('all')
   const [selectedUrgency, setSelectedUrgency] = useState('all')
   const [searchQuery, setSearchQuery] = useState('')
@@ -168,41 +80,49 @@ export default function DonationsPage() {
   const [showDonationModal, setShowDonationModal] = useState(false)
   const [selectedCase, setSelectedCase] = useState<DonationCase | null>(null)
   const [donationAmount, setDonationAmount] = useState('')
+  const [loading, setLoading] = useState(true)
+  const [submitting, setSubmitting] = useState(false)
   const supabase = createClient()
 
   // Fetch donation cases from Supabase
   useEffect(() => {
     const fetchCases = async () => {
-      const { data, error } = await getDonationCases({
-        isActive: true,
-        category: selectedCategory !== 'all' ? selectedCategory : undefined,
-        urgency: selectedUrgency !== 'all' ? selectedUrgency : undefined,
-        search: searchQuery || undefined
-      })
-      
-      if (data && data.length > 0) {
-        // Map data to match interface
-        const mappedData = data.map((item: any) => ({
-          ...item,
-          category: item.donation_categories?.slug || 'other', // Map category slug
-          goal_amount: item.goal_amount || 0,
-          raised_amount: item.raised_amount || 0,
-          urgency: item.urgency || 'low',
-          city: item.city || 'Unknown'
-        }))
-        setCases(mappedData)
-        setFilteredCases(mappedData) // Initial set, filtering handled by backend mostly now
-      } else if (data && data.length === 0) {
-         setCases([])
-         setFilteredCases([])
-      }
-      // If error or no data, we might want to keep sample data or show empty state
-      // For now, if we get data (even empty), we use it. If error, we might fallback.
-      if (error) {
-        console.error('Error fetching donation cases:', error)
-        // Fallback to sample data if error (e.g. table doesn't exist yet)
-        setCases(sampleCases)
-        setFilteredCases(sampleCases)
+      setLoading(true)
+      try {
+        const { data, error } = await getDonationCases({
+          isActive: true,
+          category: selectedCategory !== 'all' ? selectedCategory : undefined,
+          urgency: selectedUrgency !== 'all' ? selectedUrgency : undefined,
+          search: searchQuery || undefined
+        })
+        
+        if (error) {
+          console.error('Error fetching donation cases:', error)
+          toast.error('Failed to load campaigns')
+        }
+        
+        if (data) {
+          // Map data to match interface
+          const mappedData = data.map((item: any) => ({
+            ...item,
+            category: item.donation_categories?.slug || 'other',
+            goal_amount: item.goal_amount || 0,
+            raised_amount: item.raised_amount || 0,
+            urgency: item.urgency || 'low',
+            city: item.city || 'Unknown'
+          }))
+          setCases(mappedData)
+          setFilteredCases(mappedData)
+        } else {
+          setCases([])
+          setFilteredCases([])
+        }
+      } catch (error) {
+        console.error('Error:', error)
+        setCases([])
+        setFilteredCases([])
+      } finally {
+        setLoading(false)
       }
     }
     fetchCases()
@@ -242,14 +162,56 @@ export default function DonationsPage() {
   const handleDonation = async () => {
     if (!selectedCase || !donationAmount) return
     
-    // In a real implementation, this would process payment
-    toast.success(`Thank you for your donation of ${formatCurrency(Number(donationAmount))} to "${selectedCase.title}"!`, {
-      description: "In a live system, this would redirect to a payment gateway.",
-      duration: 5000,
-    })
-    setShowDonationModal(false)
-    setDonationAmount('')
-    setSelectedCase(null)
+    setSubmitting(true)
+    try {
+      const { data, error } = await createDonation({
+        case_id: selectedCase.id,
+        amount: Number(donationAmount),
+        payment_method: 'online',
+        is_anonymous: false
+      })
+      
+      if (error) {
+        if (error.message === 'Not authenticated') {
+          toast.error('Please login to make a donation', {
+            action: {
+              label: 'Login',
+              onClick: () => window.location.href = '/auth/login'
+            }
+          })
+        } else {
+          toast.error('Donation failed', { description: error.message })
+        }
+      } else {
+        toast.success(`Thank you for your donation of ${formatCurrency(Number(donationAmount))}!`, {
+          description: `Your contribution to "${selectedCase.title}" has been recorded.`,
+          duration: 5000,
+        })
+        setShowDonationModal(false)
+        setDonationAmount('')
+        setSelectedCase(null)
+        
+        // Refresh cases to show updated amounts
+        const { data: refreshed } = await getDonationCases({ isActive: true })
+        if (refreshed) {
+          const mappedData = refreshed.map((item: any) => ({
+            ...item,
+            category: item.donation_categories?.slug || 'other',
+            goal_amount: item.goal_amount || 0,
+            raised_amount: item.raised_amount || 0,
+            urgency: item.urgency || 'low',
+            city: item.city || 'Unknown'
+          }))
+          setCases(mappedData)
+          setFilteredCases(mappedData)
+        }
+      }
+    } catch (error) {
+      console.error('Donation error:', error)
+      toast.error('An error occurred while processing your donation')
+    } finally {
+      setSubmitting(false)
+    }
   }
 
   return (
@@ -361,7 +323,7 @@ export default function DonationsPage() {
         <div className="container mx-auto px-4">
           <div className="flex justify-between items-center mb-8">
             <h2 className="text-2xl font-bold text-slate-900">
-              {filteredCases.length} Active Campaigns
+              {loading ? 'Loading...' : `${filteredCases.length} Active Campaigns`}
             </h2>
             <Link
               href="/donations/create"
@@ -372,7 +334,12 @@ export default function DonationsPage() {
             </Link>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+          {loading ? (
+            <div className="flex justify-center py-20">
+              <Loader2 className="w-12 h-12 text-emerald-600 animate-spin" />
+            </div>
+          ) : (
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
             {filteredCases.map((donationCase) => {
               const CategoryIcon = categories.find(c => c.id === donationCase.category)?.icon || Heart
               return (
@@ -445,8 +412,9 @@ export default function DonationsPage() {
               )
             })}
           </div>
+          )}
 
-          {filteredCases.length === 0 && (
+          {!loading && filteredCases.length === 0 && (
             <div className="text-center py-20 bg-white rounded-3xl border border-slate-100 shadow-sm">
               <div className="w-24 h-24 bg-slate-50 rounded-full flex items-center justify-center mx-auto mb-6 text-slate-300">
                 <Search className="w-12 h-12" />
@@ -540,10 +508,17 @@ export default function DonationsPage() {
 
             <button
               onClick={handleDonation}
-              disabled={!donationAmount}
+              disabled={!donationAmount || submitting}
               className="w-full py-4 bg-emerald-600 text-white font-bold rounded-xl hover:bg-emerald-700 transition-all disabled:opacity-50 disabled:cursor-not-allowed shadow-lg shadow-emerald-600/20 flex items-center justify-center gap-2 text-lg"
             >
-              Donate {donationAmount ? formatCurrency(Number(donationAmount)) : ''}
+              {submitting ? (
+                <>
+                  <Loader2 className="w-5 h-5 animate-spin" />
+                  Processing...
+                </>
+              ) : (
+                `Donate ${donationAmount ? formatCurrency(Number(donationAmount)) : ''}`
+              )}
             </button>
 
             <p className="text-center text-xs text-slate-400 mt-6 flex items-center justify-center gap-1.5 font-medium">

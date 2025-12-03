@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react'
 import { createClient } from '@/lib/supabase/client'
+import { registerAsVolunteer } from '@/lib/supabase/helpers'
 import { toast } from 'sonner'
 import { 
   Handshake, 
@@ -19,7 +20,8 @@ import {
   Cpu, 
   Truck, 
   Siren,
-  Filter
+  Filter,
+  Loader2
 } from 'lucide-react'
 
 interface Volunteer {
@@ -59,69 +61,6 @@ const skillCategories = [
   { id: 'emergency', name: 'Emergency Response', icon: Siren, skills: ['Rescue', 'Firefighting', 'Disaster Relief', 'Security'] },
 ]
 
-const sampleVolunteers: Volunteer[] = [
-  {
-    id: '1',
-    full_name: 'Dr. Fatima Khan',
-    email: 'fatima@example.com',
-    phone: '0300-1234567',
-    city: 'Karachi',
-    skills: ['First Aid', 'Doctor', 'Training'],
-    availability: 'Weekends',
-    experience: 'Medical professional with 10+ years experience',
-    verified: true,
-    created_at: '2024-01-15',
-  },
-  {
-    id: '2',
-    full_name: 'Ali Ahmed',
-    email: 'ali@example.com',
-    phone: '0321-7654321',
-    city: 'Lahore',
-    skills: ['Teaching', 'Tutoring', 'Mentoring'],
-    availability: 'Flexible',
-    experience: 'University lecturer and community educator',
-    verified: true,
-    created_at: '2024-01-10',
-  },
-  {
-    id: '3',
-    full_name: 'Hassan Raza',
-    email: 'hassan@example.com',
-    phone: '0333-9876543',
-    city: 'Islamabad',
-    skills: ['IT Support', 'Web Development', 'Training'],
-    availability: 'Evenings',
-    experience: 'Software developer with passion for teaching tech',
-    verified: true,
-    created_at: '2024-01-08',
-  },
-  {
-    id: '4',
-    full_name: 'Zainab Malik',
-    email: 'zainab@example.com',
-    phone: '0345-1122334',
-    city: 'Rawalpindi',
-    skills: ['Counseling', 'Community Outreach', 'Event Management'],
-    availability: 'Full-time',
-    experience: 'Social worker specializing in community development',
-    verified: true,
-    created_at: '2024-01-05',
-  },
-  {
-    id: '5',
-    full_name: 'Muhammad Usman',
-    email: 'usman@example.com',
-    phone: '0311-5566778',
-    city: 'Peshawar',
-    skills: ['Driving', 'Delivery', 'Rescue'],
-    availability: 'Weekends',
-    experience: 'Emergency response volunteer for 5 years',
-    verified: false,
-    created_at: '2024-01-03',
-  },
-]
-
 export default function VolunteersPage() {
   const [volunteers, setVolunteers] = useState<Volunteer[]>([])
   const [filteredVolunteers, setFilteredVolunteers] = useState<Volunteer[]>([])
@@ -130,6 +69,7 @@ export default function VolunteersPage() {
   const [searchQuery, setSearchQuery] = useState('')
   const [showRegistrationForm, setShowRegistrationForm] = useState(false)
   const [loading, setLoading] = useState(true)
+  const [submitting, setSubmitting] = useState(false)
   const [formData, setFormData] = useState({
     full_name: '',
     email: '',
@@ -145,39 +85,53 @@ export default function VolunteersPage() {
   useEffect(() => {
     const fetchVolunteers = async () => {
       setLoading(true)
-      const { data, error } = await supabase
-        .from('volunteers')
-        .select(`
-          *,
-          profiles:user_id (
-            full_name,
-            email,
-            phone,
-            city,
-            avatar_url
-          )
-        `)
-        .eq('is_active', true)
-        .order('created_at', { ascending: false })
-      
-      if (data) {
-        // Transform data to match Volunteer interface
-        const transformedVolunteers = data.map((v: any) => ({
-          id: v.id,
-          full_name: v.profiles?.full_name || 'Anonymous Volunteer',
-          email: v.profiles?.email || '',
-          phone: v.profiles?.phone || '',
-          city: v.city,
-          skills: v.skills || [],
-          availability: v.availability,
-          experience: v.experience,
-          verified: true, // Assuming active volunteers are verified
-          created_at: v.created_at,
-        }))
-        setVolunteers(transformedVolunteers)
-        setFilteredVolunteers(transformedVolunteers)
+      try {
+        const { data, error } = await supabase
+          .from('volunteers')
+          .select(`
+            *,
+            profiles:user_id (
+              full_name,
+              email,
+              phone,
+              city,
+              avatar_url
+            )
+          `)
+          .eq('is_active', true)
+          .order('created_at', { ascending: false })
+        
+        if (error) {
+          console.error('Error fetching volunteers:', error)
+        }
+        
+        if (data) {
+          // Transform data to match Volunteer interface
+          const transformedVolunteers = data.map((v: any) => ({
+            id: v.id,
+            full_name: v.profiles?.full_name || 'Anonymous Volunteer',
+            email: v.profiles?.email || '',
+            phone: v.profiles?.phone || '',
+            city: v.city,
+            skills: v.skills || [],
+            availability: v.availability,
+            experience: v.experience,
+            verified: true,
+            created_at: v.created_at,
+          }))
+          setVolunteers(transformedVolunteers)
+          setFilteredVolunteers(transformedVolunteers)
+        } else {
+          setVolunteers([])
+          setFilteredVolunteers([])
+        }
+      } catch (error) {
+        console.error('Error:', error)
+        setVolunteers([])
+        setFilteredVolunteers([])
+      } finally {
+        setLoading(false)
       }
-      setLoading(false)
     }
     fetchVolunteers()
   }, [])
@@ -218,46 +172,83 @@ export default function VolunteersPage() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
+    setSubmitting(true)
     
-    const { data: { user } } = await supabase.auth.getUser()
-    
-    if (!user) {
-      toast.error('Please login to register as a volunteer')
-      return
-    }
-
-    const { error } = await supabase
-      .from('volunteers')
-      .insert([{
-        user_id: user.id,
+    try {
+      const { data, error } = await registerAsVolunteer({
         city: formData.city,
         skills: formData.skills,
-        availability: formData.availability.toLowerCase(),
+        availability: formData.availability.toLowerCase() as 'weekdays' | 'weekends' | 'both' | 'flexible',
         experience: formData.experience,
         is_active: true
-      }])
-    
-    if (error) {
-      if (error.code === '23505') {
-        toast.error('You are already registered as a volunteer!')
-      } else {
-        toast.error('Error registering. Please try again.')
-        console.error(error)
-      }
-    } else {
-      toast.success('Thank you for registering as a volunteer!')
-      setShowRegistrationForm(false)
-      setFormData({
-        full_name: '',
-        email: '',
-        phone: '',
-        city: '',
-        skills: [],
-        availability: '',
-        experience: '',
       })
-      // Refresh list
-      window.location.reload()
+      
+      if (error) {
+        if (error.message === 'Not authenticated') {
+          toast.error('Please login to register as a volunteer', {
+            action: {
+              label: 'Login',
+              onClick: () => window.location.href = '/auth/login'
+            }
+          })
+        } else if ('code' in error && error.code === '23505') {
+          toast.error('You are already registered as a volunteer!')
+        } else {
+          toast.error('Registration failed', { description: error.message })
+        }
+      } else {
+        toast.success('Thank you for registering as a volunteer!', {
+          description: 'Your profile has been added to our network.'
+        })
+        setShowRegistrationForm(false)
+        setFormData({
+          full_name: '',
+          email: '',
+          phone: '',
+          city: '',
+          skills: [],
+          availability: '',
+          experience: '',
+        })
+        
+        // Refresh the volunteers list
+        const { data: refreshedData } = await supabase
+          .from('volunteers')
+          .select(`
+            *,
+            profiles:user_id (
+              full_name,
+              email,
+              phone,
+              city,
+              avatar_url
+            )
+          `)
+          .eq('is_active', true)
+          .order('created_at', { ascending: false })
+        
+        if (refreshedData) {
+          const transformedVolunteers = refreshedData.map((v: any) => ({
+            id: v.id,
+            full_name: v.profiles?.full_name || 'Anonymous Volunteer',
+            email: v.profiles?.email || '',
+            phone: v.profiles?.phone || '',
+            city: v.city,
+            skills: v.skills || [],
+            availability: v.availability,
+            experience: v.experience,
+            verified: true,
+            created_at: v.created_at,
+          }))
+          setVolunteers(transformedVolunteers)
+          setFilteredVolunteers(transformedVolunteers)
+        }
+      }
+    } catch (error) {
+      console.error('Registration error:', error)
+      toast.error('An error occurred while registering')
+    } finally {
+      setSubmitting(false)
     }
   }
 
@@ -411,6 +402,11 @@ export default function VolunteersPage() {
           </div>
 
           {/* Volunteers Grid */}
+          {loading ? (
+            <div className="flex justify-center py-20">
+              <Loader2 className="w-12 h-12 text-emerald-600 animate-spin" />
+            </div>
+          ) : (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             {filteredVolunteers.map((volunteer) => (
               <div
@@ -466,8 +462,9 @@ export default function VolunteersPage() {
               </div>
             ))}
           </div>
+          )}
 
-          {filteredVolunteers.length === 0 && (
+          {!loading && filteredVolunteers.length === 0 && (
             <div className="text-center py-16 bg-white rounded-3xl border border-slate-100 shadow-sm">
               <div className="w-20 h-20 bg-slate-50 rounded-full flex items-center justify-center mx-auto mb-4">
                 <Search className="w-10 h-10 text-slate-300" />
@@ -624,9 +621,17 @@ export default function VolunteersPage() {
 
               <button
                 type="submit"
-                className="w-full py-4 bg-emerald-600 text-white font-bold rounded-xl hover:bg-emerald-700 transition-all shadow-lg shadow-emerald-600/20"
+                disabled={submitting || formData.skills.length === 0}
+                className="w-full py-4 bg-emerald-600 text-white font-bold rounded-xl hover:bg-emerald-700 transition-all shadow-lg shadow-emerald-600/20 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
               >
-                Register as Volunteer
+                {submitting ? (
+                  <>
+                    <Loader2 className="w-5 h-5 animate-spin" />
+                    Registering...
+                  </>
+                ) : (
+                  'Register as Volunteer'
+                )}
               </button>
             </form>
           </div>

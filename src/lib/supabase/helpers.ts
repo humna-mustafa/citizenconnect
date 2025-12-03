@@ -370,6 +370,40 @@ export async function getEmergencyGuides() {
   return { data, error }
 }
 
+export async function getEmergencyContacts() {
+  const supabase = createClient()
+  
+  const { data, error } = await supabase
+    .from('emergency_contacts')
+    .select('*')
+    .eq('is_active', true)
+    .order('priority', { ascending: true })
+
+  return { data, error }
+}
+
+// =====================================================
+// DONATION STATISTICS
+// =====================================================
+
+export async function getDonationStats() {
+  const supabase = createClient()
+  
+  // Get monthly donation stats
+  const { data: monthlyStats, error: monthlyError } = await supabase
+    .rpc('get_monthly_donation_stats')
+
+  // Get category distribution
+  const { data: categoryStats, error: categoryError } = await supabase
+    .rpc('get_donation_category_stats')
+
+  return { 
+    monthlyStats: monthlyStats || [], 
+    categoryStats: categoryStats || [],
+    error: monthlyError || categoryError
+  }
+}
+
 // =====================================================
 // CONTACT & FEEDBACK
 // =====================================================

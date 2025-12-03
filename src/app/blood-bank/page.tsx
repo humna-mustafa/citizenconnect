@@ -4,7 +4,8 @@ import { useState, useEffect } from 'react'
 import Link from 'next/link'
 import dynamic from 'next/dynamic'
 import { createClient } from '@/lib/supabase/client'
-import { getBloodDonors, subscribeToBloodRequests } from '@/lib/supabase/helpers'
+import { getBloodDonors, registerAsBloodDonor, createBloodRequest, subscribeToBloodRequests } from '@/lib/supabase/helpers'
+import { toast } from 'sonner'
 import { 
   Search, 
   AlertCircle, 
@@ -74,27 +75,24 @@ export default function BloodBankPage() {
   const [donors, setDonors] = useState<BloodDonor[]>([])
   const [requests, setRequests] = useState<BloodRequest[]>([])
   const [loading, setLoading] = useState(false)
+  const [submitting, setSubmitting] = useState(false)
   const [filters, setFilters] = useState({
     bloodGroup: '',
     city: ''
   })
   const [showMap, setShowMap] = useState(false)
+  
+  // Registration form data
+  const [registerForm, setRegisterForm] = useState({
+    blood_group: '',
+    city: '',
+    area: '',
+    contact_phone: '',
+    whatsapp_number: '',
+    is_available: true
+  })
+  
   const supabase = createClient()
-
-  // Demo data
-  const demoDonors: BloodDonor[] = [
-    { id: '1', blood_group: 'A+', city: 'Karachi', area: 'Gulshan', is_available: true, contact_phone: '0300-1234567', donation_count: 5, full_name: 'Ahmed Khan', avatar_url: '' },
-    { id: '2', blood_group: 'O-', city: 'Lahore', area: 'DHA', is_available: true, contact_phone: '0321-9876543', donation_count: 12, full_name: 'Sara Ali', avatar_url: '' },
-    { id: '3', blood_group: 'B+', city: 'Islamabad', area: 'F-10', is_available: true, contact_phone: '0333-5551234', donation_count: 8, full_name: 'Usman Malik', avatar_url: '' },
-    { id: '4', blood_group: 'AB+', city: 'Karachi', area: 'Clifton', is_available: false, contact_phone: '0345-7778899', donation_count: 3, full_name: 'Fatima Hassan', avatar_url: '' },
-    { id: '5', blood_group: 'O+', city: 'Rawalpindi', area: 'Saddar', is_available: true, contact_phone: '0312-4445566', donation_count: 15, full_name: 'Ali Raza', avatar_url: '' },
-  ]
-
-  const demoRequests: BloodRequest[] = [
-    { id: '1', patient_name: 'Muhammad Asif', blood_group: 'O-', hospital_name: 'Aga Khan Hospital', city: 'Karachi', urgency_level: 'critical', status: 'open', created_at: new Date().toISOString() },
-    { id: '2', patient_name: 'Ayesha Bibi', blood_group: 'B+', hospital_name: 'Services Hospital', city: 'Lahore', urgency_level: 'urgent', status: 'open', created_at: new Date().toISOString() },
-    { id: '3', patient_name: 'Kamran Shah', blood_group: 'A+', hospital_name: 'PIMS Hospital', city: 'Islamabad', urgency_level: 'normal', status: 'open', created_at: new Date().toISOString() },
-  ]
 
   useEffect(() => {
     fetchDonors()
@@ -102,11 +100,13 @@ export default function BloodBankPage() {
 
     // Realtime subscription for blood requests
     const subscription = subscribeToBloodRequests(
-      filters.city || 'Karachi', // Default to Karachi or handle global
-      filters.bloodGroup || 'O+', // Default or handle all
+      filters.city || 'Karachi',
+      filters.bloodGroup || 'O+',
       (payload) => {
         console.log('New blood request:', payload)
-        // Refresh requests
+        toast.info('New blood request received!', {
+          description: `${payload.new.blood_group} needed in ${payload.new.city}`,
+        })
         fetchRequests()
       }
     )
@@ -124,35 +124,105 @@ export default function BloodBankPage() {
         city: filters.city || undefined
       })
 
-      if (data && data.length > 0) {
-        // Map RPC result to BloodDonor interface if needed, but it should match mostly
-        // The RPC returns flat structure, interface is flat now too
-        setDonors(data as any[])
-      } else {
-        setDonors(demoDonors)
+      if (error) {
+        console.error('Error fetching donors:', error)
+        toast.error('Failed to fetch donors')
       }
+      
+      // Set whatever data we got (empty array if none)
+      setDonors((data as BloodDonor[]) || [])
     } catch (error) {
       console.error('Error fetching donors:', error)
-      setDonors(demoDonors)
+      setDonors([])
     } finally {
       setLoading(false)
     }
   }
 
   const fetchRequests = async () => {
-    const { data } = await supabase
-      .from('blood_requests')
-      .select('*')
-      .eq('status', 'open')
-      .order('urgency_level', { ascending: false })
-      .order('created_at', { ascending: false })
-      .limit(10)
+    try {
+      const { data, error } = await supabase
+        .from('blood_requests')
+        .select('*')
+        .eq('status', 'open')
+        .order('created_at', { ascending: false })
+        .limit(10)
 
-    if (data && data.length > 0) {
-      setRequests(data)
-    } else {
-      setRequests(demoRequests)
+      if (error) {
+        console.error('Error fetching requests:', error)
+      }
+      
+      setRequests(data || [])
+    } catch (error) {
+      console.error('Error fetching requests:', error)
+      setRequests([])
     }
+  }
+
+  const handleRegisterDonor = async (e: React.FormEvent) => {
+    e.preventDefault()
+    setSubmitting(true)
+    
+    try {
+      const { data, error } = await registerAsBloodDonor({
+        blood_group: registerForm.blood_group as 'A+' | 'A-' | 'B+' | 'B-' | 'AB+' | 'AB-' | 'O+' | 'O-',
+        city: registerForm.city,
+        area: registerForm.area,
+        contact_phone: registerForm.contact_phone,
+        contact_whatsapp: registerForm.whatsapp_number || null,
+        is_available: registerForm.is_available,
+      })
+      
+      if (error) {
+        if (error.message === 'Not authenticated') {
+          toast.error('Please login to register as a donor', {
+            action: {
+              label: 'Login',
+              onClick: () => window.location.href = '/auth/login'
+            }
+          })
+        } else {
+          toast.error('Failed to register', { description: error.message })
+        }
+      } else {
+        toast.success('Successfully registered as blood donor!', {
+          description: 'Thank you for joining our donor network.'
+        })
+        setRegisterForm({
+          blood_group: '',
+          city: '',
+          area: '',
+          contact_phone: '',
+          whatsapp_number: '',
+          is_available: true
+        })
+        setActiveTab('find')
+        fetchDonors()
+      }
+    } catch (error) {
+      console.error('Registration error:', error)
+      toast.error('An error occurred while registering')
+    } finally {
+      setSubmitting(false)
+    }
+  }
+
+  const handleHelpRequest = async (request: BloodRequest) => {
+    const { data: { user } } = await supabase.auth.getUser()
+    
+    if (!user) {
+      toast.error('Please login to respond to blood requests', {
+        action: {
+          label: 'Login',
+          onClick: () => window.location.href = '/auth/login'
+        }
+      })
+      return
+    }
+    
+    toast.success('Thank you for offering to help!', {
+      description: `Contact info will be shared with the requester for ${request.patient_name}.`
+    })
   }
 
   const getUrgencyColor = (level: string) => {
@@ -326,7 +396,7 @@ export default function BloodBankPage() {
                 <div className="flex justify-center py-20">
                   <Loader2 className="w-12 h-12 text-red-600 animate-spin" />
                 </div>
-              ) : (
+              ) : donors.length > 0 ? (
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                   {donors.map(donor => (
                     <div key={donor.id} className="bg-white rounded-3xl p-6 shadow-sm hover:shadow-xl transition-all border border-slate-100 group relative overflow-hidden">
@@ -340,7 +410,7 @@ export default function BloodBankPage() {
                           <h3 className="font-bold text-slate-900 text-lg">{donor.full_name || 'Anonymous Donor'}</h3>
                           <p className="text-slate-500 flex items-center gap-1.5 mt-1">
                             <MapPin className="w-4 h-4 text-slate-400" />
-                            {donor.city}, {donor.area}
+                            {donor.city}{donor.area ? `, ${donor.area}` : ''}
                           </p>
                         </div>
                       </div>
@@ -356,7 +426,7 @@ export default function BloodBankPage() {
                         </span>
                         <span className="text-sm text-slate-500 font-medium flex items-center gap-1.5">
                           <Heart className="w-4 h-4 text-red-400" />
-                          {donor.donation_count} donations
+                          {donor.donation_count || 0} donations
                         </span>
                       </div>
                       
@@ -369,6 +439,24 @@ export default function BloodBankPage() {
                       </a>
                     </div>
                   ))}
+                </div>
+              ) : (
+                <div className="text-center py-20 bg-white rounded-3xl border border-slate-100 shadow-sm">
+                  <div className="w-24 h-24 bg-red-50 rounded-full flex items-center justify-center mx-auto mb-6 text-red-300">
+                    <Droplets className="w-12 h-12" />
+                  </div>
+                  <h3 className="text-2xl font-bold text-slate-900 mb-2">No donors found</h3>
+                  <p className="text-slate-500 mb-8">
+                    {filters.bloodGroup || filters.city 
+                      ? 'Try adjusting your filters or search in a different city' 
+                      : 'Be the first to register as a blood donor!'}
+                  </p>
+                  <button
+                    onClick={() => setActiveTab('register')}
+                    className="px-8 py-4 bg-red-600 text-white font-bold rounded-xl hover:bg-red-700 transition-all shadow-lg shadow-red-600/20"
+                  >
+                    Register as Donor
+                  </button>
                 </div>
               )}
             </div>
@@ -409,11 +497,26 @@ export default function BloodBankPage() {
                       </span>
                     </div>
                     <div className="mt-6 flex items-center gap-4">
-                      <button className="flex-1 px-6 py-3 bg-red-600 text-white font-bold rounded-xl hover:bg-red-700 transition-all shadow-lg shadow-red-600/20 flex items-center justify-center gap-2">
+                      <button 
+                        onClick={() => handleHelpRequest(request)}
+                        className="flex-1 px-6 py-3 bg-red-600 text-white font-bold rounded-xl hover:bg-red-700 transition-all shadow-lg shadow-red-600/20 flex items-center justify-center gap-2"
+                      >
                         <Heart className="w-5 h-5" />
                         I Can Help
                       </button>
-                      <button className="px-6 py-3 border-2 border-slate-200 text-slate-600 font-bold rounded-xl hover:border-red-600 hover:text-red-600 hover:bg-red-50 transition-all flex items-center gap-2">
+                      <button 
+                        onClick={() => {
+                          navigator.share?.({
+                            title: `Blood Needed: ${request.blood_group}`,
+                            text: `${request.blood_group} blood needed for ${request.patient_name} at ${request.hospital_name}, ${request.city}`,
+                            url: window.location.href
+                          }).catch(() => {
+                            navigator.clipboard.writeText(`${request.blood_group} blood needed for ${request.patient_name} at ${request.hospital_name}, ${request.city}`)
+                            toast.success('Link copied to clipboard!')
+                          })
+                        }}
+                        className="px-6 py-3 border-2 border-slate-200 text-slate-600 font-bold rounded-xl hover:border-red-600 hover:text-red-600 hover:bg-red-50 transition-all flex items-center gap-2"
+                      >
                         <Share2 className="w-5 h-5" />
                         Share
                       </button>
@@ -436,11 +539,16 @@ export default function BloodBankPage() {
                   <p className="text-slate-500 text-lg">Register as a blood donor and help save lives in your community.</p>
                 </div>
 
-                <form className="space-y-6">
+                <form onSubmit={handleRegisterDonor} className="space-y-6">
                   <div className="grid grid-cols-2 gap-6">
                     <div>
                       <label className="block text-sm font-bold text-slate-700 mb-2">Blood Group *</label>
-                      <select className="w-full px-5 py-4 rounded-xl bg-slate-50 border border-slate-200 focus:border-red-500 focus:ring-2 focus:ring-red-500/20 outline-none transition-all font-medium">
+                      <select 
+                        required
+                        value={registerForm.blood_group}
+                        onChange={(e) => setRegisterForm(prev => ({ ...prev, blood_group: e.target.value }))}
+                        className="w-full px-5 py-4 rounded-xl bg-slate-50 border border-slate-200 focus:border-red-500 focus:ring-2 focus:ring-red-500/20 outline-none transition-all font-medium"
+                      >
                         <option value="">Select</option>
                         {bloodGroups.map(group => (
                           <option key={group} value={group}>{group}</option>
@@ -449,7 +557,12 @@ export default function BloodBankPage() {
                     </div>
                     <div>
                       <label className="block text-sm font-bold text-slate-700 mb-2">City *</label>
-                      <select className="w-full px-5 py-4 rounded-xl bg-slate-50 border border-slate-200 focus:border-red-500 focus:ring-2 focus:ring-red-500/20 outline-none transition-all font-medium">
+                      <select 
+                        required
+                        value={registerForm.city}
+                        onChange={(e) => setRegisterForm(prev => ({ ...prev, city: e.target.value }))}
+                        className="w-full px-5 py-4 rounded-xl bg-slate-50 border border-slate-200 focus:border-red-500 focus:ring-2 focus:ring-red-500/20 outline-none transition-all font-medium"
+                      >
                         <option value="">Select</option>
                         {cities.map(city => (
                           <option key={city} value={city}>{city}</option>
@@ -462,6 +575,8 @@ export default function BloodBankPage() {
                     <label className="block text-sm font-bold text-slate-700 mb-2">Area / Locality</label>
                     <input
                       type="text"
+                      value={registerForm.area}
+                      onChange={(e) => setRegisterForm(prev => ({ ...prev, area: e.target.value }))}
                       className="w-full px-5 py-4 rounded-xl bg-slate-50 border border-slate-200 focus:border-red-500 focus:ring-2 focus:ring-red-500/20 outline-none transition-all font-medium"
                       placeholder="e.g., Gulshan, DHA, etc."
                     />
@@ -471,6 +586,9 @@ export default function BloodBankPage() {
                     <label className="block text-sm font-bold text-slate-700 mb-2">Contact Phone *</label>
                     <input
                       type="tel"
+                      required
+                      value={registerForm.contact_phone}
+                      onChange={(e) => setRegisterForm(prev => ({ ...prev, contact_phone: e.target.value }))}
                       className="w-full px-5 py-4 rounded-xl bg-slate-50 border border-slate-200 focus:border-red-500 focus:ring-2 focus:ring-red-500/20 outline-none transition-all font-medium"
                       placeholder="03XX-XXXXXXX"
                     />
@@ -480,13 +598,21 @@ export default function BloodBankPage() {
                     <label className="block text-sm font-bold text-slate-700 mb-2">WhatsApp Number (Optional)</label>
                     <input
                       type="tel"
+                      value={registerForm.whatsapp_number}
+                      onChange={(e) => setRegisterForm(prev => ({ ...prev, whatsapp_number: e.target.value }))}
                       className="w-full px-5 py-4 rounded-xl bg-slate-50 border border-slate-200 focus:border-red-500 focus:ring-2 focus:ring-red-500/20 outline-none transition-all font-medium"
                       placeholder="03XX-XXXXXXX"
                     />
                   </div>
 
                   <div className="flex items-start gap-3 p-4 bg-slate-50 rounded-xl">
-                    <input type="checkbox" className="mt-1 w-5 h-5 text-red-600 border-slate-300 rounded focus:ring-red-500" />
+                    <input 
+                      type="checkbox" 
+                      required
+                      checked={registerForm.is_available}
+                      onChange={(e) => setRegisterForm(prev => ({ ...prev, is_available: e.target.checked }))}
+                      className="mt-1 w-5 h-5 text-red-600 border-slate-300 rounded focus:ring-red-500" 
+                    />
                     <span className="text-sm text-slate-600 font-medium">
                       I confirm that I am eligible to donate blood and agree to be contacted by those in need.
                     </span>
@@ -494,9 +620,17 @@ export default function BloodBankPage() {
 
                   <button
                     type="submit"
-                    className="w-full py-5 bg-red-600 text-white font-bold rounded-xl shadow-lg hover:bg-red-700 transition-all shadow-red-600/20 text-lg"
+                    disabled={submitting}
+                    className="w-full py-5 bg-red-600 text-white font-bold rounded-xl shadow-lg hover:bg-red-700 transition-all shadow-red-600/20 text-lg disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
                   >
-                    Register as Donor
+                    {submitting ? (
+                      <>
+                        <Loader2 className="w-5 h-5 animate-spin" />
+                        Registering...
+                      </>
+                    ) : (
+                      'Register as Donor'
+                    )}
                   </button>
                 </form>
               </div>

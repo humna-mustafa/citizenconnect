@@ -16,7 +16,7 @@ const navigation = [
   { name: 'Donations', href: '/donations' },
   { name: 'Volunteers', href: '/volunteers' },
   { name: 'Emergency', href: '/emergency' },
-  { name: 'Report Issue', href: '/report-issue' },
+  { name: 'Impact', href: '/impact' },
   { name: 'Dashboard', href: '/dashboard' },
 ]
 

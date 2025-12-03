@@ -19,14 +19,17 @@ import {
   ExternalLink,
   ChevronRight,
   Stethoscope,
-  Building2
+  Building2,
+  Loader2
 } from 'lucide-react'
 
 interface EmergencyContact {
+  id?: string
   name: string
   phone: string
   description: string
   icon: any
+  is_active?: boolean
 }
 
 interface EmergencyGuide {
@@ -40,7 +43,8 @@ interface EmergencyGuide {
   gradient: string
 }
 
-const emergencyContacts: EmergencyContact[] = [
+// Default emergency contacts (used as fallback when no database data)
+const defaultEmergencyContacts: EmergencyContact[] = [
   { name: 'Rescue 1122', phone: '1122', description: 'Emergency Rescue Services (Punjab)', icon: Ambulance },
   { name: 'Edhi Foundation', phone: '115', description: 'Nationwide Emergency & Ambulance', icon: Stethoscope },
   { name: 'Police Emergency', phone: '15', description: 'Police Emergency Helpline', icon: Shield },
@@ -51,7 +55,8 @@ const emergencyContacts: EmergencyContact[] = [
   { name: 'Chhipa Helpline', phone: '0800-42244', description: 'Toll Free Ambulance Service', icon: Phone },
 ]
 
-const emergencyGuides: EmergencyGuide[] = [
+// Default emergency guides (used as fallback)
+const defaultEmergencyGuides: EmergencyGuide[] = [
   {
     id: 'medical',
     title: 'Medical Emergency',
@@ -157,32 +162,55 @@ const emergencyGuides: EmergencyGuide[] = [
 ]
 
 export default function EmergencyPage() {
-  const [guides, setGuides] = useState<EmergencyGuide[]>([])
+  const [guides, setGuides] = useState<EmergencyGuide[]>(defaultEmergencyGuides)
+  const [contacts, setContacts] = useState<EmergencyContact[]>(defaultEmergencyContacts)
   const [selectedGuide, setSelectedGuide] = useState<EmergencyGuide | null>(null)
   const [checkedItems, setCheckedItems] = useState<string[]>([])
   const [loading, setLoading] = useState(true)
 
   useEffect(() => {
-    const fetchGuides = async () => {
-      const { getEmergencyGuides } = await import('@/lib/supabase/helpers')
-      const { data, error } = await getEmergencyGuides()
-      
-      if (data) {
-        const transformedGuides = data.map((g: any) => ({
-          id: g.id,
-          title: g.title,
-          category: g.category,
-          steps: typeof g.steps === 'string' ? JSON.parse(g.steps) : g.steps,
-          checklist: typeof g.checklist === 'string' ? JSON.parse(g.checklist) : g.checklist,
-          icon: getIconForCategory(g.category),
-          color: getColorForCategory(g.category),
-          gradient: getGradientForCategory(g.category)
-        }))
-        setGuides(transformedGuides)
+    const fetchData = async () => {
+      try {
+        const { getEmergencyGuides, getEmergencyContacts } = await import('@/lib/supabase/helpers')
+        
+        // Fetch emergency guides
+        const { data: guidesData, error: guidesError } = await getEmergencyGuides()
+        
+        if (guidesData && guidesData.length > 0) {
+          const transformedGuides = guidesData.map((g: any) => ({
+            id: g.id,
+            title: g.title,
+            category: g.category,
+            steps: typeof g.steps === 'string' ? JSON.parse(g.steps) : g.steps || [],
+            checklist: typeof g.checklist === 'string' ? JSON.parse(g.checklist) : g.checklist || [],
+            icon: getIconForCategory(g.category),
+            color: getColorForCategory(g.category),
+            gradient: getGradientForCategory(g.category)
+          }))
+          setGuides(transformedGuides)
+        }
+        
+        // Fetch emergency contacts
+        const { data: contactsData, error: contactsError } = await getEmergencyContacts()
+        
+        if (contactsData && contactsData.length > 0) {
+          const transformedContacts = contactsData.map((c: any) => ({
+            id: c.id,
+            name: c.name,
+            phone: c.phone,
+            description: c.description,
+            icon: getContactIcon(c.type || c.name)
+          }))
+          setContacts(transformedContacts)
+        }
+      } catch (error) {
+        console.error('Error fetching emergency data:', error)
+        // Keep default data on error
+      } finally {
+        setLoading(false)
       }
-      setLoading(false)
     }
-    fetchGuides()
+    fetchData()
   }, [])
 
   const getIconForCategory = (category: string) => {
@@ -213,6 +241,18 @@ export default function EmergencyPage() {
       case 'natural_disaster': return 'from-cyan-500 to-blue-600'
       default: return 'from-slate-500 to-slate-600'
     }
+  }
+
+  const getContactIcon = (type: string) => {
+    const typeLower = type.toLowerCase()
+    if (typeLower.includes('rescue') || typeLower.includes('ambulance')) return Ambulance
+    if (typeLower.includes('police')) return Shield
+    if (typeLower.includes('fire')) return Flame
+    if (typeLower.includes('edhi')) return Stethoscope
+    if (typeLower.includes('chippa') || typeLower.includes('chhipa')) return Siren
+    if (typeLower.includes('madadgar') || typeLower.includes('women') || typeLower.includes('child')) return HeartHandshake
+    if (typeLower.includes('nadra')) return CreditCard
+    return Phone
   }
 
   const toggleCheckItem = (item: string) => {
@@ -253,10 +293,15 @@ export default function EmergencyPage() {
               <Phone className="w-6 h-6 text-red-500" />
               Emergency Contact Numbers
             </h2>
+            {loading ? (
+              <div className="flex justify-center py-8">
+                <Loader2 className="w-8 h-8 text-red-500 animate-spin" />
+              </div>
+            ) : (
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-              {emergencyContacts.map((contact, index) => (
+              {contacts.map((contact, index) => (
                 <a
-                  key={index}
+                  key={contact.id || index}
                   href={`tel:${contact.phone}`}
                   className="group bg-slate-50 rounded-xl p-5 border border-slate-200 hover:border-red-500 hover:bg-red-50 hover:shadow-md transition-all cursor-pointer"
                 >
@@ -275,6 +320,7 @@ export default function EmergencyPage() {
                 </a>
               ))}
             </div>
+            )}
           </div>
         </div>
       </section>
@@ -286,8 +332,13 @@ export default function EmergencyPage() {
             Emergency Response Guides
           </h2>
           
+          {loading ? (
+            <div className="flex justify-center py-12">
+              <Loader2 className="w-12 h-12 text-slate-400 animate-spin" />
+            </div>
+          ) : (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-            {emergencyGuides.map((guide) => (
+            {guides.map((guide) => (
               <button
                 key={guide.id}
                 onClick={() => setSelectedGuide(guide)}
@@ -300,7 +351,7 @@ export default function EmergencyPage() {
                 </div>
                 <h3 className="text-xl font-bold text-slate-900 mb-2">{guide.title}</h3>
                 <p className="text-sm text-slate-500 mb-4">
-                  {guide.steps.length} steps • {guide.checklist.length} checklist items
+                  {guide.steps?.length || 0} steps • {guide.checklist?.length || 0} checklist items
                 </p>
                 <div className={`flex items-center font-semibold text-sm ${guide.color} group-hover:translate-x-1 transition-transform`}>
                   View Guide
@@ -309,6 +360,7 @@ export default function EmergencyPage() {
               </button>
             ))}
           </div>
+          )}
 
           {/* Selected Guide Details */}
           {selectedGuide && (
