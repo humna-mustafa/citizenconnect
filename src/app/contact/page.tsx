@@ -33,15 +33,17 @@ export default function ContactPage() {
     e.preventDefault()
     setLoading(true)
     
-    // In production, save to Supabase
-    // const supabase = createClient()
-    // await supabase.from('contact_messages').insert([formData])
+    const { createContactMessage } = await import('@/lib/supabase/helpers')
+    const { error } = await createContactMessage(formData)
     
-    // Simulate API call
-    await new Promise(resolve => setTimeout(resolve, 1000))
+    if (error) {
+      alert('Error sending message. Please try again.')
+      console.error(error)
+    } else {
+      setSubmitted(true)
+    }
     
     setLoading(false)
-    setSubmitted(true)
   }
 
   if (submitted) {

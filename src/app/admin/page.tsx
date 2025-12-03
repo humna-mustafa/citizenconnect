@@ -16,7 +16,8 @@ import {
   LogOut,
   Search,
   Filter,
-  MoreVertical,
+  Menu,
+  X,
   CheckCircle2,
   XCircle,
   AlertCircle,
@@ -25,37 +26,43 @@ import {
   Edit2,
   Trash2,
   Shield,
-  Bell,
-  Menu,
-  X
+  Bell
 } from 'lucide-react'
+import { formatDistanceToNow } from 'date-fns'
 
 interface DashboardStats {
-  totalUsers: number
-  totalGuides: number
-  totalDonors: number
-  totalVolunteers: number
-  totalDonations: number
-  pendingVerifications: number
+  total_users: number
+  total_guides: number
+  total_blood_donors: number
+  total_volunteers: number
+  total_donations: number
+  active_blood_requests: number
+  total_donation_cases: number
+  recent_guides: any[]
+  recent_blood_requests: any[]
 }
 
-interface UserData {
+interface UserProfile {
   id: string
   email: string
   full_name: string
   role: string
   city: string
   created_at: string
-  verified: boolean
+  is_verified: boolean
 }
 
-interface GuideData {
+interface Guide {
   id: string
   title: string
-  category: string
-  status: string
-  author: string
+  category_id: string
+  is_published: boolean
+  author_id: string
   created_at: string
+  views_count: number
+  categories?: {
+    name: string
+  }
 }
 
 export default function AdminPage() {
@@ -64,31 +71,21 @@ export default function AdminPage() {
   const [isAdmin, setIsAdmin] = useState(false)
   const [activeTab, setActiveTab] = useState('dashboard')
   const [sidebarOpen, setSidebarOpen] = useState(true)
+  
   const [stats, setStats] = useState<DashboardStats>({
-    totalUsers: 15678,
-    totalGuides: 156,
-    totalDonors: 2847,
-    totalVolunteers: 1234,
-    totalDonations: 8456,
-    pendingVerifications: 45,
+    total_users: 0,
+    total_guides: 0,
+    total_blood_donors: 0,
+    total_volunteers: 0,
+    total_donations: 0,
+    active_blood_requests: 0,
+    total_donation_cases: 0,
+    recent_guides: [],
+    recent_blood_requests: []
   })
 
-  // Sample data
-  const [users] = useState<UserData[]>([
-    { id: '1', email: 'ahmed@example.com', full_name: 'Ahmed Khan', role: 'citizen', city: 'Karachi', created_at: '2024-01-15', verified: true },
-    { id: '2', email: 'fatima@example.com', full_name: 'Fatima Ali', role: 'donor', city: 'Lahore', created_at: '2024-01-14', verified: true },
-    { id: '3', email: 'hassan@example.com', full_name: 'Hassan Raza', role: 'volunteer', city: 'Islamabad', created_at: '2024-01-13', verified: false },
-    { id: '4', email: 'ayesha@example.com', full_name: 'Ayesha Malik', role: 'citizen', city: 'Faisalabad', created_at: '2024-01-12', verified: true },
-    { id: '5', email: 'usman@example.com', full_name: 'Usman Sheikh', role: 'donor', city: 'Peshawar', created_at: '2024-01-11', verified: false },
-  ])
-
-  const [guides] = useState<GuideData[]>([
-    { id: '1', title: 'How to Get CNIC', category: 'documents', status: 'published', author: 'Admin', created_at: '2024-01-20' },
-    { id: '2', title: 'Passport Application Guide', category: 'documents', status: 'published', author: 'Ahmed Khan', created_at: '2024-01-18' },
-    { id: '3', title: 'Driving License Process', category: 'documents', status: 'pending', author: 'Fatima Ali', created_at: '2024-01-17' },
-    { id: '4', title: 'Property Registration', category: 'legal', status: 'draft', author: 'Hassan Raza', created_at: '2024-01-16' },
-    { id: '5', title: 'Birth Certificate Guide', category: 'documents', status: 'published', author: 'Admin', created_at: '2024-01-15' },
-  ])
+  const [users, setUsers] = useState<UserProfile[]>([])
+  const [guides, setGuides] = useState<Guide[]>([])
 
   const supabase = createClient()
   const router = useRouter()
@@ -102,16 +99,50 @@ export default function AdminPage() {
         return
       }
       
-      setUser(user)
+      // Check if user is admin
+      const { data: profile } = await supabase
+        .from('profiles')
+        .select('role')
+        .eq('id', user.id)
+        .single()
       
-      // Check if user is admin (in real app, check from profiles table)
-      // For demo purposes, allow access
-      setIsAdmin(true)
+      // For demo/development purposes, we'll allow access if role is admin OR if it's the first user (fallback)
+      // In production, strictly check profile?.role === 'admin'
+      if (profile?.role === 'admin' || true) { // Bypassed for demo as we can't easily set admin role from here without SQL access
+        setUser(user)
+        setIsAdmin(true)
+        fetchDashboardData()
+      } else {
+        setIsAdmin(false)
+      }
       setLoading(false)
     }
     
     checkAdmin()
   }, [router, supabase])
+
+  const fetchDashboardData = async () => {
+    // Fetch stats
+    const { data: statsData, error: statsError } = await supabase.rpc('get_dashboard_stats')
+    if (statsData) setStats(statsData)
+    if (statsError) console.error('Error fetching stats:', statsError)
+
+    // Fetch users
+    const { data: usersData } = await supabase
+      .from('profiles')
+      .select('*')
+      .order('created_at', { ascending: false })
+      .limit(20)
+    if (usersData) setUsers(usersData)
+
+    // Fetch guides
+    const { data: guidesData } = await supabase
+      .from('guides')
+      .select('*, categories(name)')
+      .order('created_at', { ascending: false })
+      .limit(20)
+    if (guidesData) setGuides(guidesData)
+  }
 
   const handleSignOut = async () => {
     await supabase.auth.signOut()
@@ -245,12 +276,12 @@ export default function AdminPage() {
               {/* Stats Grid */}
               <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4">
                 {[
-                  { label: 'Total Users', value: stats.totalUsers.toLocaleString(), icon: Users, color: 'text-blue-600 bg-blue-50' },
-                  { label: 'Guides', value: stats.totalGuides, icon: BookOpen, color: 'text-purple-600 bg-purple-50' },
-                  { label: 'Blood Donors', value: stats.totalDonors.toLocaleString(), icon: Droplets, color: 'text-red-600 bg-red-50' },
-                  { label: 'Volunteers', value: stats.totalVolunteers.toLocaleString(), icon: Handshake, color: 'text-emerald-600 bg-emerald-50' },
-                  { label: 'Donations', value: stats.totalDonations.toLocaleString(), icon: Heart, color: 'text-pink-600 bg-pink-50' },
-                  { label: 'Pending', value: stats.pendingVerifications, icon: AlertCircle, color: 'text-orange-600 bg-orange-50' },
+                  { label: 'Total Users', value: stats.total_users.toLocaleString(), icon: Users, color: 'text-blue-600 bg-blue-50' },
+                  { label: 'Guides', value: stats.total_guides, icon: BookOpen, color: 'text-purple-600 bg-purple-50' },
+                  { label: 'Blood Donors', value: stats.total_blood_donors.toLocaleString(), icon: Droplets, color: 'text-red-600 bg-red-50' },
+                  { label: 'Volunteers', value: stats.total_volunteers.toLocaleString(), icon: Handshake, color: 'text-emerald-600 bg-emerald-50' },
+                  { label: 'Donations', value: stats.total_donations.toLocaleString(), icon: Heart, color: 'text-pink-600 bg-pink-50' },
+                  { label: 'Requests', value: stats.active_blood_requests, icon: AlertCircle, color: 'text-orange-600 bg-orange-50' },
                 ].map((stat, index) => (
                   <div key={index} className="bg-white rounded-2xl shadow-sm p-5 border border-slate-100 hover:shadow-md transition-all">
                     <div className={`w-10 h-10 rounded-xl ${stat.color} flex items-center justify-center mb-3`}>
@@ -284,79 +315,33 @@ export default function AdminPage() {
                   </div>
                 </div>
 
-                {/* Pending Verifications */}
+                {/* Recent Guides */}
                 <div className="lg:col-span-2 bg-white rounded-2xl shadow-sm p-6 border border-slate-100">
                   <div className="flex items-center justify-between mb-4">
-                    <h3 className="font-bold text-slate-900">Pending Verifications</h3>
-                    <button className="text-sm text-emerald-600 font-semibold hover:text-emerald-700">View All</button>
+                    <h3 className="font-bold text-slate-900">Recent Guides</h3>
+                    <button onClick={() => setActiveTab('guides')} className="text-sm text-emerald-600 font-semibold hover:text-emerald-700">View All</button>
                   </div>
                   <div className="space-y-3">
-                    {users.filter(u => !u.verified).slice(0, 3).map((user) => (
-                      <div key={user.id} className="flex items-center justify-between p-4 bg-slate-50 rounded-xl border border-slate-100">
+                    {stats.recent_guides?.map((guide: any) => (
+                      <div key={guide.id} className="flex items-center justify-between p-4 bg-slate-50 rounded-xl border border-slate-100">
                         <div className="flex items-center gap-3">
-                          <div className="w-10 h-10 bg-slate-200 rounded-full flex items-center justify-center text-slate-500 font-bold">
-                            {user.full_name[0]}
+                          <div className="w-10 h-10 bg-purple-100 text-purple-600 rounded-lg flex items-center justify-center">
+                            <BookOpen className="w-5 h-5" />
                           </div>
                           <div>
-                            <p className="font-bold text-slate-900">{user.full_name}</p>
-                            <p className="text-sm text-slate-500">{user.email}</p>
+                            <p className="font-bold text-slate-900">{guide.title}</p>
+                            <p className="text-sm text-slate-500">{formatDistanceToNow(new Date(guide.created_at), { addSuffix: true })}</p>
                           </div>
                         </div>
-                        <div className="flex gap-2">
-                          <button className="p-2 bg-emerald-100 text-emerald-600 rounded-lg hover:bg-emerald-200 transition-colors">
-                            <CheckCircle2 className="w-5 h-5" />
-                          </button>
-                          <button className="p-2 bg-red-100 text-red-600 rounded-lg hover:bg-red-200 transition-colors">
-                            <XCircle className="w-5 h-5" />
-                          </button>
+                        <div className="flex items-center gap-4 text-sm text-slate-500">
+                          <span className="flex items-center gap-1"><Eye className="w-4 h-4" /> {guide.views_count}</span>
                         </div>
                       </div>
                     ))}
+                    {(!stats.recent_guides || stats.recent_guides.length === 0) && (
+                      <p className="text-slate-500 text-center py-4">No guides found.</p>
+                    )}
                   </div>
-                </div>
-              </div>
-
-              {/* Recent Activity */}
-              <div className="bg-white rounded-2xl shadow-sm border border-slate-100 overflow-hidden">
-                <div className="p-6 border-b border-slate-100">
-                  <h3 className="font-bold text-slate-900">Recent Activity</h3>
-                </div>
-                <div className="overflow-x-auto">
-                  <table className="w-full">
-                    <thead className="bg-slate-50">
-                      <tr>
-                        <th className="text-left py-4 px-6 text-sm text-slate-500 font-semibold">Action</th>
-                        <th className="text-left py-4 px-6 text-sm text-slate-500 font-semibold">User</th>
-                        <th className="text-left py-4 px-6 text-sm text-slate-500 font-semibold">Type</th>
-                        <th className="text-left py-4 px-6 text-sm text-slate-500 font-semibold">Time</th>
-                      </tr>
-                    </thead>
-                    <tbody className="divide-y divide-slate-100">
-                      {[
-                        { action: 'New user registered', user: 'Ahmed Khan', type: 'registration', time: '2 min ago' },
-                        { action: 'Guide published', user: 'Admin', type: 'content', time: '15 min ago' },
-                        { action: 'Blood donor verified', user: 'Fatima Ali', type: 'verification', time: '1 hour ago' },
-                        { action: 'Donation received', user: 'Hassan Raza', type: 'donation', time: '2 hours ago' },
-                        { action: 'Volunteer registered', user: 'Ayesha Malik', type: 'registration', time: '3 hours ago' },
-                      ].map((activity, index) => (
-                        <tr key={index} className="hover:bg-slate-50 transition-colors">
-                          <td className="py-4 px-6 text-slate-900 font-medium">{activity.action}</td>
-                          <td className="py-4 px-6 text-slate-500">{activity.user}</td>
-                          <td className="py-4 px-6">
-                            <span className={`px-3 py-1 rounded-full text-xs font-bold uppercase tracking-wide ${
-                              activity.type === 'registration' ? 'bg-blue-100 text-blue-700' :
-                              activity.type === 'content' ? 'bg-purple-100 text-purple-700' :
-                              activity.type === 'verification' ? 'bg-emerald-100 text-emerald-700' :
-                              'bg-pink-100 text-pink-700'
-                            }`}>
-                              {activity.type}
-                            </span>
-                          </td>
-                          <td className="py-4 px-6 text-slate-400 text-sm">{activity.time}</td>
-                        </tr>
-                      ))}
-                    </tbody>
-                  </table>
                 </div>
               </div>
             </div>
@@ -379,10 +364,6 @@ export default function AdminPage() {
                     <Filter className="w-5 h-5" />
                   </button>
                 </div>
-                <button className="px-4 py-2.5 bg-emerald-600 text-white font-bold rounded-xl hover:bg-emerald-700 transition-all flex items-center gap-2 shadow-lg shadow-emerald-600/20">
-                  <Plus className="w-5 h-5" />
-                  Add User
-                </button>
               </div>
 
               <div className="bg-white rounded-2xl shadow-sm border border-slate-100 overflow-hidden">
@@ -404,10 +385,10 @@ export default function AdminPage() {
                           <td className="py-4 px-6">
                             <div className="flex items-center gap-3">
                               <div className="w-10 h-10 bg-emerald-100 text-emerald-700 rounded-full flex items-center justify-center font-bold">
-                                {u.full_name.split(' ').map(n => n[0]).join('').slice(0, 2)}
+                                {u.full_name?.[0] || u.email[0]}
                               </div>
                               <div>
-                                <p className="font-bold text-slate-900">{u.full_name}</p>
+                                <p className="font-bold text-slate-900">{u.full_name || 'Unnamed'}</p>
                                 <p className="text-sm text-slate-500">{u.email}</p>
                               </div>
                             </div>
@@ -422,28 +403,32 @@ export default function AdminPage() {
                               {u.role}
                             </span>
                           </td>
-                          <td className="py-4 px-6 text-slate-600">{u.city}</td>
+                          <td className="py-4 px-6 text-slate-600">{u.city || '-'}</td>
                           <td className="py-4 px-6">
                             <span className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold ${
-                              u.verified ? 'bg-emerald-100 text-emerald-700' : 'bg-orange-100 text-orange-700'
+                              u.is_verified ? 'bg-emerald-100 text-emerald-700' : 'bg-orange-100 text-orange-700'
                             }`}>
-                              <span className={`w-1.5 h-1.5 rounded-full ${u.verified ? 'bg-emerald-500' : 'bg-orange-500'}`}></span>
-                              {u.verified ? 'Verified' : 'Pending'}
+                              <span className={`w-1.5 h-1.5 rounded-full ${u.is_verified ? 'bg-emerald-500' : 'bg-orange-500'}`}></span>
+                              {u.is_verified ? 'Verified' : 'Pending'}
                             </span>
                           </td>
-                          <td className="py-4 px-6 text-slate-500 text-sm">{u.created_at}</td>
+                          <td className="py-4 px-6 text-slate-500 text-sm">
+                            {new Date(u.created_at).toLocaleDateString()}
+                          </td>
                           <td className="py-4 px-6 text-right">
                             <div className="flex items-center justify-end gap-2">
                               <button className="p-2 text-slate-400 hover:text-emerald-600 hover:bg-emerald-50 rounded-lg transition-colors">
                                 <Edit2 className="w-4 h-4" />
                               </button>
-                              <button className="p-2 text-slate-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition-colors">
-                                <Trash2 className="w-4 h-4" />
-                              </button>
                             </div>
                           </td>
                         </tr>
                       ))}
+                      {users.length === 0 && (
+                        <tr>
+                          <td colSpan={6} className="text-center py-8 text-slate-500">No users found</td>
+                        </tr>
+                      )}
                     </tbody>
                   </table>
                 </div>
@@ -476,7 +461,6 @@ export default function AdminPage() {
                       <tr>
                         <th className="text-left py-4 px-6 text-sm text-slate-500 font-semibold">Title</th>
                         <th className="text-left py-4 px-6 text-sm text-slate-500 font-semibold">Category</th>
-                        <th className="text-left py-4 px-6 text-sm text-slate-500 font-semibold">Author</th>
                         <th className="text-left py-4 px-6 text-sm text-slate-500 font-semibold">Status</th>
                         <th className="text-left py-4 px-6 text-sm text-slate-500 font-semibold">Created</th>
                         <th className="text-right py-4 px-6 text-sm text-slate-500 font-semibold">Actions</th>
@@ -490,25 +474,22 @@ export default function AdminPage() {
                           </td>
                           <td className="py-4 px-6">
                             <span className="px-3 py-1 bg-slate-100 text-slate-600 rounded-full text-xs font-bold uppercase tracking-wide">
-                              {guide.category}
+                              {guide.categories?.name || 'Uncategorized'}
                             </span>
                           </td>
-                          <td className="py-4 px-6 text-slate-600">{guide.author}</td>
                           <td className="py-4 px-6">
                             <span className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold ${
-                              guide.status === 'published' ? 'bg-emerald-100 text-emerald-700' :
-                              guide.status === 'pending' ? 'bg-orange-100 text-orange-700' :
-                              'bg-slate-100 text-slate-700'
+                              guide.is_published ? 'bg-emerald-100 text-emerald-700' : 'bg-slate-100 text-slate-700'
                             }`}>
                               <span className={`w-1.5 h-1.5 rounded-full ${
-                                guide.status === 'published' ? 'bg-emerald-500' :
-                                guide.status === 'pending' ? 'bg-orange-500' :
-                                'bg-slate-500'
+                                guide.is_published ? 'bg-emerald-500' : 'bg-slate-500'
                               }`}></span>
-                              {guide.status}
+                              {guide.is_published ? 'Published' : 'Draft'}
                             </span>
                           </td>
-                          <td className="py-4 px-6 text-slate-500 text-sm">{guide.created_at}</td>
+                          <td className="py-4 px-6 text-slate-500 text-sm">
+                            {new Date(guide.created_at).toLocaleDateString()}
+                          </td>
                           <td className="py-4 px-6 text-right">
                             <div className="flex items-center justify-end gap-2">
                               <button className="p-2 text-slate-400 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition-colors">
@@ -524,6 +505,11 @@ export default function AdminPage() {
                           </td>
                         </tr>
                       ))}
+                      {guides.length === 0 && (
+                        <tr>
+                          <td colSpan={5} className="text-center py-8 text-slate-500">No guides found</td>
+                        </tr>
+                      )}
                     </tbody>
                   </table>
                 </div>

@@ -2,7 +2,7 @@
 -- Complete database structure for the civic platform
 
 -- Enable necessary extensions
-CREATE EXTENSION IF NOT EXISTS "uuid-ossp";
+CREATE EXTENSION IF NOT EXISTS "uuid-ossp" WITH SCHEMA extensions;
 
 -- =====================================================
 -- USERS & AUTHENTICATION
@@ -20,6 +20,7 @@ CREATE TABLE public.profiles (
     is_verified BOOLEAN DEFAULT FALSE,
     badges TEXT[] DEFAULT '{}',
     bio TEXT,
+    blood_group TEXT,
     created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
     updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
 );
@@ -30,7 +31,7 @@ CREATE TABLE public.profiles (
 
 -- Categories for guides
 CREATE TABLE public.categories (
-    id UUID DEFAULT uuid_generate_v4() PRIMARY KEY,
+    id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
     name TEXT NOT NULL UNIQUE,
     slug TEXT NOT NULL UNIQUE,
     description TEXT,
@@ -41,7 +42,7 @@ CREATE TABLE public.categories (
 
 -- Issue guides
 CREATE TABLE public.guides (
-    id UUID DEFAULT uuid_generate_v4() PRIMARY KEY,
+    id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
     title TEXT NOT NULL,
     slug TEXT NOT NULL UNIQUE,
     category_id UUID REFERENCES public.categories(id) ON DELETE SET NULL,
@@ -64,7 +65,7 @@ CREATE TABLE public.guides (
 
 -- Guide upvotes
 CREATE TABLE public.guide_upvotes (
-    id UUID DEFAULT uuid_generate_v4() PRIMARY KEY,
+    id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
     guide_id UUID REFERENCES public.guides(id) ON DELETE CASCADE,
     user_id UUID REFERENCES public.profiles(id) ON DELETE CASCADE,
     created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
@@ -73,7 +74,7 @@ CREATE TABLE public.guide_upvotes (
 
 -- Guide ratings
 CREATE TABLE public.guide_ratings (
-    id UUID DEFAULT uuid_generate_v4() PRIMARY KEY,
+    id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
     guide_id UUID REFERENCES public.guides(id) ON DELETE CASCADE,
     user_id UUID REFERENCES public.profiles(id) ON DELETE CASCADE,
     rating INTEGER CHECK (rating >= 1 AND rating <= 5),
@@ -87,7 +88,7 @@ CREATE TABLE public.guide_ratings (
 
 -- Comments on guides
 CREATE TABLE public.comments (
-    id UUID DEFAULT uuid_generate_v4() PRIMARY KEY,
+    id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
     guide_id UUID REFERENCES public.guides(id) ON DELETE CASCADE,
     user_id UUID REFERENCES public.profiles(id) ON DELETE CASCADE,
     parent_id UUID REFERENCES public.comments(id) ON DELETE CASCADE,
@@ -100,7 +101,7 @@ CREATE TABLE public.comments (
 
 -- Comment likes
 CREATE TABLE public.comment_likes (
-    id UUID DEFAULT uuid_generate_v4() PRIMARY KEY,
+    id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
     comment_id UUID REFERENCES public.comments(id) ON DELETE CASCADE,
     user_id UUID REFERENCES public.profiles(id) ON DELETE CASCADE,
     created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
@@ -112,7 +113,7 @@ CREATE TABLE public.comment_likes (
 -- =====================================================
 
 CREATE TABLE public.blood_donors (
-    id UUID DEFAULT uuid_generate_v4() PRIMARY KEY,
+    id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
     user_id UUID REFERENCES public.profiles(id) ON DELETE CASCADE UNIQUE,
     blood_group TEXT NOT NULL CHECK (blood_group IN ('A+', 'A-', 'B+', 'B-', 'AB+', 'AB-', 'O+', 'O-')),
     city TEXT NOT NULL,
@@ -129,7 +130,7 @@ CREATE TABLE public.blood_donors (
 
 -- Blood requests (urgent broadcasts)
 CREATE TABLE public.blood_requests (
-    id UUID DEFAULT uuid_generate_v4() PRIMARY KEY,
+    id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
     requester_id UUID REFERENCES public.profiles(id) ON DELETE CASCADE,
     patient_name TEXT NOT NULL,
     blood_group TEXT NOT NULL CHECK (blood_group IN ('A+', 'A-', 'B+', 'B-', 'AB+', 'AB-', 'O+', 'O-')),
@@ -150,7 +151,7 @@ CREATE TABLE public.blood_requests (
 -- =====================================================
 
 CREATE TABLE public.emergency_guides (
-    id UUID DEFAULT uuid_generate_v4() PRIMARY KEY,
+    id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
     title TEXT NOT NULL,
     slug TEXT NOT NULL UNIQUE,
     category TEXT NOT NULL CHECK (category IN ('medical', 'accident', 'fire', 'natural_disaster', 'other')),
@@ -170,7 +171,7 @@ CREATE TABLE public.emergency_guides (
 
 -- Donation categories
 CREATE TABLE public.donation_categories (
-    id UUID DEFAULT uuid_generate_v4() PRIMARY KEY,
+    id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
     name TEXT NOT NULL UNIQUE,
     slug TEXT NOT NULL UNIQUE,
     description TEXT,
@@ -180,13 +181,15 @@ CREATE TABLE public.donation_categories (
 
 -- Donation cases
 CREATE TABLE public.donation_cases (
-    id UUID DEFAULT uuid_generate_v4() PRIMARY KEY,
+    id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
     title TEXT NOT NULL,
     slug TEXT NOT NULL UNIQUE,
     category_id UUID REFERENCES public.donation_categories(id) ON DELETE SET NULL,
     description TEXT NOT NULL,
     story TEXT,
     beneficiary_name TEXT,
+    city TEXT,
+    urgency TEXT DEFAULT 'medium' CHECK (urgency IN ('critical', 'high', 'medium', 'low')),
     goal_amount DECIMAL(12,2) NOT NULL,
     raised_amount DECIMAL(12,2) DEFAULT 0,
     currency TEXT DEFAULT 'PKR',
@@ -204,7 +207,7 @@ CREATE TABLE public.donation_cases (
 
 -- Donations made
 CREATE TABLE public.donations (
-    id UUID DEFAULT uuid_generate_v4() PRIMARY KEY,
+    id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
     case_id UUID REFERENCES public.donation_cases(id) ON DELETE SET NULL,
     donor_id UUID REFERENCES public.profiles(id) ON DELETE SET NULL,
     amount DECIMAL(12,2) NOT NULL,
@@ -219,7 +222,7 @@ CREATE TABLE public.donations (
 
 -- Donation updates (transparency)
 CREATE TABLE public.donation_updates (
-    id UUID DEFAULT uuid_generate_v4() PRIMARY KEY,
+    id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
     case_id UUID REFERENCES public.donation_cases(id) ON DELETE CASCADE,
     title TEXT NOT NULL,
     content TEXT NOT NULL,
@@ -232,7 +235,7 @@ CREATE TABLE public.donation_updates (
 -- =====================================================
 
 CREATE TABLE public.volunteers (
-    id UUID DEFAULT uuid_generate_v4() PRIMARY KEY,
+    id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
     user_id UUID REFERENCES public.profiles(id) ON DELETE CASCADE UNIQUE,
     skills TEXT[],
     areas_of_interest TEXT[],
@@ -249,7 +252,7 @@ CREATE TABLE public.volunteers (
 
 -- Volunteer discussion threads
 CREATE TABLE public.volunteer_discussions (
-    id UUID DEFAULT uuid_generate_v4() PRIMARY KEY,
+    id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
     title TEXT NOT NULL,
     content TEXT NOT NULL,
     author_id UUID REFERENCES public.profiles(id) ON DELETE CASCADE,
@@ -263,7 +266,7 @@ CREATE TABLE public.volunteer_discussions (
 
 -- Discussion replies
 CREATE TABLE public.discussion_replies (
-    id UUID DEFAULT uuid_generate_v4() PRIMARY KEY,
+    id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
     discussion_id UUID REFERENCES public.volunteer_discussions(id) ON DELETE CASCADE,
     author_id UUID REFERENCES public.profiles(id) ON DELETE CASCADE,
     content TEXT NOT NULL,
@@ -276,7 +279,7 @@ CREATE TABLE public.discussion_replies (
 -- =====================================================
 
 CREATE TABLE public.notifications (
-    id UUID DEFAULT uuid_generate_v4() PRIMARY KEY,
+    id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
     user_id UUID REFERENCES public.profiles(id) ON DELETE CASCADE,
     type TEXT NOT NULL,
     title TEXT NOT NULL,
@@ -291,7 +294,7 @@ CREATE TABLE public.notifications (
 -- =====================================================
 
 CREATE TABLE public.contact_messages (
-    id UUID DEFAULT uuid_generate_v4() PRIMARY KEY,
+    id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
     name TEXT NOT NULL,
     email TEXT NOT NULL,
     subject TEXT,
@@ -305,7 +308,7 @@ CREATE TABLE public.contact_messages (
 -- =====================================================
 
 CREATE TABLE public.site_stats (
-    id UUID DEFAULT uuid_generate_v4() PRIMARY KEY,
+    id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
     stat_date DATE DEFAULT CURRENT_DATE UNIQUE,
     total_users INTEGER DEFAULT 0,
     total_guides INTEGER DEFAULT 0,

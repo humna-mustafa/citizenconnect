@@ -5,6 +5,7 @@ import Link from 'next/link'
 import Image from 'next/image'
 import { usePathname } from 'next/navigation'
 import { createClient } from '@/lib/supabase/client'
+import { subscribeToNotifications } from '@/lib/supabase/helpers'
 import type { User } from '@supabase/supabase-js'
 import { Menu, X, User as UserIcon, Bell, Settings, LogOut, ChevronDown } from 'lucide-react'
 
@@ -15,6 +16,7 @@ const navigation = [
   { name: 'Donations', href: '/donations' },
   { name: 'Volunteers', href: '/volunteers' },
   { name: 'Emergency', href: '/emergency' },
+  { name: 'Report Issue', href: '/report-issue' },
   { name: 'Dashboard', href: '/dashboard' },
 ]
 
@@ -23,6 +25,7 @@ export default function Header() {
   const [isMenuOpen, setIsMenuOpen] = useState(false)
   const [isScrolled, setIsScrolled] = useState(false)
   const [isProfileOpen, setIsProfileOpen] = useState(false)
+  const [unreadCount, setUnreadCount] = useState(0)
   const pathname = usePathname()
   const supabase = createClient()
 
@@ -41,6 +44,30 @@ export default function Header() {
   }, [supabase.auth])
 
   useEffect(() => {
+    if (user) {
+      // Fetch initial count
+      const fetchUnread = async () => {
+        const { count } = await supabase
+          .from('notifications')
+          .select('*', { count: 'exact', head: true })
+          .eq('user_id', user.id)
+          .eq('is_read', false)
+        setUnreadCount(count || 0)
+      }
+      fetchUnread()
+
+      // Subscribe to real-time notifications
+      const channel = subscribeToNotifications(user.id, () => {
+        setUnreadCount(prev => prev + 1)
+      })
+
+      return () => {
+        supabase.removeChannel(channel)
+      }
+    }
+  }, [user])
+
+  useEffect(() => {
     const handleScroll = () => {
       setIsScrolled(window.scrollY > 10)
     }
@@ -55,7 +82,9 @@ export default function Header() {
 
   return (
     <header 
-      className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 border-b`}
+      className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 border-b ${
+        isScrolled ? 'bg-background/80 backdrop-blur-md border-border shadow-sm' : 'bg-background border-transparent'
+      }`}
     >
       <div className='container mx-auto px-4'>
         <div className='flex items-center justify-between h-16 lg:h-20'>
@@ -92,60 +121,75 @@ export default function Header() {
           {/* Auth Buttons / Profile */}
           <div className='flex items-center gap-3'>
             {user ? (
-              <div className='relative'>
-                <button
-                  onClick={() => setIsProfileOpen(!isProfileOpen)}
-                  className='flex items-center gap-2 p-1.5 rounded-full hover:bg-muted transition-colors border border-transparent hover:border-border'
-                >
-                  <div className='w-8 h-8 bg-primary/10 rounded-full flex items-center justify-center text-primary font-semibold text-sm'>
-                    {user.email?.charAt(0).toUpperCase()}
-                  </div>
-                  <ChevronDown className={`w-4 h-4 text-muted-foreground transition-transform ${isProfileOpen ? 'rotate-180' : ''}`} />
-                </button>
-                
-                {isProfileOpen && (
-                  <div className='absolute right-0 top-full mt-2 w-64 bg-popover rounded-xl shadow-xl border border-border py-2 animate-in fade-in slide-in-from-top-2'>
-                    <div className='px-4 py-3 border-b border-border'>
-                      <p className='font-medium text-foreground truncate'>{user.email}</p>
-                      <p className='text-xs text-muted-foreground'>Member</p>
+              <div className='flex items-center gap-4'>
+                {/* Notification Bell */}
+                <Link href="/notifications" className="relative p-2 text-muted-foreground hover:text-foreground transition-colors">
+                  <Bell className="w-5 h-5" />
+                  {unreadCount > 0 && (
+                    <span className="absolute top-1 right-1 w-2.5 h-2.5 bg-red-500 rounded-full border-2 border-background"></span>
+                  )}
+                </Link>
+
+                <div className='relative'>
+                  <button
+                    onClick={() => setIsProfileOpen(!isProfileOpen)}
+                    className='flex items-center gap-2 p-1.5 rounded-full hover:bg-muted transition-colors border border-transparent hover:border-border'
+                  >
+                    <div className='w-8 h-8 bg-primary/10 rounded-full flex items-center justify-center text-primary font-semibold text-sm'>
+                      {user.email?.charAt(0).toUpperCase()}
                     </div>
-                    <div className='p-1'>
-                      <Link 
-                        href='/profile' 
-                        onClick={() => setIsProfileOpen(false)}
-                        className='flex items-center gap-3 px-3 py-2 rounded-md hover:bg-muted text-sm text-muted-foreground hover:text-foreground transition-colors'
-                      >
-                        <UserIcon className='w-4 h-4' />
-                        My Profile
-                      </Link>
-                      <Link 
-                        href='/notifications' 
-                        onClick={() => setIsProfileOpen(false)}
-                        className='flex items-center gap-3 px-3 py-2 rounded-md hover:bg-muted text-sm text-muted-foreground hover:text-foreground transition-colors'
-                      >
-                        <Bell className='w-4 h-4' />
-                        Notifications
-                      </Link>
-                      <Link 
-                        href='/settings' 
-                        onClick={() => setIsProfileOpen(false)}
-                        className='flex items-center gap-3 px-3 py-2 rounded-md hover:bg-muted text-sm text-muted-foreground hover:text-foreground transition-colors'
-                      >
-                        <Settings className='w-4 h-4' />
-                        Settings
-                      </Link>
+                    <ChevronDown className={`w-4 h-4 text-muted-foreground transition-transform ${isProfileOpen ? 'rotate-180' : ''}`} />
+                  </button>
+                  
+                  {isProfileOpen && (
+                    <div className='absolute right-0 top-full mt-2 w-64 bg-popover rounded-xl shadow-xl border border-border py-2 animate-in fade-in slide-in-from-top-2'>
+                      <div className='px-4 py-3 border-b border-border'>
+                        <p className='font-medium text-foreground truncate'>{user.email}</p>
+                        <p className='text-xs text-muted-foreground'>Member</p>
+                      </div>
+                      <div className='p-1'>
+                        <Link 
+                          href='/profile' 
+                          onClick={() => setIsProfileOpen(false)}
+                          className='flex items-center gap-3 px-3 py-2 rounded-md hover:bg-muted text-sm text-muted-foreground hover:text-foreground transition-colors'
+                        >
+                          <UserIcon className='w-4 h-4' />
+                          My Profile
+                        </Link>
+                        <Link 
+                          href='/notifications' 
+                          onClick={() => setIsProfileOpen(false)}
+                          className='flex items-center gap-3 px-3 py-2 rounded-md hover:bg-muted text-sm text-muted-foreground hover:text-foreground transition-colors'
+                        >
+                          <Bell className='w-4 h-4' />
+                          Notifications
+                          {unreadCount > 0 && (
+                            <span className="ml-auto bg-red-100 text-red-600 text-xs font-bold px-2 py-0.5 rounded-full">
+                              {unreadCount}
+                            </span>
+                          )}
+                        </Link>
+                        <Link 
+                          href='/settings' 
+                          onClick={() => setIsProfileOpen(false)}
+                          className='flex items-center gap-3 px-3 py-2 rounded-md hover:bg-muted text-sm text-muted-foreground hover:text-foreground transition-colors'
+                        >
+                          <Settings className='w-4 h-4' />
+                          Settings
+                        </Link>
+                      </div>
+                      <div className='border-t border-border mt-1 p-1'>
+                        <button
+                          onClick={handleSignOut}
+                          className='w-full flex items-center gap-3 px-3 py-2 rounded-md hover:bg-destructive/10 text-sm text-destructive transition-colors'
+                        >
+                          <LogOut className='w-4 h-4' />
+                          Sign Out
+                        </button>
+                      </div>
                     </div>
-                    <div className='border-t border-border mt-1 p-1'>
-                      <button
-                        onClick={handleSignOut}
-                        className='w-full flex items-center gap-3 px-3 py-2 rounded-md hover:bg-destructive/10 text-sm text-destructive transition-colors'
-                      >
-                        <LogOut className='w-4 h-4' />
-                        Sign Out
-                      </button>
-                    </div>
-                  </div>
-                )}
+                  )}
+                </div>
               </div>
             ) : (
               <div className='hidden sm:flex items-center gap-3'>

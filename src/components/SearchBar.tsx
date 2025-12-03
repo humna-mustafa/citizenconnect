@@ -3,6 +3,7 @@
 import { useState, useEffect, useRef } from 'react'
 import { useRouter } from 'next/navigation'
 import { Search } from 'lucide-react'
+import { createClient } from '@/lib/supabase/client'
 
 interface SearchBarProps {
   placeholder?: string
@@ -10,15 +11,12 @@ interface SearchBarProps {
   size?: 'sm' | 'md' | 'lg'
 }
 
-const suggestions = [
-  'How to report a pothole',
-  'Water supply complaint',
-  'Electricity bill issue',
-  'Find blood donor',
-  'Register as volunteer',
-  'Emergency contacts',
-  'File property tax',
-  'Get domicile certificate',
+const defaultSuggestions = [
+  'How to Get CNIC',
+  'Passport Application',
+  'Electricity Bill Complaint',
+  'Driving License',
+  'Birth Certificate',
 ]
 
 export default function SearchBar({ 
@@ -31,16 +29,30 @@ export default function SearchBar({
   const [filteredSuggestions, setFilteredSuggestions] = useState<string[]>([])
   const router = useRouter()
   const searchRef = useRef<HTMLDivElement>(null)
+  const supabase = createClient()
 
   useEffect(() => {
-    if (query.length > 0) {
-      const filtered = suggestions.filter(s => 
-        s.toLowerCase().includes(query.toLowerCase())
-      )
-      setFilteredSuggestions(filtered)
-    } else {
-      setFilteredSuggestions(suggestions.slice(0, 5))
+    const fetchSuggestions = async () => {
+      if (query.length > 0) {
+        const { data } = await supabase
+          .from('guides')
+          .select('title')
+          .ilike('title', `%${query}%`)
+          .eq('is_published', true)
+          .limit(5)
+        
+        if (data && data.length > 0) {
+          setFilteredSuggestions(data.map(g => g.title))
+        } else {
+          setFilteredSuggestions([])
+        }
+      } else {
+        setFilteredSuggestions(defaultSuggestions)
+      }
     }
+
+    const timer = setTimeout(fetchSuggestions, 300)
+    return () => clearTimeout(timer)
   }, [query])
 
   useEffect(() => {

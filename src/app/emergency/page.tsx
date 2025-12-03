@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import Link from 'next/link'
 import { 
   Phone, 
@@ -157,8 +157,63 @@ const emergencyGuides: EmergencyGuide[] = [
 ]
 
 export default function EmergencyPage() {
+  const [guides, setGuides] = useState<EmergencyGuide[]>([])
   const [selectedGuide, setSelectedGuide] = useState<EmergencyGuide | null>(null)
   const [checkedItems, setCheckedItems] = useState<string[]>([])
+  const [loading, setLoading] = useState(true)
+
+  useEffect(() => {
+    const fetchGuides = async () => {
+      const { getEmergencyGuides } = await import('@/lib/supabase/helpers')
+      const { data, error } = await getEmergencyGuides()
+      
+      if (data) {
+        const transformedGuides = data.map((g: any) => ({
+          id: g.id,
+          title: g.title,
+          category: g.category,
+          steps: typeof g.steps === 'string' ? JSON.parse(g.steps) : g.steps,
+          checklist: typeof g.checklist === 'string' ? JSON.parse(g.checklist) : g.checklist,
+          icon: getIconForCategory(g.category),
+          color: getColorForCategory(g.category),
+          gradient: getGradientForCategory(g.category)
+        }))
+        setGuides(transformedGuides)
+      }
+      setLoading(false)
+    }
+    fetchGuides()
+  }, [])
+
+  const getIconForCategory = (category: string) => {
+    switch (category) {
+      case 'medical': return Activity
+      case 'fire': return Flame
+      case 'accident': return Car
+      case 'natural_disaster': return Waves
+      default: return AlertTriangle
+    }
+  }
+
+  const getColorForCategory = (category: string) => {
+    switch (category) {
+      case 'medical': return 'text-red-600'
+      case 'fire': return 'text-orange-600'
+      case 'accident': return 'text-blue-600'
+      case 'natural_disaster': return 'text-cyan-600'
+      default: return 'text-slate-600'
+    }
+  }
+
+  const getGradientForCategory = (category: string) => {
+    switch (category) {
+      case 'medical': return 'from-red-500 to-pink-600'
+      case 'fire': return 'from-orange-500 to-red-600'
+      case 'accident': return 'from-blue-500 to-cyan-600'
+      case 'natural_disaster': return 'from-cyan-500 to-blue-600'
+      default: return 'from-slate-500 to-slate-600'
+    }
+  }
 
   const toggleCheckItem = (item: string) => {
     setCheckedItems(prev => 
@@ -279,12 +334,21 @@ export default function EmergencyPage() {
                       Step-by-Step Guide
                     </h4>
                     <div className="space-y-4">
-                      {selectedGuide.steps.map((step, index) => (
+                      {selectedGuide.steps.map((step: any, index) => (
                         <div key={index} className="flex gap-4 items-start group">
                           <span className={`w-8 h-8 rounded-full bg-gradient-to-br ${selectedGuide.gradient} flex items-center justify-center text-white font-bold text-sm flex-shrink-0 shadow-md group-hover:scale-110 transition-transform`}>
                             {index + 1}
                           </span>
-                          <p className="text-slate-600 pt-1 leading-relaxed">{step}</p>
+                          <div className="pt-1">
+                            {typeof step === 'string' ? (
+                              <p className="text-slate-600 leading-relaxed">{step}</p>
+                            ) : (
+                              <>
+                                <h5 className="font-bold text-slate-900 mb-1">{step.title}</h5>
+                                <p className="text-slate-600 leading-relaxed">{step.description}</p>
+                              </>
+                            )}
+                          </div>
                         </div>
                       ))}
                     </div>

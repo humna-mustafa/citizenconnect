@@ -51,8 +51,9 @@ interface Contribution {
   title: string
   description: string
   date: string
-  icon: any
-  color: string
+  icon?: any
+  color?: string
+  created_at?: string
 }
 
 export default function ProfilePage() {
@@ -71,21 +72,24 @@ export default function ProfilePage() {
   const supabase = createClient()
   const router = useRouter()
 
-  // Sample badges
-  const [badges] = useState<Badge[]>([
-    { id: '1', name: 'First Donation', description: 'Made your first donation', icon: Heart, earned_at: '2024-01-15', color: 'text-pink-500 bg-pink-50' },
-    { id: '2', name: 'Blood Hero', description: 'Donated blood 3 times', icon: Droplets, earned_at: '2024-02-20', color: 'text-red-500 bg-red-50' },
-    { id: '3', name: 'Community Star', description: 'Helped 10 people', icon: Award, earned_at: '2024-03-10', color: 'text-amber-500 bg-amber-50' },
-    { id: '4', name: 'Guide Creator', description: 'Published a helpful guide', icon: BookOpen, earned_at: '2024-03-25', color: 'text-blue-500 bg-blue-50' },
-  ])
+  const [stats, setStats] = useState({
+    donations: 0,
+    bloodDonations: 0,
+    volunteerTasks: 0,
+    guides: 0
+  })
+  const [badges, setBadges] = useState<Badge[]>([])
+  const [contributions, setContributions] = useState<Contribution[]>([])
 
-  // Sample contributions
-  const [contributions] = useState<Contribution[]>([
-    { id: '1', type: 'donation', title: 'Donated to Medical Fund', description: 'PKR 5,000 donated', date: '2024-03-20', icon: Heart, color: 'text-pink-600 bg-pink-50' },
-    { id: '2', type: 'blood', title: 'Blood Donation', description: 'O+ donated at CMH Lahore', date: '2024-03-15', icon: Droplets, color: 'text-red-600 bg-red-50' },
-    { id: '3', type: 'volunteer', title: 'Volunteered at Event', description: '4 hours at food drive', date: '2024-03-10', icon: Handshake, color: 'text-purple-600 bg-purple-50' },
-    { id: '4', type: 'guide', title: 'Published Guide', description: 'NADRA CNIC Process', date: '2024-03-05', icon: BookOpen, color: 'text-blue-600 bg-blue-50' },
-  ])
+  // Badge Definitions
+
+  // Badge Definitions
+  const BADGE_DEFINITIONS: Record<string, Omit<Badge, 'earned_at'>> = {
+    'first_donation': { id: 'first_donation', name: 'First Donation', description: 'Made your first donation', icon: Heart, color: 'text-pink-500 bg-pink-50' },
+    'blood_hero': { id: 'blood_hero', name: 'Blood Hero', description: 'Donated blood 3 times', icon: Droplets, color: 'text-red-500 bg-red-50' },
+    'community_star': { id: 'community_star', name: 'Community Star', description: 'Helped 10 people', icon: Award, color: 'text-amber-500 bg-amber-50' },
+    'guide_creator': { id: 'guide_creator', name: 'Guide Creator', description: 'Published a helpful guide', icon: BookOpen, color: 'text-blue-500 bg-blue-50' },
+  }
 
   useEffect(() => {
     const getUser = async () => {
@@ -113,6 +117,27 @@ export default function ProfilePage() {
           city: profileData.city || '',
           blood_group: profileData.blood_group || '',
         })
+
+        // Set badges
+        if (profileData.badges) {
+          const userBadges = profileData.badges.map((badgeId: string) => {
+            const def = BADGE_DEFINITIONS[badgeId]
+            return def ? { ...def, earned_at: 'Earned' } : null
+          }).filter(Boolean) as Badge[]
+          setBadges(userBadges)
+        }
+      }
+
+      // Fetch stats and contributions
+      const { getUserStats, getUserContributions } = await import('@/lib/supabase/helpers')
+      const statsData = await getUserStats(user.id)
+      const contributionsData = await getUserContributions(user.id)
+      
+      if (statsData.data) {
+        setStats(statsData.data)
+      }
+      if (contributionsData) {
+        setContributions(contributionsData)
       }
       
       setLoading(false)
@@ -250,10 +275,10 @@ export default function ProfilePage() {
               {/* Stats Cards */}
               <div className="md:col-span-2 grid grid-cols-2 md:grid-cols-4 gap-4">
                 {[
-                  { label: 'Donations', value: '12', icon: Heart, color: 'text-pink-600 bg-pink-50' },
-                  { label: 'Blood Donations', value: '3', icon: Droplets, color: 'text-red-600 bg-red-50' },
-                  { label: 'Volunteer Hours', value: '45', icon: Handshake, color: 'text-purple-600 bg-purple-50' },
-                  { label: 'Guides Created', value: '5', icon: BookOpen, color: 'text-blue-600 bg-blue-50' },
+                  { label: 'Donations', value: stats.donations, icon: Heart, color: 'text-pink-600 bg-pink-50' },
+                  { label: 'Blood Donations', value: stats.bloodDonations, icon: Droplets, color: 'text-red-600 bg-red-50' },
+                  { label: 'Volunteer Tasks', value: stats.volunteerTasks, icon: Handshake, color: 'text-purple-600 bg-purple-50' },
+                  { label: 'Guides Created', value: stats.guides, icon: BookOpen, color: 'text-blue-600 bg-blue-50' },
                 ].map((stat, index) => (
                   <div key={index} className="bg-white rounded-2xl shadow-sm p-5 border border-slate-100 hover:shadow-md transition-all group">
                     <div className={`w-12 h-12 rounded-xl ${stat.color} flex items-center justify-center mb-3 group-hover:scale-110 transition-transform`}>

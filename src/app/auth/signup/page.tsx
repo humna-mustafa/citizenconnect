@@ -1,77 +1,16 @@
 'use client'
 
-import { useState } from 'react'
+import { useActionState } from 'react'
 import Link from 'next/link'
-import { useRouter } from 'next/navigation'
-import { createClient } from '@/lib/supabase/client'
+import { signup } from '../actions'
 import { User, Mail, Phone, MapPin, Lock, Loader2, ArrowRight, Check } from 'lucide-react'
 
+const initialState = {
+  error: '',
+}
+
 export default function SignUpPage() {
-  const [formData, setFormData] = useState({
-    fullName: '',
-    email: '',
-    phone: '',
-    city: '',
-    password: '',
-    confirmPassword: '',
-    role: 'citizen'
-  })
-  const [error, setError] = useState('')
-  const [loading, setLoading] = useState(false)
-  const router = useRouter()
-  const supabase = createClient()
-
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
-    setFormData({ ...formData, [e.target.name]: e.target.value })
-  }
-
-  const handleSignUp = async (e: React.FormEvent) => {
-    e.preventDefault()
-    setLoading(true)
-    setError('')
-
-    if (formData.password !== formData.confirmPassword) {
-      setError('Passwords do not match')
-      setLoading(false)
-      return
-    }
-
-    if (formData.password.length < 6) {
-      setError('Password must be at least 6 characters')
-      setLoading(false)
-      return
-    }
-
-    const { data, error } = await supabase.auth.signUp({
-      email: formData.email,
-      password: formData.password,
-      options: {
-        data: {
-          full_name: formData.fullName,
-          phone: formData.phone,
-          city: formData.city,
-          role: formData.role
-        }
-      }
-    })
-
-    if (error) {
-      setError(error.message)
-      setLoading(false)
-    } else if (data.user) {
-      // Update profile
-      await supabase.from('profiles').upsert({
-        id: data.user.id,
-        email: formData.email,
-        full_name: formData.fullName,
-        phone: formData.phone,
-        city: formData.city,
-        role: formData.role
-      })
-      
-      router.push('/auth/verify-email')
-    }
-  }
+  const [state, formAction, isPending] = useActionState(signup, initialState)
 
   const cities = [
     'Karachi', 'Lahore', 'Islamabad', 'Rawalpindi', 'Faisalabad', 
@@ -111,14 +50,20 @@ export default function SignUpPage() {
             <p className="text-slate-500">Join our community of active citizens</p>
           </div>
 
-          {error && (
+          {state?.error && (
             <div className="mb-6 p-4 bg-red-50 border border-red-100 rounded-xl text-red-600 text-sm flex items-start gap-2">
               <div className="mt-0.5">⚠️</div>
-              <p>{error}</p>
+              <p>{state.error}</p>
+            </div>
+          )}
+          {state?.success && (
+            <div className="mb-6 p-4 bg-green-50 border border-green-100 rounded-xl text-green-600 text-sm flex items-start gap-2">
+              <div className="mt-0.5">✅</div>
+              <p>{state.success}</p>
             </div>
           )}
 
-          <form onSubmit={handleSignUp} className="space-y-5">
+          <form action={formAction} className="space-y-5">
             <div>
               <label className="block text-sm font-semibold text-slate-700 mb-2">
                 Full Name
@@ -128,8 +73,6 @@ export default function SignUpPage() {
                 <input
                   type="text"
                   name="fullName"
-                  value={formData.fullName}
-                  onChange={handleChange}
                   required
                   className="w-full pl-12 pr-4 py-3 rounded-xl border border-slate-200 focus:border-emerald-500 focus:ring-2 focus:ring-emerald-500/20 outline-none transition-all"
                   placeholder="Enter your full name"
@@ -147,8 +90,6 @@ export default function SignUpPage() {
                   <input
                     type="email"
                     name="email"
-                    value={formData.email}
-                    onChange={handleChange}
                     required
                     className="w-full pl-12 pr-4 py-3 rounded-xl border border-slate-200 focus:border-emerald-500 focus:ring-2 focus:ring-emerald-500/20 outline-none transition-all"
                     placeholder="your@email.com"
@@ -164,8 +105,6 @@ export default function SignUpPage() {
                   <input
                     type="tel"
                     name="phone"
-                    value={formData.phone}
-                    onChange={handleChange}
                     className="w-full pl-12 pr-4 py-3 rounded-xl border border-slate-200 focus:border-emerald-500 focus:ring-2 focus:ring-emerald-500/20 outline-none transition-all"
                     placeholder="03XX-XXXXXXX"
                   />
@@ -182,8 +121,6 @@ export default function SignUpPage() {
                   <MapPin className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-400" />
                   <select
                     name="city"
-                    value={formData.city}
-                    onChange={handleChange}
                     className="w-full pl-12 pr-4 py-3 rounded-xl border border-slate-200 focus:border-emerald-500 focus:ring-2 focus:ring-emerald-500/20 outline-none bg-white transition-all appearance-none"
                   >
                     <option value="">Select City</option>
@@ -201,8 +138,6 @@ export default function SignUpPage() {
                   <User className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-400" />
                   <select
                     name="role"
-                    value={formData.role}
-                    onChange={handleChange}
                     className="w-full pl-12 pr-4 py-3 rounded-xl border border-slate-200 focus:border-emerald-500 focus:ring-2 focus:ring-emerald-500/20 outline-none bg-white transition-all appearance-none"
                   >
                     <option value="citizen">Citizen</option>
@@ -223,8 +158,6 @@ export default function SignUpPage() {
                   <input
                     type="password"
                     name="password"
-                    value={formData.password}
-                    onChange={handleChange}
                     required
                     className="w-full pl-12 pr-4 py-3 rounded-xl border border-slate-200 focus:border-emerald-500 focus:ring-2 focus:ring-emerald-500/20 outline-none transition-all"
                     placeholder="Min. 6 characters"
@@ -240,8 +173,6 @@ export default function SignUpPage() {
                   <input
                     type="password"
                     name="confirmPassword"
-                    value={formData.confirmPassword}
-                    onChange={handleChange}
                     required
                     className="w-full pl-12 pr-4 py-3 rounded-xl border border-slate-200 focus:border-emerald-500 focus:ring-2 focus:ring-emerald-500/20 outline-none transition-all"
                     placeholder="Confirm password"
@@ -266,10 +197,10 @@ export default function SignUpPage() {
 
             <button
               type="submit"
-              disabled={loading}
+              disabled={isPending}
               className="w-full py-4 bg-emerald-600 text-white font-bold rounded-xl hover:bg-emerald-700 transition-all shadow-lg shadow-emerald-600/20 flex items-center justify-center gap-2 disabled:opacity-70 disabled:cursor-not-allowed"
             >
-              {loading ? (
+              {isPending ? (
                 <>
                   <Loader2 className="w-5 h-5 animate-spin" />
                   Creating Account...

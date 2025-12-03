@@ -3,6 +3,8 @@
 import { useState, useEffect } from 'react'
 import Link from 'next/link'
 import { createClient } from '@/lib/supabase/client'
+import { getDonationCases } from '@/lib/supabase/helpers'
+import { toast } from 'sonner'
 import { 
   Heart, 
   Stethoscope, 
@@ -28,7 +30,7 @@ interface DonationCase {
   title: string
   description: string
   category: string
-  target_amount: number
+  goal_amount: number
   raised_amount: number
   beneficiary_name: string
   city: string
@@ -37,6 +39,10 @@ interface DonationCase {
   verification_status: string
   created_at: string
   image_url?: string
+  donation_categories?: {
+    name: string
+    slug: string
+  }
 }
 
 const categories = [
@@ -70,7 +76,7 @@ const sampleCases: DonationCase[] = [
     title: 'Heart Surgery for 5-Year-Old Ahmed',
     description: 'Ahmed needs urgent heart surgery. His family cannot afford the treatment. Help save this young life.',
     category: 'medical',
-    target_amount: 500000,
+    goal_amount: 500000,
     raised_amount: 350000,
     beneficiary_name: 'Ahmed Ali',
     city: 'Lahore',
@@ -85,7 +91,7 @@ const sampleCases: DonationCase[] = [
     title: 'Scholarship for 50 Students in Sindh',
     description: 'Help provide quality education to deserving students from underprivileged families in rural Sindh.',
     category: 'education',
-    target_amount: 300000,
+    goal_amount: 300000,
     raised_amount: 180000,
     beneficiary_name: 'Various Students',
     city: 'Hyderabad',
@@ -99,7 +105,7 @@ const sampleCases: DonationCase[] = [
     title: 'Flood Relief - Rebuild Homes in Balochistan',
     description: 'Recent floods destroyed 200+ homes. Help families rebuild their lives and shelter.',
     category: 'flood_relief',
-    target_amount: 2000000,
+    goal_amount: 2000000,
     raised_amount: 850000,
     beneficiary_name: 'Flood Victims',
     city: 'Quetta',
@@ -113,7 +119,7 @@ const sampleCases: DonationCase[] = [
     title: 'Monthly Ration for 100 Families',
     description: 'Provide monthly food supplies to families struggling with poverty in Karachi slums.',
     category: 'food',
-    target_amount: 200000,
+    goal_amount: 200000,
     raised_amount: 120000,
     beneficiary_name: 'Multiple Families',
     city: 'Karachi',
@@ -127,7 +133,7 @@ const sampleCases: DonationCase[] = [
     title: 'Support Dar-ul-Atfal Orphanage',
     description: 'Help provide education, meals, and care for 75 orphan children at Dar-ul-Atfal.',
     category: 'orphanage',
-    target_amount: 400000,
+    goal_amount: 400000,
     raised_amount: 280000,
     beneficiary_name: 'Orphan Children',
     city: 'Peshawar',
@@ -141,7 +147,7 @@ const sampleCases: DonationCase[] = [
     title: 'Build Shelter for Homeless in Islamabad',
     description: 'Construct a shelter home to provide warmth and safety for homeless individuals during winter.',
     category: 'shelter',
-    target_amount: 800000,
+    goal_amount: 800000,
     raised_amount: 400000,
     beneficiary_name: 'Homeless Community',
     city: 'Islamabad',
@@ -167,54 +173,54 @@ export default function DonationsPage() {
   // Fetch donation cases from Supabase
   useEffect(() => {
     const fetchCases = async () => {
-      const { data, error } = await supabase
-        .from('donation_cases')
-        .select('*')
-        .eq('status', 'active')
-        .order('created_at', { ascending: false })
+      const { data, error } = await getDonationCases({
+        isActive: true,
+        category: selectedCategory !== 'all' ? selectedCategory : undefined,
+        urgency: selectedUrgency !== 'all' ? selectedUrgency : undefined,
+        search: searchQuery || undefined
+      })
       
       if (data && data.length > 0) {
-        setCases(data)
+        // Map data to match interface
+        const mappedData = data.map((item: any) => ({
+          ...item,
+          category: item.donation_categories?.slug || 'other', // Map category slug
+          goal_amount: item.goal_amount || 0,
+          raised_amount: item.raised_amount || 0,
+          urgency: item.urgency || 'low',
+          city: item.city || 'Unknown'
+        }))
+        setCases(mappedData)
+        setFilteredCases(mappedData) // Initial set, filtering handled by backend mostly now
+      } else if (data && data.length === 0) {
+         setCases([])
+         setFilteredCases([])
       }
-      // If no data from Supabase, keep using sample data
+      // If error or no data, we might want to keep sample data or show empty state
+      // For now, if we get data (even empty), we use it. If error, we might fallback.
+      if (error) {
+        console.error('Error fetching donation cases:', error)
+        // Fallback to sample data if error (e.g. table doesn't exist yet)
+        setCases(sampleCases)
+        setFilteredCases(sampleCases)
+      }
     }
     fetchCases()
-  }, [])
+  }, [selectedCategory, selectedUrgency, searchQuery])
 
-  // Filter cases
+  // Client-side sorting (since backend sorting is limited in helper currently)
   useEffect(() => {
-    let filtered = [...cases]
-    
-    if (selectedCategory !== 'all') {
-      filtered = filtered.filter(c => c.category === selectedCategory)
-    }
-    
-    if (selectedUrgency !== 'all') {
-      filtered = filtered.filter(c => c.urgency === selectedUrgency)
-    }
-    
-    if (searchQuery) {
-      filtered = filtered.filter(c => 
-        c.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        c.description.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        c.city.toLowerCase().includes(searchQuery.toLowerCase())
-      )
-    }
-    
-    // Sort
-    if (sortBy === 'urgency') {
-      const urgencyOrder = { critical: 0, high: 1, medium: 2, low: 3 }
-      filtered.sort((a, b) => urgencyOrder[a.urgency] - urgencyOrder[b.urgency])
-    } else if (sortBy === 'progress') {
-      filtered.sort((a, b) => (b.raised_amount / b.target_amount) - (a.raised_amount / a.target_amount))
+    let sorted = [...cases]
+    if (sortBy === 'progress') {
+      sorted.sort((a, b) => (b.raised_amount / b.goal_amount) - (a.raised_amount / a.goal_amount))
     } else if (sortBy === 'newest') {
-      filtered.sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime())
+      sorted.sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime())
     } else if (sortBy === 'amount') {
-      filtered.sort((a, b) => b.target_amount - a.target_amount)
+      sorted.sort((a, b) => b.goal_amount - a.goal_amount)
     }
     
-    setFilteredCases(filtered)
-  }, [cases, selectedCategory, selectedUrgency, searchQuery, sortBy])
+    setFilteredCases(sorted)
+  }, [cases, sortBy])
 
   const formatCurrency = (amount: number) => {
     return new Intl.NumberFormat('en-PK', {
@@ -237,7 +243,10 @@ export default function DonationsPage() {
     if (!selectedCase || !donationAmount) return
     
     // In a real implementation, this would process payment
-    alert(`Thank you for your donation of ${formatCurrency(Number(donationAmount))} to "${selectedCase.title}"! In a live system, this would redirect to a payment gateway.`)
+    toast.success(`Thank you for your donation of ${formatCurrency(Number(donationAmount))} to "${selectedCase.title}"!`, {
+      description: "In a live system, this would redirect to a payment gateway.",
+      duration: 5000,
+    })
     setShowDonationModal(false)
     setDonationAmount('')
     setSelectedCase(null)
@@ -408,23 +417,20 @@ export default function DonationsPage() {
                     <p className="text-slate-500 text-sm mb-6 line-clamp-2 leading-relaxed">
                       {donationCase.description}
                     </p>
-
-                    {/* Progress Bar */}
-                    <div className="mb-6 bg-slate-50 p-4 rounded-2xl border border-slate-100">
-                      <div className="flex justify-between text-sm mb-2">
-                        <span className="font-bold text-emerald-600 text-lg">{formatCurrency(donationCase.raised_amount)}</span>
-                        <span className="text-slate-400 font-medium text-xs self-end mb-1">of {formatCurrency(donationCase.target_amount)}</span>
-                      </div>
-                      <div className="w-full h-2.5 bg-slate-200 rounded-full overflow-hidden">
-                        <div
-                          className="h-full bg-emerald-500 rounded-full transition-all duration-1000 ease-out"
-                          style={{ width: `${getProgress(donationCase.raised_amount, donationCase.target_amount)}%` }}
-                        ></div>
-                      </div>
-                      <div className="flex justify-between items-center mt-2">
-                        <span className="text-xs font-bold text-slate-700">{getProgress(donationCase.raised_amount, donationCase.target_amount).toFixed(0)}% funded</span>
-                        <span className="text-xs text-slate-400 font-medium">12 days left</span>
-                      </div>
+                      
+                    <div className="flex justify-between text-sm mb-2">
+                      <span className="font-bold text-emerald-600 text-lg">{formatCurrency(donationCase.raised_amount)}</span>
+                      <span className="text-slate-400 font-medium text-xs self-end mb-1">of {formatCurrency(donationCase.goal_amount)}</span>
+                    </div>
+                    <div className="w-full h-2.5 bg-slate-200 rounded-full overflow-hidden">
+                      <div
+                        className="h-full bg-emerald-500 rounded-full transition-all duration-1000 ease-out"
+                        style={{ width: `${getProgress(donationCase.raised_amount, donationCase.goal_amount)}%` }}
+                      ></div>
+                    </div>
+                    <div className="flex justify-between items-center mt-2 mb-6">
+                      <span className="text-xs font-bold text-slate-700">{getProgress(donationCase.raised_amount, donationCase.goal_amount).toFixed(0)}% funded</span>
+                      <span className="text-xs text-slate-400 font-medium">12 days left</span>
                     </div>
 
                     <button

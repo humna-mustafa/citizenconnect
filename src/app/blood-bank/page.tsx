@@ -2,7 +2,9 @@
 
 import { useState, useEffect } from 'react'
 import Link from 'next/link'
+import dynamic from 'next/dynamic'
 import { createClient } from '@/lib/supabase/client'
+import { getBloodDonors, subscribeToBloodRequests } from '@/lib/supabase/helpers'
 import { 
   Search, 
   AlertCircle, 
@@ -16,8 +18,30 @@ import {
   CheckCircle2, 
   XCircle,
   Filter,
-  Loader2
+  Loader2,
+  Map as MapIcon
 } from 'lucide-react'
+
+const Map = dynamic(() => import('@/components/Map'), { 
+  ssr: false,
+  loading: () => <div className="h-[400px] w-full bg-slate-100 animate-pulse rounded-xl flex items-center justify-center text-slate-400">Loading Map...</div>
+})
+
+const getCityCoordinates = (city: string): [number, number] => {
+  const coords: Record<string, [number, number]> = {
+    'Karachi': [24.8607, 67.0011],
+    'Lahore': [31.5204, 74.3587],
+    'Islamabad': [33.6844, 73.0479],
+    'Rawalpindi': [33.5651, 73.0169],
+    'Faisalabad': [31.4504, 73.1350],
+    'Multan': [30.1575, 71.5249],
+    'Peshawar': [34.0151, 71.5249],
+    'Quetta': [30.1798, 66.9750]
+  }
+  // Add some random jitter so markers don't overlap perfectly
+  const base = coords[city] || [30.3753, 69.3451]
+  return [base[0] + (Math.random() - 0.5) * 0.05, base[1] + (Math.random() - 0.5) * 0.05]
+}
 
 interface BloodDonor {
   id: string
@@ -27,10 +51,8 @@ interface BloodDonor {
   is_available: boolean
   contact_phone: string
   donation_count: number
-  profile: {
-    full_name: string
-    avatar_url: string
-  }
+  full_name: string
+  avatar_url: string
 }
 
 interface BloodRequest {
@@ -56,15 +78,16 @@ export default function BloodBankPage() {
     bloodGroup: '',
     city: ''
   })
+  const [showMap, setShowMap] = useState(false)
   const supabase = createClient()
 
   // Demo data
   const demoDonors: BloodDonor[] = [
-    { id: '1', blood_group: 'A+', city: 'Karachi', area: 'Gulshan', is_available: true, contact_phone: '0300-1234567', donation_count: 5, profile: { full_name: 'Ahmed Khan', avatar_url: '' } },
-    { id: '2', blood_group: 'O-', city: 'Lahore', area: 'DHA', is_available: true, contact_phone: '0321-9876543', donation_count: 12, profile: { full_name: 'Sara Ali', avatar_url: '' } },
-    { id: '3', blood_group: 'B+', city: 'Islamabad', area: 'F-10', is_available: true, contact_phone: '0333-5551234', donation_count: 8, profile: { full_name: 'Usman Malik', avatar_url: '' } },
-    { id: '4', blood_group: 'AB+', city: 'Karachi', area: 'Clifton', is_available: false, contact_phone: '0345-7778899', donation_count: 3, profile: { full_name: 'Fatima Hassan', avatar_url: '' } },
-    { id: '5', blood_group: 'O+', city: 'Rawalpindi', area: 'Saddar', is_available: true, contact_phone: '0312-4445566', donation_count: 15, profile: { full_name: 'Ali Raza', avatar_url: '' } },
+    { id: '1', blood_group: 'A+', city: 'Karachi', area: 'Gulshan', is_available: true, contact_phone: '0300-1234567', donation_count: 5, full_name: 'Ahmed Khan', avatar_url: '' },
+    { id: '2', blood_group: 'O-', city: 'Lahore', area: 'DHA', is_available: true, contact_phone: '0321-9876543', donation_count: 12, full_name: 'Sara Ali', avatar_url: '' },
+    { id: '3', blood_group: 'B+', city: 'Islamabad', area: 'F-10', is_available: true, contact_phone: '0333-5551234', donation_count: 8, full_name: 'Usman Malik', avatar_url: '' },
+    { id: '4', blood_group: 'AB+', city: 'Karachi', area: 'Clifton', is_available: false, contact_phone: '0345-7778899', donation_count: 3, full_name: 'Fatima Hassan', avatar_url: '' },
+    { id: '5', blood_group: 'O+', city: 'Rawalpindi', area: 'Saddar', is_available: true, contact_phone: '0312-4445566', donation_count: 15, full_name: 'Ali Raza', avatar_url: '' },
   ]
 
   const demoRequests: BloodRequest[] = [
@@ -76,32 +99,44 @@ export default function BloodBankPage() {
   useEffect(() => {
     fetchDonors()
     fetchRequests()
+
+    // Realtime subscription for blood requests
+    const subscription = subscribeToBloodRequests(
+      filters.city || 'Karachi', // Default to Karachi or handle global
+      filters.bloodGroup || 'O+', // Default or handle all
+      (payload) => {
+        console.log('New blood request:', payload)
+        // Refresh requests
+        fetchRequests()
+      }
+    )
+
+    return () => {
+      subscription.unsubscribe()
+    }
   }, [filters])
 
   const fetchDonors = async () => {
     setLoading(true)
-    let query = supabase
-      .from('blood_donors')
-      .select(`
-        *,
-        profile:profiles(full_name, avatar_url)
-      `)
-      .eq('is_available', true)
+    try {
+      const { data, error } = await getBloodDonors({
+        bloodGroup: filters.bloodGroup || undefined,
+        city: filters.city || undefined
+      })
 
-    if (filters.bloodGroup) {
-      query = query.eq('blood_group', filters.bloodGroup)
-    }
-    if (filters.city) {
-      query = query.eq('city', filters.city)
-    }
-
-    const { data } = await query.limit(20)
-    if (data && data.length > 0) {
-      setDonors(data as unknown as BloodDonor[])
-    } else {
+      if (data && data.length > 0) {
+        // Map RPC result to BloodDonor interface if needed, but it should match mostly
+        // The RPC returns flat structure, interface is flat now too
+        setDonors(data as any[])
+      } else {
+        setDonors(demoDonors)
+      }
+    } catch (error) {
+      console.error('Error fetching donors:', error)
       setDonors(demoDonors)
+    } finally {
+      setLoading(false)
     }
-    setLoading(false)
   }
 
   const fetchRequests = async () => {
@@ -251,17 +286,40 @@ export default function BloodBankPage() {
                       <MapPin className="absolute right-4 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-400 pointer-events-none" />
                     </div>
                   </div>
-                  <div className="flex items-end">
+                  <div className="flex items-end gap-2">
                     <button
                       onClick={fetchDonors}
-                      className="w-full px-6 py-4 bg-red-600 text-white font-bold rounded-xl hover:bg-red-700 transition-all shadow-lg shadow-red-600/20 flex items-center justify-center gap-2"
+                      className="flex-1 px-6 py-4 bg-red-600 text-white font-bold rounded-xl hover:bg-red-700 transition-all shadow-lg shadow-red-600/20 flex items-center justify-center gap-2"
                     >
                       <Search className="w-5 h-5" />
-                      Search Donors
+                      Search
+                    </button>
+                    <button
+                      onClick={() => setShowMap(!showMap)}
+                      className={`px-4 py-4 font-bold rounded-xl transition-all border border-slate-200 flex items-center justify-center gap-2 ${
+                        showMap ? 'bg-slate-900 text-white' : 'bg-white text-slate-700 hover:bg-slate-50'
+                      }`}
+                    >
+                      <MapIcon className="w-5 h-5" />
                     </button>
                   </div>
                 </div>
               </div>
+
+              {/* Map View */}
+              {showMap && (
+                <div className="mb-10 animate-in fade-in slide-in-from-top-4 duration-500">
+                  <Map 
+                    markers={donors.map(d => ({
+                      id: d.id,
+                      position: getCityCoordinates(d.city),
+                      title: `${d.full_name} (${d.blood_group})`,
+                      description: `${d.city}, ${d.area}`
+                    }))}
+                    zoom={6}
+                  />
+                </div>
+              )}
 
               {/* Donors Grid */}
               {loading ? (
@@ -279,7 +337,7 @@ export default function BloodBankPage() {
                           {donor.blood_group}
                         </div>
                         <div>
-                          <h3 className="font-bold text-slate-900 text-lg">{donor.profile?.full_name || 'Anonymous Donor'}</h3>
+                          <h3 className="font-bold text-slate-900 text-lg">{donor.full_name || 'Anonymous Donor'}</h3>
                           <p className="text-slate-500 flex items-center gap-1.5 mt-1">
                             <MapPin className="w-4 h-4 text-slate-400" />
                             {donor.city}, {donor.area}

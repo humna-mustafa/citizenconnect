@@ -4,6 +4,7 @@ import { useState, useEffect, Suspense } from 'react'
 import Link from 'next/link'
 import { useSearchParams } from 'next/navigation'
 import { createClient } from '@/lib/supabase/client'
+import { getGuides } from '@/lib/supabase/helpers'
 import SearchBar from '@/components/SearchBar'
 import { 
   Car, 
@@ -79,52 +80,34 @@ function GuidesPageContent() {
   const fetchGuides = async () => {
     setLoading(true)
     
-    let query = supabase
-      .from('guides')
-      .select(`
-        id, title, slug, problem_explanation, views_count, upvotes_count, average_rating, created_at,
-        category:categories(name, slug, icon)
-      `)
-      .eq('is_published', true)
+    const sortMapping: Record<string, 'recent' | 'popular' | 'rated' | 'upvoted'> = {
+      'newest': 'recent',
+      'popular': 'popular',
+      'most-upvoted': 'upvoted',
+      'top-rated': 'rated'
+    }
 
-    if (selectedCategory) {
-      const { data: cat } = await supabase
-        .from('categories')
-        .select('id')
-        .eq('slug', selectedCategory)
-        .single()
+    try {
+      const { data, error } = await getGuides({
+        category: selectedCategory || undefined,
+        search: searchParams.get('search') || undefined,
+        sort: sortMapping[sortBy] || 'recent',
+        limit: 20
+      })
       
-      if (cat) {
-        query = query.eq('category_id', cat.id)
+      if (data) {
+        // Map the data to match the interface
+        const mappedData = data.map((guide: any) => ({
+          ...guide,
+          category: guide.categories // Map 'categories' from join to 'category' prop
+        }))
+        setGuides(mappedData)
       }
+    } catch (error) {
+      console.error('Error fetching guides:', error)
+    } finally {
+      setLoading(false)
     }
-
-    const searchQuery = searchParams.get('search')
-    if (searchQuery) {
-      query = query.ilike('title', `%${searchQuery}%`)
-    }
-
-    // Apply sorting
-    switch (sortBy) {
-      case 'popular':
-        query = query.order('views_count', { ascending: false })
-        break
-      case 'most-upvoted':
-        query = query.order('upvotes_count', { ascending: false })
-        break
-      case 'top-rated':
-        query = query.order('average_rating', { ascending: false })
-        break
-      default:
-        query = query.order('created_at', { ascending: false })
-    }
-
-    const { data } = await query.limit(20)
-    
-    if (data) {
-      setGuides(data as unknown as Guide[])
-    }
-    setLoading(false)
   }
 
   useEffect(() => {

@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react'
 import { createClient } from '@/lib/supabase/client'
+import { toast } from 'sonner'
 import { 
   Handshake, 
   Heart, 
@@ -122,12 +123,13 @@ const sampleVolunteers: Volunteer[] = [
 ]
 
 export default function VolunteersPage() {
-  const [volunteers, setVolunteers] = useState<Volunteer[]>(sampleVolunteers)
-  const [filteredVolunteers, setFilteredVolunteers] = useState<Volunteer[]>(sampleVolunteers)
+  const [volunteers, setVolunteers] = useState<Volunteer[]>([])
+  const [filteredVolunteers, setFilteredVolunteers] = useState<Volunteer[]>([])
   const [selectedCity, setSelectedCity] = useState('All Cities')
   const [selectedSkill, setSelectedSkill] = useState('all')
   const [searchQuery, setSearchQuery] = useState('')
   const [showRegistrationForm, setShowRegistrationForm] = useState(false)
+  const [loading, setLoading] = useState(true)
   const [formData, setFormData] = useState({
     full_name: '',
     email: '',
@@ -142,14 +144,40 @@ export default function VolunteersPage() {
   // Fetch volunteers from Supabase
   useEffect(() => {
     const fetchVolunteers = async () => {
+      setLoading(true)
       const { data, error } = await supabase
         .from('volunteers')
-        .select('*')
+        .select(`
+          *,
+          profiles:user_id (
+            full_name,
+            email,
+            phone,
+            city,
+            avatar_url
+          )
+        `)
+        .eq('is_active', true)
         .order('created_at', { ascending: false })
       
-      if (data && data.length > 0) {
-        setVolunteers(data)
+      if (data) {
+        // Transform data to match Volunteer interface
+        const transformedVolunteers = data.map((v: any) => ({
+          id: v.id,
+          full_name: v.profiles?.full_name || 'Anonymous Volunteer',
+          email: v.profiles?.email || '',
+          phone: v.profiles?.phone || '',
+          city: v.city,
+          skills: v.skills || [],
+          availability: v.availability,
+          experience: v.experience,
+          verified: true, // Assuming active volunteers are verified
+          created_at: v.created_at,
+        }))
+        setVolunteers(transformedVolunteers)
+        setFilteredVolunteers(transformedVolunteers)
       }
+      setLoading(false)
     }
     fetchVolunteers()
   }, [])
@@ -191,16 +219,33 @@ export default function VolunteersPage() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     
-    const { data, error } = await supabase
+    const { data: { user } } = await supabase.auth.getUser()
+    
+    if (!user) {
+      toast.error('Please login to register as a volunteer')
+      return
+    }
+
+    const { error } = await supabase
       .from('volunteers')
-      .insert([{ ...formData, verified: false }])
-      .select()
+      .insert([{
+        user_id: user.id,
+        city: formData.city,
+        skills: formData.skills,
+        availability: formData.availability.toLowerCase(),
+        experience: formData.experience,
+        is_active: true
+      }])
     
     if (error) {
-      alert('Error registering. Please try again.')
-      console.error(error)
+      if (error.code === '23505') {
+        toast.error('You are already registered as a volunteer!')
+      } else {
+        toast.error('Error registering. Please try again.')
+        console.error(error)
+      }
     } else {
-      alert('Thank you for registering as a volunteer! Your profile is pending verification.')
+      toast.success('Thank you for registering as a volunteer!')
       setShowRegistrationForm(false)
       setFormData({
         full_name: '',
@@ -211,6 +256,8 @@ export default function VolunteersPage() {
         availability: '',
         experience: '',
       })
+      // Refresh list
+      window.location.reload()
     }
   }
 
