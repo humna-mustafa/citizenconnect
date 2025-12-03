@@ -754,6 +754,256 @@ export interface Database {
           created_at?: string
         }
       }
+      issue_categories: {
+        Row: {
+          id: string
+          name: string
+          slug: string
+          description: string | null
+          icon: string | null
+          color: string
+          priority: number
+          created_at: string
+        }
+        Insert: {
+          id?: string
+          name: string
+          slug: string
+          description?: string | null
+          icon?: string | null
+          color?: string
+          priority?: number
+          created_at?: string
+        }
+        Update: {
+          id?: string
+          name?: string
+          slug?: string
+          description?: string | null
+          icon?: string | null
+          color?: string
+          priority?: number
+          created_at?: string
+        }
+      }
+      community_issues: {
+        Row: {
+          id: string
+          ticket_number: string
+          title: string
+          description: string
+          category_id: string | null
+          city: string
+          area: string | null
+          address: string | null
+          latitude: number | null
+          longitude: number | null
+          reporter_id: string | null
+          reporter_name: string | null
+          reporter_contact: string | null
+          is_anonymous: boolean
+          status: 'open' | 'assigned' | 'in_progress' | 'resolved' | 'closed' | 'rejected'
+          priority: 'low' | 'medium' | 'high' | 'urgent'
+          urgency_score: number
+          assigned_to: string | null
+          assigned_mentor_id: string | null
+          images: string[] | null
+          documents: string[] | null
+          upvotes: number
+          views_count: number
+          resolution_notes: string | null
+          resolved_at: string | null
+          resolved_by: string | null
+          created_at: string
+          updated_at: string
+        }
+        Insert: {
+          id?: string
+          ticket_number?: string
+          title: string
+          description: string
+          category_id?: string | null
+          city: string
+          area?: string | null
+          address?: string | null
+          latitude?: number | null
+          longitude?: number | null
+          reporter_id?: string | null
+          reporter_name?: string | null
+          reporter_contact?: string | null
+          is_anonymous?: boolean
+          status?: 'open' | 'assigned' | 'in_progress' | 'resolved' | 'closed' | 'rejected'
+          priority?: 'low' | 'medium' | 'high' | 'urgent'
+          urgency_score?: number
+          assigned_to?: string | null
+          assigned_mentor_id?: string | null
+          images?: string[] | null
+          documents?: string[] | null
+          upvotes?: number
+          views_count?: number
+          resolution_notes?: string | null
+          resolved_at?: string | null
+          resolved_by?: string | null
+          created_at?: string
+          updated_at?: string
+        }
+        Update: {
+          id?: string
+          ticket_number?: string
+          title?: string
+          description?: string
+          category_id?: string | null
+          city?: string
+          area?: string | null
+          address?: string | null
+          latitude?: number | null
+          longitude?: number | null
+          reporter_id?: string | null
+          reporter_name?: string | null
+          reporter_contact?: string | null
+          is_anonymous?: boolean
+          status?: 'open' | 'assigned' | 'in_progress' | 'resolved' | 'closed' | 'rejected'
+          priority?: 'low' | 'medium' | 'high' | 'urgent'
+          urgency_score?: number
+          assigned_to?: string | null
+          assigned_mentor_id?: string | null
+          images?: string[] | null
+          documents?: string[] | null
+          upvotes?: number
+          views_count?: number
+          resolution_notes?: string | null
+          resolved_at?: string | null
+          resolved_by?: string | null
+          created_at?: string
+          updated_at?: string
+        }
+      }
+      issue_comments: {
+        Row: {
+          id: string
+          issue_id: string
+          author_id: string | null
+          content: string
+          is_solution: boolean
+          is_official: boolean
+          likes_count: number
+          created_at: string
+          updated_at: string
+        }
+        Insert: {
+          id?: string
+          issue_id: string
+          author_id?: string | null
+          content: string
+          is_solution?: boolean
+          is_official?: boolean
+          likes_count?: number
+          created_at?: string
+          updated_at?: string
+        }
+        Update: {
+          id?: string
+          issue_id?: string
+          author_id?: string | null
+          content?: string
+          is_solution?: boolean
+          is_official?: boolean
+          likes_count?: number
+          created_at?: string
+          updated_at?: string
+        }
+      }
+      community_contributors: {
+        Row: {
+          id: string
+          user_id: string
+          role: 'contributor' | 'mentor' | 'senior_mentor' | 'admin'
+          expertise_areas: string[] | null
+          categories: string[] | null
+          issues_resolved: number
+          issues_assigned: number
+          avg_resolution_time: string | null
+          rating: number
+          total_ratings: number
+          is_available: boolean
+          max_active_issues: number
+          badges: string[] | null
+          points: number
+          level: number
+          preferred_city: string | null
+          preferred_areas: string[] | null
+          created_at: string
+          updated_at: string
+        }
+        Insert: {
+          id?: string
+          user_id: string
+          role?: 'contributor' | 'mentor' | 'senior_mentor' | 'admin'
+          expertise_areas?: string[] | null
+          categories?: string[] | null
+          issues_resolved?: number
+          issues_assigned?: number
+          avg_resolution_time?: string | null
+          rating?: number
+          total_ratings?: number
+          is_available?: boolean
+          max_active_issues?: number
+          badges?: string[] | null
+          points?: number
+          level?: number
+          preferred_city?: string | null
+          preferred_areas?: string[] | null
+          created_at?: string
+          updated_at?: string
+        }
+        Update: {
+          id?: string
+          user_id?: string
+          role?: 'contributor' | 'mentor' | 'senior_mentor' | 'admin'
+          expertise_areas?: string[] | null
+          categories?: string[] | null
+          issues_resolved?: number
+          issues_assigned?: number
+          avg_resolution_time?: string | null
+          rating?: number
+          total_ratings?: number
+          is_available?: boolean
+          max_active_issues?: number
+          badges?: string[] | null
+          points?: number
+          level?: number
+          preferred_city?: string | null
+          preferred_areas?: string[] | null
+          created_at?: string
+          updated_at?: string
+        }
+      }
+      issue_activity_log: {
+        Row: {
+          id: string
+          issue_id: string
+          actor_id: string | null
+          action: string
+          details: Record<string, unknown> | null
+          created_at: string
+        }
+        Insert: {
+          id?: string
+          issue_id: string
+          actor_id?: string | null
+          action: string
+          details?: Record<string, unknown> | null
+          created_at?: string
+        }
+        Update: {
+          id?: string
+          issue_id?: string
+          actor_id?: string | null
+          action?: string
+          details?: Record<string, unknown> | null
+          created_at?: string
+        }
+      }
     }
     Views: {
       [_ in never]: never
@@ -762,6 +1012,14 @@ export interface Database {
       increment_guide_views: {
         Args: { guide_id: string }
         Returns: void
+      }
+      get_community_stats: {
+        Args: Record<string, never>
+        Returns: Record<string, unknown>
+      }
+      auto_assign_issue: {
+        Args: { issue_id: string }
+        Returns: string | null
       }
     }
     Enums: {

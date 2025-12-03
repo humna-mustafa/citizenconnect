@@ -12,12 +12,12 @@ import { Menu, X, User as UserIcon, Bell, Settings, LogOut, ChevronDown } from '
 const navigation = [
   { name: 'Home', href: '/' },
   { name: 'Issue Guides', href: '/guides' },
+  { name: 'Community', href: '/community' },
   { name: 'Blood Bank', href: '/blood-bank' },
   { name: 'Donations', href: '/donations' },
   { name: 'Volunteers', href: '/volunteers' },
   { name: 'Emergency', href: '/emergency' },
   { name: 'Impact', href: '/impact' },
-  { name: 'Dashboard', href: '/dashboard' },
 ]
 
 export default function Header() {

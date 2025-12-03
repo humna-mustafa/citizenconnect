@@ -30,7 +30,9 @@ import {
   Bell,
   Save,
   Loader2,
-  RefreshCw
+  RefreshCw,
+  MessageSquare,
+  AlertTriangle
 } from 'lucide-react'
 import { formatDistanceToNow } from 'date-fns'
 
@@ -131,6 +133,41 @@ interface DonationAdmin {
   }
 }
 
+interface CommunityIssueAdmin {
+  id: string
+  title: string
+  description: string
+  category: string
+  priority: 'low' | 'medium' | 'high' | 'urgent'
+  status: 'open' | 'assigned' | 'in_progress' | 'resolved' | 'closed'
+  upvotes_count: number
+  responses_count: number
+  created_at: string
+  resolved_at: string | null
+  reporter?: {
+    full_name: string | null
+    email: string
+  }
+  assigned_mentor?: {
+    full_name: string | null
+  }
+}
+
+interface MentorAdmin {
+  id: string
+  user_id: string
+  expertise_areas: string[]
+  is_verified: boolean
+  is_available: boolean
+  issues_resolved: number
+  rating: number
+  created_at: string
+  profiles?: {
+    full_name: string
+    email: string
+  }
+}
+
 export default function AdminPage() {
   const [user, setUser] = useState<User | null>(null)
   const [loading, setLoading] = useState(true)
@@ -156,6 +193,8 @@ export default function AdminPage() {
   const [volunteers, setVolunteers] = useState<VolunteerAdmin[]>([])
   const [donationCases, setDonationCases] = useState<DonationCaseAdmin[]>([])
   const [donations, setDonations] = useState<DonationAdmin[]>([])
+  const [communityIssues, setCommunityIssues] = useState<CommunityIssueAdmin[]>([])
+  const [mentors, setMentors] = useState<MentorAdmin[]>([])
   const [searchQuery, setSearchQuery] = useState('')
   const [refreshing, setRefreshing] = useState(false)
   
@@ -258,6 +297,22 @@ export default function AdminPage() {
         .order('created_at', { ascending: false })
         .limit(50)
       if (donationsData) setDonations(donationsData)
+
+      // Fetch community issues
+      const { data: issuesData } = await supabase
+        .from('community_issues')
+        .select('*, reporter:profiles!community_issues_reporter_id_fkey(full_name, email), assigned_mentor:profiles!community_issues_assigned_mentor_id_fkey(full_name)')
+        .order('created_at', { ascending: false })
+        .limit(50)
+      if (issuesData) setCommunityIssues(issuesData)
+
+      // Fetch mentors
+      const { data: mentorsData } = await supabase
+        .from('mentors')
+        .select('*, profiles(full_name, email)')
+        .order('created_at', { ascending: false })
+        .limit(50)
+      if (mentorsData) setMentors(mentorsData)
     } catch (error) {
       console.error('Error fetching data:', error)
     } finally {
@@ -450,6 +505,77 @@ export default function AdminPage() {
     c.title?.toLowerCase().includes(searchQuery.toLowerCase())
   )
 
+  const filteredIssues = communityIssues.filter(i =>
+    i.title?.toLowerCase().includes(searchQuery.toLowerCase()) ||
+    i.category?.toLowerCase().includes(searchQuery.toLowerCase()) ||
+    i.reporter?.full_name?.toLowerCase().includes(searchQuery.toLowerCase())
+  )
+
+  const filteredMentors = mentors.filter(m =>
+    m.profiles?.full_name?.toLowerCase().includes(searchQuery.toLowerCase()) ||
+    m.profiles?.email?.toLowerCase().includes(searchQuery.toLowerCase())
+  )
+
+  // Community Issue handlers
+  const handleUpdateIssueStatus = async (issueId: string, status: string) => {
+    const updates: { status: string; resolved_at?: string | null } = { status }
+    if (status === 'resolved') {
+      updates.resolved_at = new Date().toISOString()
+    } else {
+      updates.resolved_at = null
+    }
+    
+    const { error } = await supabase
+      .from('community_issues')
+      .update(updates)
+      .eq('id', issueId)
+    
+    if (error) {
+      toast.error('Failed to update issue status', { description: error.message })
+    } else {
+      toast.success('Issue status updated')
+      setCommunityIssues(communityIssues.map(i => i.id === issueId ? { ...i, status: status as CommunityIssueAdmin['status'], resolved_at: updates.resolved_at || null } : i))
+    }
+  }
+
+  const handleDeleteIssue = async (issueId: string) => {
+    if (!confirm('Are you sure you want to delete this community issue?')) return
+    
+    const { error } = await supabase.from('community_issues').delete().eq('id', issueId)
+    if (error) {
+      toast.error('Failed to delete issue', { description: error.message })
+    } else {
+      toast.success('Issue deleted successfully')
+      setCommunityIssues(communityIssues.filter(i => i.id !== issueId))
+    }
+  }
+
+  const handleToggleMentorVerification = async (mentorId: string, verified: boolean) => {
+    const { error } = await supabase
+      .from('mentors')
+      .update({ is_verified: verified })
+      .eq('id', mentorId)
+    
+    if (error) {
+      toast.error('Failed to update mentor', { description: error.message })
+    } else {
+      toast.success(verified ? 'Mentor verified' : 'Mentor unverified')
+      setMentors(mentors.map(m => m.id === mentorId ? { ...m, is_verified: verified } : m))
+    }
+  }
+
+  const handleDeleteMentor = async (mentorId: string) => {
+    if (!confirm('Are you sure you want to remove this mentor?')) return
+    
+    const { error } = await supabase.from('mentors').delete().eq('id', mentorId)
+    if (error) {
+      toast.error('Failed to delete mentor', { description: error.message })
+    } else {
+      toast.success('Mentor removed successfully')
+      setMentors(mentors.filter(m => m.id !== mentorId))
+    }
+  }
+
   const handleSignOut = async () => {
     await supabase.auth.signOut()
     router.push('/')
@@ -490,6 +616,7 @@ export default function AdminPage() {
     { id: 'donations', label: 'Donations', icon: Heart },
     { id: 'donors', label: 'Blood Donors', icon: Droplets },
     { id: 'volunteers', label: 'Volunteers', icon: Handshake },
+    { id: 'issues', label: 'Community Issues', icon: MessageSquare },
     { id: 'reports', label: 'Reports', icon: BarChart2 },
     { id: 'settings', label: 'Settings', icon: Settings },
   ]
@@ -1206,6 +1333,252 @@ export default function AdminPage() {
                       {filteredVolunteers.length === 0 && (
                         <tr>
                           <td colSpan={7} className="text-center py-8 text-slate-500">No volunteers found</td>
+                        </tr>
+                      )}
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+            </div>
+          )}
+
+          {/* Community Issues Tab */}
+          {activeTab === 'issues' && (
+            <div className="space-y-6">
+              {/* Stats */}
+              <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+                <div className="bg-white rounded-2xl shadow-sm p-5 border border-slate-100">
+                  <div className="flex items-center gap-3">
+                    <div className="w-12 h-12 bg-yellow-100 text-yellow-600 rounded-xl flex items-center justify-center">
+                      <AlertTriangle className="w-6 h-6" />
+                    </div>
+                    <div>
+                      <p className="text-2xl font-bold text-slate-900">{communityIssues.filter(i => i.status === 'open').length}</p>
+                      <p className="text-sm text-slate-500">Open Issues</p>
+                    </div>
+                  </div>
+                </div>
+                <div className="bg-white rounded-2xl shadow-sm p-5 border border-slate-100">
+                  <div className="flex items-center gap-3">
+                    <div className="w-12 h-12 bg-purple-100 text-purple-600 rounded-xl flex items-center justify-center">
+                      <Loader2 className="w-6 h-6" />
+                    </div>
+                    <div>
+                      <p className="text-2xl font-bold text-slate-900">{communityIssues.filter(i => i.status === 'in_progress').length}</p>
+                      <p className="text-sm text-slate-500">In Progress</p>
+                    </div>
+                  </div>
+                </div>
+                <div className="bg-white rounded-2xl shadow-sm p-5 border border-slate-100">
+                  <div className="flex items-center gap-3">
+                    <div className="w-12 h-12 bg-emerald-100 text-emerald-600 rounded-xl flex items-center justify-center">
+                      <CheckCircle2 className="w-6 h-6" />
+                    </div>
+                    <div>
+                      <p className="text-2xl font-bold text-slate-900">{communityIssues.filter(i => i.status === 'resolved').length}</p>
+                      <p className="text-sm text-slate-500">Resolved</p>
+                    </div>
+                  </div>
+                </div>
+                <div className="bg-white rounded-2xl shadow-sm p-5 border border-slate-100">
+                  <div className="flex items-center gap-3">
+                    <div className="w-12 h-12 bg-blue-100 text-blue-600 rounded-xl flex items-center justify-center">
+                      <Shield className="w-6 h-6" />
+                    </div>
+                    <div>
+                      <p className="text-2xl font-bold text-slate-900">{mentors.filter(m => m.is_verified).length}</p>
+                      <p className="text-sm text-slate-500">Verified Mentors</p>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              {/* Issues Table */}
+              <div className="flex justify-between items-center">
+                <div className="relative flex-1 max-w-md">
+                  <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-400" />
+                  <input
+                    type="text"
+                    placeholder="Search issues..."
+                    value={searchQuery}
+                    onChange={(e) => setSearchQuery(e.target.value)}
+                    className="w-full pl-10 pr-4 py-2.5 rounded-xl border border-slate-200 focus:border-emerald-500 focus:ring-2 focus:ring-emerald-500/20 outline-none"
+                  />
+                </div>
+                <p className="text-sm text-slate-500 ml-4">{filteredIssues.length} issues</p>
+              </div>
+
+              <div className="bg-white rounded-2xl shadow-sm border border-slate-100 overflow-hidden">
+                <div className="overflow-x-auto">
+                  <table className="w-full">
+                    <thead className="bg-slate-50">
+                      <tr>
+                        <th className="text-left py-4 px-6 text-sm text-slate-500 font-semibold">Issue</th>
+                        <th className="text-left py-4 px-6 text-sm text-slate-500 font-semibold">Category</th>
+                        <th className="text-left py-4 px-6 text-sm text-slate-500 font-semibold">Priority</th>
+                        <th className="text-left py-4 px-6 text-sm text-slate-500 font-semibold">Reporter</th>
+                        <th className="text-left py-4 px-6 text-sm text-slate-500 font-semibold">Status</th>
+                        <th className="text-left py-4 px-6 text-sm text-slate-500 font-semibold">Engagement</th>
+                        <th className="text-right py-4 px-6 text-sm text-slate-500 font-semibold">Actions</th>
+                      </tr>
+                    </thead>
+                    <tbody className="divide-y divide-slate-100">
+                      {filteredIssues.map((issue) => (
+                        <tr key={issue.id} className="hover:bg-slate-50 transition-colors">
+                          <td className="py-4 px-6">
+                            <div>
+                              <p className="font-bold text-slate-900 truncate max-w-xs">{issue.title}</p>
+                              <p className="text-xs text-slate-500">{new Date(issue.created_at).toLocaleDateString()}</p>
+                            </div>
+                          </td>
+                          <td className="py-4 px-6">
+                            <span className="px-3 py-1 bg-slate-100 text-slate-600 rounded-full text-xs font-bold capitalize">
+                              {issue.category}
+                            </span>
+                          </td>
+                          <td className="py-4 px-6">
+                            <span className={`px-3 py-1 rounded-full text-xs font-bold capitalize ${
+                              issue.priority === 'urgent' ? 'bg-red-100 text-red-700' :
+                              issue.priority === 'high' ? 'bg-orange-100 text-orange-700' :
+                              issue.priority === 'medium' ? 'bg-blue-100 text-blue-700' :
+                              'bg-slate-100 text-slate-600'
+                            }`}>
+                              {issue.priority}
+                            </span>
+                          </td>
+                          <td className="py-4 px-6">
+                            <p className="text-slate-600 text-sm">{issue.reporter?.full_name || 'Anonymous'}</p>
+                          </td>
+                          <td className="py-4 px-6">
+                            <select
+                              value={issue.status}
+                              onChange={(e) => handleUpdateIssueStatus(issue.id, e.target.value)}
+                              className={`px-3 py-1 rounded-full text-xs font-bold cursor-pointer border-0 ${
+                                issue.status === 'resolved' ? 'bg-emerald-100 text-emerald-700' :
+                                issue.status === 'closed' ? 'bg-slate-100 text-slate-600' :
+                                issue.status === 'in_progress' ? 'bg-purple-100 text-purple-700' :
+                                issue.status === 'assigned' ? 'bg-blue-100 text-blue-700' :
+                                'bg-yellow-100 text-yellow-700'
+                              }`}
+                            >
+                              <option value="open">Open</option>
+                              <option value="assigned">Assigned</option>
+                              <option value="in_progress">In Progress</option>
+                              <option value="resolved">Resolved</option>
+                              <option value="closed">Closed</option>
+                            </select>
+                          </td>
+                          <td className="py-4 px-6">
+                            <div className="flex items-center gap-3 text-sm text-slate-500">
+                              <span className="flex items-center gap-1">👍 {issue.upvotes_count}</span>
+                              <span className="flex items-center gap-1">💬 {issue.responses_count}</span>
+                            </div>
+                          </td>
+                          <td className="py-4 px-6 text-right">
+                            <div className="flex items-center justify-end gap-2">
+                              <a 
+                                href={`/community/${issue.id}`}
+                                target="_blank"
+                                className="p-2 text-slate-400 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition-colors"
+                              >
+                                <Eye className="w-4 h-4" />
+                              </a>
+                              <button 
+                                onClick={() => handleDeleteIssue(issue.id)}
+                                className="p-2 text-slate-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition-colors"
+                              >
+                                <Trash2 className="w-4 h-4" />
+                              </button>
+                            </div>
+                          </td>
+                        </tr>
+                      ))}
+                      {filteredIssues.length === 0 && (
+                        <tr>
+                          <td colSpan={7} className="text-center py-8 text-slate-500">No community issues found</td>
+                        </tr>
+                      )}
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+
+              {/* Mentors Section */}
+              <h3 className="font-bold text-slate-900 text-lg mt-8">Community Mentors</h3>
+              <div className="bg-white rounded-2xl shadow-sm border border-slate-100 overflow-hidden">
+                <div className="overflow-x-auto">
+                  <table className="w-full">
+                    <thead className="bg-slate-50">
+                      <tr>
+                        <th className="text-left py-4 px-6 text-sm text-slate-500 font-semibold">Mentor</th>
+                        <th className="text-left py-4 px-6 text-sm text-slate-500 font-semibold">Expertise</th>
+                        <th className="text-left py-4 px-6 text-sm text-slate-500 font-semibold">Issues Resolved</th>
+                        <th className="text-left py-4 px-6 text-sm text-slate-500 font-semibold">Rating</th>
+                        <th className="text-left py-4 px-6 text-sm text-slate-500 font-semibold">Status</th>
+                        <th className="text-right py-4 px-6 text-sm text-slate-500 font-semibold">Actions</th>
+                      </tr>
+                    </thead>
+                    <tbody className="divide-y divide-slate-100">
+                      {filteredMentors.map((mentor) => (
+                        <tr key={mentor.id} className="hover:bg-slate-50 transition-colors">
+                          <td className="py-4 px-6">
+                            <div className="flex items-center gap-3">
+                              <div className="w-10 h-10 bg-purple-100 text-purple-700 rounded-full flex items-center justify-center font-bold">
+                                {mentor.profiles?.full_name?.[0] || '?'}
+                              </div>
+                              <div>
+                                <p className="font-bold text-slate-900">{mentor.profiles?.full_name || 'Unknown'}</p>
+                                <p className="text-sm text-slate-500">{mentor.profiles?.email}</p>
+                              </div>
+                            </div>
+                          </td>
+                          <td className="py-4 px-6">
+                            <div className="flex flex-wrap gap-1 max-w-xs">
+                              {(mentor.expertise_areas || []).slice(0, 2).map((area, i) => (
+                                <span key={i} className="px-2 py-0.5 bg-purple-100 text-purple-700 rounded text-xs font-medium">
+                                  {area}
+                                </span>
+                              ))}
+                              {(mentor.expertise_areas || []).length > 2 && (
+                                <span className="px-2 py-0.5 bg-slate-100 text-slate-600 rounded text-xs">
+                                  +{mentor.expertise_areas!.length - 2}
+                                </span>
+                              )}
+                            </div>
+                          </td>
+                          <td className="py-4 px-6">
+                            <span className="px-3 py-1 bg-emerald-100 text-emerald-700 rounded-full text-sm font-bold">
+                              {mentor.issues_resolved}
+                            </span>
+                          </td>
+                          <td className="py-4 px-6">
+                            <span className="flex items-center gap-1 text-amber-600 font-medium">
+                              ⭐ {mentor.rating.toFixed(1)}
+                            </span>
+                          </td>
+                          <td className="py-4 px-6">
+                            <button
+                              onClick={() => handleToggleMentorVerification(mentor.id, !mentor.is_verified)}
+                              className={`px-3 py-1 rounded-full text-xs font-bold cursor-pointer hover:opacity-80 ${
+                                mentor.is_verified ? 'bg-emerald-100 text-emerald-700' : 'bg-orange-100 text-orange-600'
+                              }`}
+                            >
+                              {mentor.is_verified ? 'Verified' : 'Pending'}
+                            </button>
+                          </td>
+                          <td className="py-4 px-6 text-right">
+                            <button 
+                              onClick={() => handleDeleteMentor(mentor.id)}
+                              className="p-2 text-slate-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition-colors"
+                            >
+                              <Trash2 className="w-4 h-4" />
+                            </button>
+                          </td>
+                        </tr>
+                      ))}
+                      {filteredMentors.length === 0 && (
+                        <tr>
+                          <td colSpan={6} className="text-center py-8 text-slate-500">No mentors found</td>
                         </tr>
                       )}
                     </tbody>
