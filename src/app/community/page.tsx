@@ -29,14 +29,10 @@ interface CommunityIssue {
   upvotes: number
   views_count: number
   created_at: string
-  reporter: {
-    full_name: string | null
-    avatar_url: string | null
-  } | null
-  assigned_mentor: {
-    full_name: string | null
-    avatar_url: string | null
-  } | null
+  reporter_id: string | null
+  reporter_name: string | null
+  assigned_to: string | null
+  assigned_mentor_id: string | null
 }
 
 interface Mentor {
@@ -170,9 +166,7 @@ export default function CommunityPage() {
         .from('community_issues')
         .select(`
           *,
-          category:issue_categories(name, slug),
-          reporter:profiles!community_issues_reporter_id_fkey(full_name, avatar_url),
-          assigned_mentor:profiles!community_issues_assigned_mentor_id_fkey(full_name, avatar_url)
+          category:issue_categories(name, slug)
         `)
 
       if (selectedCategory) {
@@ -585,7 +579,7 @@ export default function CommunityPage() {
                           <div className="flex flex-wrap items-center gap-4 text-sm text-slate-500">
                             <div className="flex items-center gap-1">
                               <User className="w-4 h-4" />
-                              {issue.reporter?.full_name || 'Anonymous'}
+                              {issue.reporter_name || 'Anonymous'}
                             </div>
                             <div className="flex items-center gap-1">
                               <Clock className="w-4 h-4" />
@@ -603,13 +597,13 @@ export default function CommunityPage() {
                             </div>
                           </div>
 
-                          {issue.assigned_mentor && (
+                          {issue.assigned_to && (
                             <div className="mt-4 pt-4 border-t border-slate-100 flex items-center gap-2">
                               <div className="w-6 h-6 rounded-full bg-purple-100 flex items-center justify-center text-purple-600 text-xs font-bold">
-                                {issue.assigned_mentor.full_name?.charAt(0) || 'M'}
+                                M
                               </div>
                               <span className="text-sm text-slate-600">
-                                Assigned to <strong className="text-purple-600">{issue.assigned_mentor.full_name}</strong>
+                                Issue assigned to mentor
                               </span>
                             </div>
                           )}
