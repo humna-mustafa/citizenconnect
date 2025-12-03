@@ -465,8 +465,10 @@ export default function IssueDetailPage({ params }: { params: Promise<{ id: stri
                     center={[issue.location.lat, issue.location.lng]} 
                     zoom={15}
                     markers={[{
+                      id: issue.id,
                       position: [issue.location.lat, issue.location.lng],
-                      popup: issue.title
+                      title: issue.title,
+                      description: issue.location.address || undefined
                     }]}
                   />
                 </div>
