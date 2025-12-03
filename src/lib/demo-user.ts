@@ -18,7 +18,7 @@ export const DEMO_PROFILE = {
   phone: '0300-1234567',
   city: 'Lahore',
   role: 'citizen',
-  avatar_url: null,
+  avatar_url: undefined,
   bio: 'This is a demo account for testing CitizenConnect features.',
   is_verified: true,
   created_at: '2025-01-01T00:00:00Z',
