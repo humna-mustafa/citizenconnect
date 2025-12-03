@@ -129,33 +129,36 @@ export default function CommunityPage() {
 
   const fetchStats = async () => {
     try {
-      const { count: total } = await supabase
+      const { count: total, error: totalError } = await supabase
         .from('community_issues')
         .select('*', { count: 'exact', head: true })
 
-      const { count: open } = await supabase
+      const { count: open, error: openError } = await supabase
         .from('community_issues')
         .select('*', { count: 'exact', head: true })
         .eq('status', 'open')
 
-      const { count: resolved } = await supabase
+      const { count: resolved, error: resolvedError } = await supabase
         .from('community_issues')
         .select('*', { count: 'exact', head: true })
         .eq('status', 'resolved')
 
-      const { count: mentorsCount } = await supabase
+      const { count: mentorsCount, error: mentorsError } = await supabase
         .from('community_contributors')
         .select('*', { count: 'exact', head: true })
         .in('role', ['mentor', 'senior_mentor'])
 
+      // Silently handle errors - tables might not exist yet
       setStats({
-        total: total || 0,
-        open: open || 0,
-        resolved: resolved || 0,
-        mentors: mentorsCount || 0
+        total: totalError ? 0 : (total || 0),
+        open: openError ? 0 : (open || 0),
+        resolved: resolvedError ? 0 : (resolved || 0),
+        mentors: mentorsError ? 0 : (mentorsCount || 0)
       })
     } catch (error) {
       console.error('Error fetching stats:', error)
+      // Set default values if any error occurs
+      setStats({ total: 0, open: 0, resolved: 0, mentors: 0 })
     }
   }
 
@@ -199,11 +202,17 @@ export default function CommunityPage() {
 
       const { data, error } = await query.limit(50)
 
-      if (error) throw error
+      if (error) {
+        // If table doesn't exist or permission denied, just show empty state
+        console.error('Error fetching issues:', error.message)
+        setIssues([])
+        return
+      }
       setIssues(data || [])
     } catch (error) {
       console.error('Error fetching issues:', error)
-      toast.error('Failed to load issues')
+      // Don't show error toast - silently show empty state
+      setIssues([])
     } finally {
       setLoading(false)
     }
@@ -222,10 +231,16 @@ export default function CommunityPage() {
         .order('issues_resolved', { ascending: false })
         .limit(5)
 
-      if (error) throw error
+      // Silently handle errors - table might not exist
+      if (error) {
+        console.error('Error fetching mentors:', error.message)
+        setMentors([])
+        return
+      }
       setMentors(data || [])
     } catch (error) {
       console.error('Error fetching mentors:', error)
+      setMentors([])
     }
   }
 
