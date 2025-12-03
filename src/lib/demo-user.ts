@@ -27,7 +27,9 @@ export const DEMO_PROFILE = {
 
 export function isDemoMode(): boolean {
   if (typeof window === 'undefined') return false
-  return document.cookie.includes('demo_mode=true')
+  // Check both cookie and URL param
+  const urlParams = new URLSearchParams(window.location.search)
+  return document.cookie.includes('demo_mode=true') || urlParams.get('demo') === 'true'
 }
 
 export function enableDemoMode(): void {
