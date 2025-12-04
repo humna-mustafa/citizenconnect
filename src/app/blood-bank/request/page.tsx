@@ -80,18 +80,15 @@ export default function BloodRequestPage() {
       const { error } = await createBloodRequest({
         requester_id: user.id,
         patient_name: formData.patient_name,
-        patient_age: parseInt(formData.patient_age),
-        blood_group: formData.blood_group as any,
-        units_required: parseInt(formData.units_required.toString()),
+        blood_group: formData.blood_group as 'A+' | 'A-' | 'B+' | 'B-' | 'AB+' | 'AB-' | 'O+' | 'O-',
+        units_needed: parseInt(formData.units_required.toString()),
         hospital_name: formData.hospital_name,
-        hospital_address: formData.hospital_address,
+        hospital_address: formData.hospital_address || null,
         city: formData.city,
-        contact_person: formData.contact_person,
         contact_phone: formData.contact_phone,
-        urgency_level: formData.urgency_level as 'Critical' | 'Urgent' | 'Normal',
-        additional_notes: formData.additional_notes,
-        required_by: formData.required_by_date,
-        status: 'Active'
+        urgency_level: formData.urgency_level.toLowerCase() as 'critical' | 'urgent' | 'normal',
+        notes: formData.additional_notes || null,
+        status: 'open'
       })
 
       if (error) {
