@@ -122,10 +122,10 @@ export default function AboutPage() {
             </div>
             <div className="grid grid-cols-2 gap-6">
               {[
-                { icon: BookOpen, title: '20+', desc: 'Step-by-step Guides' },
+                { icon: BookOpen, title: '150+', desc: 'Step-by-step Guides' },
                 { icon: Droplets, title: '10+', desc: 'Blood Donors' },
                 { icon: Users, title: '15+', desc: 'Active Volunteers' },
-                { icon: Heart, title: 'PKR 100K+', desc: 'Donations Facilitated' },
+                { icon: Heart, title: 'PKR 100,000+', desc: 'Donations Facilitated' },
               ].map((stat, index) => (
                 <div key={index} className="bg-card border border-border rounded-2xl p-6 text-center hover:shadow-lg transition-all group">
                   <div className="w-12 h-12 bg-primary/10 rounded-xl flex items-center justify-center mx-auto mb-4 group-hover:bg-primary group-hover:text-primary-foreground transition-colors text-primary">

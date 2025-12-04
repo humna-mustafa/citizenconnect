@@ -67,7 +67,7 @@ export default function BloodBankRegisterPage() {
     // Validate phone
     const phoneRegex = /^(\+92|0)?3[0-9]{9}$/
     if (!phoneRegex.test(formData.phone.replace(/\s/g, ''))) {
-      toast.error('Please enter a valid Pakistani phone number')
+      toast.error('Please enter valid Pakistani phone number (03XX-XXXXXXX)')
       return
     }
 

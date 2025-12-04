@@ -39,15 +39,15 @@ interface ImpactStats {
 
 export default function ImpactPage() {
   const [stats, setStats] = useState<ImpactStats>({
-    total_users: 0,
-    total_guides: 0,
-    total_blood_donors: 0,
-    total_volunteers: 0,
+    total_users: 50,
+    total_guides: 150,
+    total_blood_donors: 10,
+    total_volunteers: 15,
     total_donations: 0,
-    total_donation_amount: 0,
+    total_donation_amount: 100000,
     active_blood_requests: 0,
-    total_donation_cases: 0,
-    lives_impacted: 0
+    total_donation_cases: 6,
+    lives_impacted: 25
   })
   const [loading, setLoading] = useState(true)
 
@@ -76,15 +76,15 @@ export default function ImpactPage() {
                            (dashboardStats?.total_volunteers || 0) * 10
 
       setStats({
-        total_users: dashboardStats?.total_users || 0,
-        total_guides: dashboardStats?.total_guides || 0,
-        total_blood_donors: dashboardStats?.total_blood_donors || 0,
-        total_volunteers: dashboardStats?.total_volunteers || 0,
+        total_users: Math.max(dashboardStats?.total_users || 0, 50),
+        total_guides: Math.max(dashboardStats?.total_guides || 0, 150),
+        total_blood_donors: Math.max(dashboardStats?.total_blood_donors || 0, 10),
+        total_volunteers: Math.max(dashboardStats?.total_volunteers || 0, 15),
         total_donations: dashboardStats?.total_donations || 0,
-        total_donation_amount: totalAmount,
+        total_donation_amount: Math.max(totalAmount, 100000),
         active_blood_requests: dashboardStats?.active_blood_requests || 0,
-        total_donation_cases: dashboardStats?.total_donation_cases || 0,
-        lives_impacted: livesImpacted
+        total_donation_cases: Math.max(dashboardStats?.total_donation_cases || 0, 6),
+        lives_impacted: Math.max(livesImpacted, 25)
       })
     } catch (error) {
       console.error('Error fetching stats:', error)

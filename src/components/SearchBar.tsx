@@ -91,7 +91,7 @@ export default function SearchBar({
           onFocus={() => setShowSuggestions(true)}
           onKeyDown={(e) => e.key === 'Enter' && handleSearch(query)}
           placeholder={placeholder}
-          className={`w-full ${sizeClasses[size]} pl-12 pr-4 bg-background border-2 border-input rounded-xl focus:border-primary focus:ring-4 focus:ring-primary/10 outline-none transition-all ${size === 'lg' ? 'shadow-xl' : 'shadow-md'}`}
+          className={`w-full ${sizeClasses[size]} pl-12 pr-4 bg-background text-black border-2 border-input rounded-xl focus:border-primary focus:ring-4 focus:ring-primary/10 outline-none transition-all ${size === 'lg' ? 'shadow-xl' : 'shadow-md'}`}
         />
         <button
           onClick={() => handleSearch(query)}
@@ -105,7 +105,7 @@ export default function SearchBar({
 
       {/* Suggestions Dropdown */}
       {showSuggestions && filteredSuggestions.length > 0 && (
-        <div className="absolute top-full left-0 right-0 mt-2 bg-popover rounded-xl shadow-2xl border border-border overflow-hidden z-[100] animate-in fade-in slide-in-from-top-2">
+        <div className="absolute top-full left-0 right-0 mt-2 bg-popover rounded-xl shadow-2xl border border-border overflow-hidden z-[9999] animate-in fade-in slide-in-from-top-2">
           <div className="p-2">
             {query.length === 0 && (
               <p className="px-3 py-2 text-xs font-semibold text-muted-foreground uppercase">Popular Searches</p>

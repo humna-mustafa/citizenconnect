@@ -172,6 +172,14 @@ export default function VolunteersPage() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
+    
+    // Validate phone
+    const phoneRegex = /^(\+92|0)?3[0-9]{9}$/
+    if (!phoneRegex.test(formData.phone.replace(/\s/g, ''))) {
+      toast.error('Please enter valid Pakistani phone number (03XX-XXXXXXX)')
+      return
+    }
+
     setSubmitting(true)
     
     try {

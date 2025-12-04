@@ -1,0 +1,445 @@
+================================================================================
+CITIZENCONNECT - COMPLETE BUG FIX & ENHANCEMENT PROMPT
+================================================================================
+
+PROJECT: CitizenConnect (Next.js/React website)
+URL: https://citizenconnect-rho.vercel.app/
+TASK: Fix all bugs and implement missing features
+
+================================================================================
+PART 1: CREATE MISSING PAGES (Currently showing 404 Error)
+================================================================================
+
+--------------------------------------------------------------------------------
+PAGE 1: Blood Request Form
+--------------------------------------------------------------------------------
+FILE TO CREATE: /app/blood-bank/request/page.tsx (or .jsx)
+URL PATH: /blood-bank/request
+CURRENT STATUS: 404 Error - Page does not exist
+
+CREATE A FORM WITH THESE FIELDS:
+1. Patient Name - text input, required
+2. Patient Age - number input, required, minimum 1
+3. Blood Group Needed - dropdown with options: A+, A-, B+, B-, AB+, AB-, O+, O-
+4. Units Required - number input, required, minimum 1, maximum 10
+5. Hospital Name - text input, required
+6. Hospital Address - text input, required
+7. City - dropdown with Pakistani cities
+8. Contact Person Name - text input, required
+9. Contact Phone - text input, required, validate Pakistani format (03XX-XXXXXXX)
+10. Urgency Level - radio buttons: Critical, Urgent, Normal
+11. Additional Notes - textarea, optional
+12. Required By Date - date picker, minimum date is today
+
+ON FORM SUBMIT:
+- Show success popup: "Blood request posted successfully! Matching donors will be notified."
+- Redirect user to /blood-bank page
+- Save data to database
+
+STYLING: Match existing website design, use same colors and components
+
+--------------------------------------------------------------------------------
+PAGE 2: Create Campaign Form
+--------------------------------------------------------------------------------
+FILE TO CREATE: /app/donations/create/page.tsx (or .jsx)
+URL PATH: /donations/create
+CURRENT STATUS: 404 Error - Page does not exist
+
+CREATE A FORM WITH THESE FIELDS:
+1. Campaign Title - text input, required, max 100 characters
+2. Category - dropdown: Medical, Education, Flood Relief, Food & Ration, Orphanage, Shelter
+3. Beneficiary Name - text input, required
+4. Beneficiary CNIC - text input, optional, validate format (XXXXX-XXXXXXX-X)
+5. Target Amount - number input, required, minimum 1000, maximum 10000000
+6. Campaign Description - textarea, required, minimum 100 characters
+7. Why This Campaign Matters - textarea, required
+8. Upload Supporting Documents - file upload, accept images and PDFs, required
+9. Bank Account Title - text input, required
+10. Bank Name - text input, required
+11. Account Number / IBAN - text input, required
+12. JazzCash/Easypaisa Number - text input, optional
+13. Campaign Duration - dropdown: 15 days, 30 days, 60 days, 90 days
+14. Contact Email - email input, required
+15. Contact Phone - text input, required
+
+ON FORM SUBMIT:
+- Show popup: "Campaign submitted for review. Our team will verify and publish within 24-48 hours."
+- Set campaign status to "Pending Approval"
+- Save to database
+
+--------------------------------------------------------------------------------
+PAGE 3: Submit Guide Form
+--------------------------------------------------------------------------------
+FILE TO FIX: /app/guides/submit/page.tsx (or .jsx)
+URL PATH: /guides/submit
+CURRENT STATUS: WRONG - Redirects to /guides/cnic-application (should show form)
+
+FIX: Remove redirect. Create a proper form page instead.
+
+CREATE A FORM WITH THESE FIELDS:
+1. Guide Title - text input, required, max 100 characters
+2. Category - dropdown: Roads & Transport, Sewerage & Water, Electricity & Gas, Health, Education, Social Causes, Legal, Government Services
+3. Subcategory - text input, optional
+4. Brief Description - textarea, required, max 200 characters
+5. Detailed Steps - repeatable section:
+   - Step Number (auto-increment)
+   - Step Title - text input
+   - Step Description - textarea
+   - Button: "Add Another Step"
+6. Documents Required - textarea
+7. Estimated Time - text input, required
+8. Estimated Cost - text input, required
+9. Helpful Links - repeatable text inputs, optional
+10. Pro Tips - textarea, optional
+11. Your Name - text input, required
+12. Your Email - email input, required
+13. Your City - dropdown, required
+14. Your Experience - textarea
+
+ON FORM SUBMIT:
+- Show popup: "Thank you for contributing! Your guide will be reviewed and published soon."
+- Save to database with status "Pending Review"
+
+================================================================================
+PART 2: HOMEPAGE FIXES
+================================================================================
+
+--------------------------------------------------------------------------------
+FIX 2.1: Hero Section Right Side - Replace Box Images
+--------------------------------------------------------------------------------
+FILE LOCATION: Homepage component (likely /app/page.tsx or /components/Hero.tsx)
+SECTION: Right side of hero, currently shows tilted box images
+
+CURRENT PROBLEM: 
+There are static tilted box images showing "Issue Resolved!", "Blood Donor Found", "PKR 50,000"
+These look unprofessional.
+
+FIX:
+Replace these static images with a professional 3D Lottie animation.
+Use a community/civic engagement themed animation.
+Or create animated glassmorphism cards with smooth CSS animations.
+
+--------------------------------------------------------------------------------
+FIX 2.2: Hero Section Text
+--------------------------------------------------------------------------------
+FILE LOCATION: Homepage hero section
+
+FIND AND REPLACE TEXT:
+
+CURRENT TEXT TO REMOVE:
+- Any badge saying "Your Complete Guide to Civic Services"
+- Remove subtitle "Your Complete Guide to Civic Services in Pakistan"
+
+REPLACE WITH:
+Headline: "Empowering Pakistani Citizens"
+Subheadline: "Everything you need to make a difference. Access step-by-step guides, connect with blood donors, find emergency help, and support verified campaigns. Let's build a stronger Pakistan together."
+
+STYLING:
+- Headline: font-size 48-56px, font-weight bold, color white
+- Subheadline: font-size 18-20px, font-weight normal, color light gray (#9CA3AF)
+
+--------------------------------------------------------------------------------
+FIX 2.3: Cities Section Alignment
+--------------------------------------------------------------------------------
+FILE LOCATION: Homepage, "Trusted by citizens across Pakistan" section
+CITIES: Karachi, Lahore, Islamabad, Peshawar, Quetta, Multan
+
+CURRENT PROBLEM: City cards have spacing and alignment issues
+
+FIX CSS:
+- Each city card: background white, padding 16px 24px, border-radius 12px
+- Box shadow: 0 2px 8px rgba(0,0,0,0.1)
+- Gap between cards: 16px
+- Center align the entire row
+- Add hover effect: transform scale(1.05), transition 0.3s
+
+--------------------------------------------------------------------------------
+FIX 2.4: Search Input Text Color
+--------------------------------------------------------------------------------
+FILE LOCATION: Search component on Guides/Issues page
+URL: /guides
+
+CURRENT PROBLEM: When user types in search box, the text is transparent/invisible
+
+FIX:
+Find the search input element and add: color: #000000 (black)
+If using Tailwind CSS, add class: text-black
+
+The placeholder text can stay light gray, but typed text MUST be black.
+
+--------------------------------------------------------------------------------
+FIX 2.5: Search Dropdown Z-Index
+--------------------------------------------------------------------------------
+FILE LOCATION: Homepage search bar dropdown
+
+CURRENT PROBLEM: Search dropdown appears BEHIND the action buttons
+
+FIX CSS:
+- Search container: position relative
+- Search dropdown: position absolute, z-index 9999
+- Ensure dropdown appears ABOVE all other elements
+
+--------------------------------------------------------------------------------
+FIX 2.6: Statistics Showing Zero
+--------------------------------------------------------------------------------
+FILE LOCATION: Homepage "Making a Difference Together" section
+
+CURRENT PROBLEM: All statistics show "0"
+
+FIND AND REPLACE:
+- "0+ Issue Guides" ? "150+ Issue Guides"
+- "0+ Blood Donors" ? "10+ Blood Donors"
+- "0+ Active Volunteers" ? "15+ Active Volunteers"
+- "PKR 0 Donations Raised" ? "PKR 100,000+ Donations Raised"
+
+================================================================================
+PART 3: FIX STATISTICS ON ALL PAGES (Use Same Values Everywhere)
+================================================================================
+
+APPLY THESE EXACT VALUES ON ALL PAGES:
+
+| Statistic        | Value to Show           |
+|------------------|-------------------------|
+| Issue Guides     | 150+                    |
+| Blood Donors     | 10+                     |
+| Active Volunteers| 15+                     |
+| Donations Raised | PKR 100,000+            |
+| Lives Impacted   | 25+                     |
+| Registered Users | 50+                     |
+| Campaigns        | 6+                      |
+
+PAGES TO UPDATE:
+1. Homepage (/page.tsx)
+2. Impact Page (/impact/page.tsx) - currently shows "..."
+3. About Page (/about/page.tsx)
+4. Guides Page (/guides/page.tsx)
+5. Blood Bank Page (/blood-bank/page.tsx)
+6. Donations Page (/donations/page.tsx)
+7. Volunteers Page (/volunteers/page.tsx)
+
+IMPORTANT RULES:
+- Never show "0" or "..." or empty values
+- Use format "150+" not "150K+"
+- Use format "PKR 100,000+" not "PKR 100K+"
+
+================================================================================
+PART 4: FORM VALIDATION & ERROR HANDLING
+================================================================================
+
+ADD TO ALL FORMS:
+
+VALIDATION MESSAGES:
+- Empty required field: "This field is required"
+- Invalid email: "Please enter a valid email address"
+- Invalid phone: "Please enter valid Pakistani phone number (03XX-XXXXXXX)"
+- Invalid CNIC: "Please enter valid CNIC (XXXXX-XXXXXXX-X)"
+- File too large: "File size must be under 5MB"
+- Text too short: "Minimum X characters required"
+- Text too long: "Maximum X characters allowed"
+
+LOADING STATES:
+- Form submit button: Show spinner and text "Submitting..." while processing
+- Disable button during submission to prevent double-submit
+
+ERROR HANDLING:
+- Network error: Show "Connection failed. Please check your internet and try again."
+- Server error: Show "Something went wrong. Please try again later."
+
+================================================================================
+PART 5: CREATE 150+ GUIDES
+================================================================================
+
+Create guides with UNIQUE, ACCURATE Pakistani-specific content.
+Each guide needs: Title, Description, Steps, Documents Required, Time, Cost, Tips
+
+CATEGORY 1: ROADS & TRANSPORT (25 guides)
+1. How to Report Pothole to City Authority
+2. Traffic Challan Payment Online Punjab
+3. Traffic Challan Payment Online Sindh
+4. Driving License Application New
+5. Driving License Renewal
+6. International Driving Permit
+7. Vehicle Registration New Car
+8. Vehicle Registration Transfer
+9. Vehicle Token Tax Payment
+10. Motorway Helpline Usage
+11. Metro Bus Card Lahore
+12. Metro Bus Card Islamabad
+13. Orange Line Train Lahore
+14. Public Transport Complaint
+15. Road Damage Report
+16. Traffic Signal Fault Report
+17. Parking Challan Appeal
+18. Vehicle Fitness Certificate
+19. Route Permit Application
+20. Heavy Vehicle License
+21. PSV Badge Application
+22. Careem Uber Driver Registration
+23. E-Bike Registration
+24. Vehicle Auction Participation
+25. Hit and Run Report
+
+CATEGORY 2: SEWERAGE & WATER (20 guides)
+1. WASA New Connection Lahore
+2. WASA New Connection Faisalabad
+3. WASA Complaint Registration
+4. Water Supply Disruption Report
+5. Sewerage Blockage Complaint
+6. Water Bill Payment Online
+7. Water Meter Installation
+8. Water Tanker Request
+9. Boring Tubewell Permission
+10. Water Quality Test Request
+11. PHED Complaint Punjab
+12. KWSB Complaint Karachi
+13. Illegal Water Connection Report
+14. Water Theft Report
+15. Rainwater Drainage Issue
+16. Flood Damage Report
+17. Water Conservation Tips
+18. Sewerage Line Extension Request
+19. Industrial Water Connection
+20. Agricultural Tubewell License
+
+CATEGORY 3: ELECTRICITY & GAS (25 guides)
+1. LESCO New Connection
+2. MEPCO New Connection
+3. FESCO New Connection
+4. K-Electric New Connection
+5. IESCO New Connection
+6. Electricity Bill Payment Online
+7. Load Shedding Complaint
+8. Transformer Fault Report
+9. Electricity Theft Report
+10. Meter Change Request
+11. Net Metering Application Solar
+12. SNGPL Gas New Connection
+13. SSGC Gas New Connection
+14. Gas Bill Payment Online
+15. Gas Leakage Report
+16. Gas Load Extension
+17. Duplicate Bill Request
+18. Meter Reading Dispute
+19. Power Outage Report
+20. Street Light Fault Report
+21. Industrial Power Connection
+22. Commercial Gas Connection
+23. Gas Geyser Installation Rules
+24. Electricity Subsidy Application
+25. Green Meter Installation
+
+CATEGORY 4: HEALTH (25 guides)
+1. Sehat Card Registration Punjab
+2. Sehat Card Registration KPK
+3. Sehat Card Hospital List
+4. Government Hospital Admission
+5. PIMS Appointment Booking
+6. Jinnah Hospital Services
+7. Free Medicine from Government
+8. Vaccination Schedule Children
+9. COVID Vaccination Certificate
+10. Birth Certificate from Hospital
+11. Death Certificate Process
+12. Disability Certificate
+13. Mental Health Helpline
+14. Emergency Room Guide
+15. Blood Donation Process
+16. Organ Donation Registration
+17. TB Treatment Free
+18. Hepatitis Treatment Program
+19. Cancer Treatment Assistance
+20. Medical Emergency Helplines
+21. Ambulance Services Guide
+22. Pharmacy License
+23. Medical Store Complaint
+24. Food Safety Complaint
+25. Drug Price Complaint
+
+CATEGORY 5: EDUCATION (25 guides)
+1. School Admission Government
+2. College Admission Process
+3. University Admission Public
+4. HEC Degree Attestation
+5. HEC Equivalence Certificate
+6. Education Board Registration
+7. Matric Result Card Duplicate
+8. Inter Result Card Duplicate
+9. Migration Certificate
+10. Character Certificate
+11. Scholarship Application Punjab
+12. Scholarship Application HEC
+13. PEEF Scholarship
+14. Ehsaas Undergraduate Scholarship
+15. Student Loan Application
+16. Private School Complaint
+17. Teacher Complaint Process
+18. School Fee Dispute
+19. Board Exam Date Sheet
+20. Supplementary Exam Application
+21. Hopeless Certificate Application
+22. Sports Certificate
+23. Library Card Application
+24. Hostel Admission
+25. Fee Concession Application
+
+CATEGORY 6: GOVERNMENT SERVICES (20 guides)
+1. CNIC Application New
+2. CNIC Renewal
+3. CNIC Modification
+4. NICOP Application
+5. Passport Application New
+6. Passport Renewal
+7. Urgent Passport Process
+8. Police Character Certificate
+9. Domicile Certificate
+10. Birth Certificate NADRA
+11. Death Certificate NADRA
+12. Marriage Certificate NADRA
+13. FIR Registration Process
+14. Complaint to Ombudsman
+15. RTI Application
+16. Property Tax Payment
+17. Property Registration
+18. Arms License Application
+19. Government Job Application
+20. Pensioner Verification
+
+CATEGORY 7: LEGAL (15 guides)
+1. Filing Court Case
+2. Free Legal Aid Lawyer
+3. Consumer Court Complaint
+4. Cyber Crime Report FIA
+5. Property Dispute Resolution
+6. Family Court Guide
+7. Bail Application Process
+8. Affidavit Creation
+9. Power of Attorney
+10. Will Registration
+11. Legal Notice Sending
+12. Small Claims Court
+13. Labor Court Complaint
+14. Rent Dispute Resolution
+15. Cheque Bounce Case
+
+CATEGORY 8: SOCIAL CAUSES (15 guides)
+1. Zakat Distribution Application
+2. Ehsaas Program Registration
+3. BISP Registration
+4. Orphanage Volunteering
+5. Food Bank Registration
+6. Old Age Home Support
+7. Disability Support Programs
+8. Widow Support Application
+9. Flood Relief Volunteering
+10. Community Cleanup Organization
+11. Tree Plantation Drive
+12. Blood Camp Organization
+13. Free Medical Camp Setup
+14. Charity Registration
+15. NGO Registration Pakistan
+
+TOTAL: 170 GUIDES
+
+================================================================================
+END OF PROMPT
+================================================================================

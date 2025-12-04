@@ -13,10 +13,10 @@ interface StatsData {
 
 // Default fallback values
 const DEFAULT_STATS: StatsData = {
-  totalGuides: 25,
+  totalGuides: 150,
   totalDonors: 10,
   totalVolunteers: 15,
-  totalDonations: 150000
+  totalDonations: 100000
 }
 
 export default function StatsSection() {
