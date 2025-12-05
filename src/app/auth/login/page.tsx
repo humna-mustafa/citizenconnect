@@ -18,23 +18,23 @@ export default function LoginPage() {
     <div className="min-h-screen flex items-center justify-center bg-slate-50 py-12 px-4 relative overflow-hidden">
       {/* Background Elements */}
       <div className="absolute inset-0 z-0">
-        <div className="absolute top-0 left-0 w-full h-96 bg-gradient-to-b from-emerald-900 to-slate-900"></div>
-        <div className="absolute top-20 right-20 w-72 h-72 bg-emerald-500 rounded-full blur-3xl opacity-20 animate-pulse"></div>
-        <div className="absolute top-40 left-20 w-60 h-60 bg-teal-500 rounded-full blur-3xl opacity-20 animate-pulse delay-700"></div>
+        <div className="absolute top-0 left-0 w-full h-96 bg-gradient-to-b from-emerald-50 via-white to-teal-50"></div>
+        <div className="absolute top-20 right-20 w-72 h-72 bg-emerald-200 rounded-full blur-3xl opacity-30 animate-pulse"></div>
+        <div className="absolute top-40 left-20 w-60 h-60 bg-teal-200 rounded-full blur-3xl opacity-30 animate-pulse delay-700"></div>
       </div>
 
       <div className="w-full max-w-md relative z-10">
         {/* Logo */}
         <div className="text-center mb-8">
           <Link href="/" className="inline-flex items-center gap-3 group">
-            <div className="w-12 h-12 bg-gradient-to-br from-emerald-500 to-teal-600 rounded-xl flex items-center justify-center shadow-lg shadow-emerald-900/20 group-hover:scale-105 transition-transform">
+            <div className="w-12 h-12 bg-gradient-to-br from-emerald-500 to-teal-600 rounded-xl flex items-center justify-center shadow-lg shadow-emerald-600/20 group-hover:scale-105 transition-transform">
               <svg className="w-7 h-7 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
               </svg>
             </div>
             <div className="text-left">
-              <h1 className="text-2xl font-bold text-white">CitizenConnect</h1>
-              <p className="text-sm text-emerald-200">Empowering Communities</p>
+              <h1 className="text-2xl font-bold text-gray-900">CitizenConnect</h1>
+              <p className="text-sm text-emerald-600">Empowering Communities</p>
             </div>
           </Link>
         </div>

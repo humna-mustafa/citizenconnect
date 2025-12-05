@@ -264,21 +264,21 @@ export default function EmergencyPage() {
   return (
     <div className="min-h-screen bg-slate-50">
       {/* Hero Section */}
-      <section className="bg-gradient-to-br from-slate-900 to-slate-800 py-20 relative overflow-hidden">
-        <div className="absolute inset-0 opacity-20">
+      <section className="bg-gradient-to-br from-red-50 via-orange-50 to-amber-50 py-20 relative overflow-hidden">
+        <div className="absolute inset-0 opacity-30">
           <div className="absolute top-10 right-10 w-64 h-64 bg-red-500 rounded-full blur-3xl animate-pulse"></div>
           <div className="absolute bottom-10 left-10 w-80 h-80 bg-orange-500 rounded-full blur-3xl animate-pulse delay-500"></div>
         </div>
         <div className="container mx-auto px-4 relative z-10">
-          <div className="max-w-3xl mx-auto text-center text-white">
-            <div className="inline-flex items-center gap-2 px-4 py-2 bg-red-500/20 rounded-full text-sm font-medium mb-6 backdrop-blur-sm border border-red-500/30 animate-pulse">
+          <div className="max-w-3xl mx-auto text-center">
+            <div className="inline-flex items-center gap-2 px-4 py-2 bg-red-100 rounded-full text-sm font-medium mb-6 border border-red-200 animate-pulse">
               <div className="w-2 h-2 bg-red-500 rounded-full"></div>
-              <span className="text-red-100">24/7 Emergency Support</span>
+              <span className="text-red-700">24/7 Emergency Support</span>
             </div>
-            <h1 className="text-4xl md:text-5xl font-bold mb-6 leading-tight">
+            <h1 className="text-4xl md:text-5xl font-bold mb-6 leading-tight text-gray-900">
               Emergency Help Center
             </h1>
-            <p className="text-xl text-slate-300 mb-10 leading-relaxed">
+            <p className="text-xl text-gray-600 mb-10 leading-relaxed">
               Quick access to emergency contacts, step-by-step guides, and essential checklists when you need them most.
             </p>
           </div>

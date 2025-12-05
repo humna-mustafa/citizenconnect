@@ -113,27 +113,27 @@ export default function BloodBankRegisterPage() {
   return (
     <div className="min-h-screen bg-slate-50">
       {/* Hero */}
-      <section className="relative py-16 overflow-hidden bg-gradient-to-br from-red-900 to-slate-900">
-        <div className="absolute inset-0 opacity-20">
-          <div className="absolute top-20 right-20 w-72 h-72 bg-red-500 rounded-full blur-3xl animate-pulse"></div>
+      <section className="relative py-16 overflow-hidden bg-gradient-to-br from-red-50 via-pink-50 to-rose-50">
+        <div className="absolute inset-0 opacity-30">
+          <div className="absolute top-20 right-20 w-72 h-72 bg-red-200 rounded-full blur-3xl animate-pulse"></div>
         </div>
         <div className="container mx-auto px-4 relative z-10">
           <Link
             href="/blood-bank"
-            className="inline-flex items-center gap-2 text-white/80 hover:text-white mb-6 transition-colors"
+            className="inline-flex items-center gap-2 text-gray-600 hover:text-gray-900 mb-6 transition-colors"
           >
             <ArrowLeft className="w-4 h-4" />
             Back to Blood Bank
           </Link>
           <div className="max-w-2xl">
-            <div className="inline-flex items-center gap-2 px-4 py-2 bg-white/10 rounded-full text-sm font-semibold mb-6 backdrop-blur-md border border-white/20">
-              <Heart className="w-4 h-4 text-red-400 animate-pulse" />
-              <span className="text-red-100">Save Lives</span>
+            <div className="inline-flex items-center gap-2 px-4 py-2 bg-red-100 rounded-full text-sm font-semibold mb-6 border border-red-200">
+              <Heart className="w-4 h-4 text-red-600 animate-pulse" />
+              <span className="text-red-700">Save Lives</span>
             </div>
-            <h1 className="text-4xl md:text-5xl font-bold text-white mb-4">
+            <h1 className="text-4xl md:text-5xl font-bold text-gray-900 mb-4">
               Register as Blood Donor
             </h1>
-            <p className="text-xl text-slate-300">
+            <p className="text-xl text-gray-600">
               Join our network of life-savers. Your blood donation can save up to 3 lives.
             </p>
           </div>

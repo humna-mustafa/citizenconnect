@@ -152,22 +152,22 @@ export default function ImpactPage() {
       </section>
 
       {/* Hero Section */}
-      <section className="relative py-20 overflow-hidden bg-gradient-to-br from-slate-900 via-emerald-900 to-slate-900">
-        <div className="absolute inset-0 bg-[url('/grid.svg')] opacity-10"></div>
+      <section className="relative py-20 overflow-hidden bg-gradient-to-br from-emerald-50 via-white to-teal-50">
+        <div className="absolute inset-0 bg-[url('/grid.svg')] opacity-5"></div>
         <div className="absolute inset-0">
-          <div className="absolute top-20 left-20 w-72 h-72 bg-emerald-500/20 rounded-full blur-3xl"></div>
-          <div className="absolute bottom-20 right-20 w-96 h-96 bg-teal-500/20 rounded-full blur-3xl"></div>
+          <div className="absolute top-20 left-20 w-72 h-72 bg-emerald-500/10 rounded-full blur-3xl"></div>
+          <div className="absolute bottom-20 right-20 w-96 h-96 bg-teal-500/10 rounded-full blur-3xl"></div>
         </div>
         <div className="container mx-auto px-4 relative z-10">
-          <div className="max-w-4xl mx-auto text-center text-white">
-            <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-white/10 backdrop-blur-sm text-emerald-300 font-medium text-sm mb-6 border border-white/10">
+          <div className="max-w-4xl mx-auto text-center">
+            <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-emerald-100 text-emerald-700 font-medium text-sm mb-6 border border-emerald-200">
               <Activity className="w-4 h-4" />
               Real-Time Impact Dashboard
             </div>
-            <h1 className="text-4xl md:text-6xl font-bold mb-6 tracking-tight">
-              Measuring Our <span className="text-emerald-400">Impact</span>
+            <h1 className="text-4xl md:text-6xl font-bold mb-6 tracking-tight text-gray-900">
+              Measuring Our <span className="text-emerald-600">Impact</span>
             </h1>
-            <p className="text-xl text-slate-300 leading-relaxed max-w-2xl mx-auto">
+            <p className="text-xl text-gray-600 leading-relaxed max-w-2xl mx-auto">
               Every action on CitizenConnect creates ripples of positive change. 
               Here's how our community is making a difference in Pakistan.
             </p>
@@ -299,11 +299,11 @@ export default function ImpactPage() {
       </section>
 
       {/* Real Stories Section */}
-      <section className="py-20 bg-slate-900 text-white">
+      <section className="py-20 bg-gradient-to-br from-gray-50 to-emerald-50">
         <div className="container mx-auto px-4">
           <div className="text-center max-w-2xl mx-auto mb-16">
-            <h2 className="text-3xl font-bold mb-4">Real Impact Stories</h2>
-            <p className="text-slate-400">
+            <h2 className="text-3xl font-bold mb-4 text-gray-900">Real Impact Stories</h2>
+            <p className="text-gray-600">
               Behind every statistic is a real person whose life was touched by our community.
             </p>
           </div>
@@ -329,18 +329,18 @@ export default function ImpactPage() {
                 category: "Donations"
               }
             ].map((story, index) => (
-              <div key={index} className="bg-slate-800/50 backdrop-blur-sm rounded-2xl p-8 border border-slate-700">
-                <div className="text-emerald-400 mb-4">❝</div>
-                <p className="text-slate-300 mb-6 leading-relaxed">{story.quote}</p>
+              <div key={index} className="bg-white rounded-2xl p-8 border border-gray-200 shadow-lg hover:shadow-xl transition-shadow">
+                <div className="text-emerald-500 mb-4 text-3xl">❝</div>
+                <p className="text-gray-600 mb-6 leading-relaxed">{story.quote}</p>
                 <div className="flex items-center justify-between">
                   <div>
-                    <p className="font-bold text-white">{story.name}</p>
-                    <div className="flex items-center gap-1 text-sm text-slate-500">
+                    <p className="font-bold text-gray-900">{story.name}</p>
+                    <div className="flex items-center gap-1 text-sm text-gray-500">
                       <MapPin className="w-3 h-3" />
                       {story.location}
                     </div>
                   </div>
-                  <span className="px-3 py-1 bg-emerald-500/20 text-emerald-400 rounded-full text-xs font-medium">
+                  <span className="px-3 py-1 bg-emerald-100 text-emerald-700 rounded-full text-xs font-medium">
                     {story.category}
                   </span>
                 </div>
@@ -351,16 +351,16 @@ export default function ImpactPage() {
       </section>
 
       {/* Project Context */}
-      <section className="py-20 bg-gradient-to-br from-emerald-50 to-teal-50 dark:from-emerald-950/30 dark:to-teal-950/30">
+      <section className="py-20 bg-gradient-to-br from-emerald-50 to-teal-50">
         <div className="container mx-auto px-4">
           <div className="max-w-4xl mx-auto">
-            <div className="bg-white dark:bg-slate-900 rounded-3xl p-8 md:p-12 shadow-xl border border-emerald-100 dark:border-emerald-900">
+            <div className="bg-white rounded-3xl p-8 md:p-12 shadow-xl border border-emerald-100">
               <div className="text-center mb-8">
-                <div className="w-20 h-20 bg-emerald-100 dark:bg-emerald-900/50 rounded-full flex items-center justify-center mx-auto mb-6">
+                <div className="w-20 h-20 bg-emerald-100 rounded-full flex items-center justify-center mx-auto mb-6">
                   <GraduationCap className="w-10 h-10 text-emerald-600" />
                 </div>
-                <h2 className="text-3xl font-bold text-foreground mb-4">Academic Context</h2>
-                <p className="text-muted-foreground max-w-2xl mx-auto">
+                <h2 className="text-3xl font-bold text-gray-900 mb-4">Academic Context</h2>
+                <p className="text-gray-600 max-w-2xl mx-auto">
                   This project demonstrates how technology can drive meaningful social impact 
                   while fulfilling academic requirements for civic education.
                 </p>

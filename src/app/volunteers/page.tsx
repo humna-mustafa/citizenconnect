@@ -263,35 +263,35 @@ export default function VolunteersPage() {
   return (
     <div className="min-h-screen bg-slate-50">
       {/* Hero Section */}
-      <section className="bg-gradient-to-br from-emerald-900 to-slate-900 py-20 relative overflow-hidden">
-        <div className="absolute inset-0 opacity-10">
-          <div className="absolute top-10 right-10 w-64 h-64 bg-emerald-500 rounded-full blur-3xl animate-pulse"></div>
-          <div className="absolute bottom-10 left-20 w-80 h-80 bg-emerald-400 rounded-full blur-3xl animate-pulse delay-700"></div>
+      <section className="bg-gradient-to-br from-emerald-50 via-white to-teal-50 py-20 relative overflow-hidden">
+        <div className="absolute inset-0 opacity-30">
+          <div className="absolute top-10 right-10 w-64 h-64 bg-emerald-200 rounded-full blur-3xl animate-pulse"></div>
+          <div className="absolute bottom-10 left-20 w-80 h-80 bg-teal-200 rounded-full blur-3xl animate-pulse delay-700"></div>
         </div>
         <div className="container mx-auto px-4 relative z-10">
-          <div className="max-w-3xl mx-auto text-center text-white">
-            <div className="inline-flex items-center gap-2 px-4 py-2 bg-white/10 rounded-full text-sm font-medium mb-6 backdrop-blur-sm border border-white/10">
-              <Handshake className="w-4 h-4 text-emerald-400" />
-              <span>Join 15+ Active Volunteers</span>
+          <div className="max-w-3xl mx-auto text-center">
+            <div className="inline-flex items-center gap-2 px-4 py-2 bg-emerald-100 rounded-full text-sm font-medium mb-6 border border-emerald-200">
+              <Handshake className="w-4 h-4 text-emerald-600" />
+              <span className="text-emerald-700">Join 15+ Active Volunteers</span>
             </div>
-            <h1 className="text-4xl md:text-5xl font-bold mb-6 leading-tight">
+            <h1 className="text-4xl md:text-5xl font-bold mb-6 leading-tight text-gray-900">
               Volunteer Network
             </h1>
-            <p className="text-xl text-slate-300 mb-10 leading-relaxed">
+            <p className="text-xl text-gray-600 mb-10 leading-relaxed">
               Connect with volunteers or become one yourself. Make a difference in your community through your skills and time.
             </p>
             
             <div className="flex flex-wrap justify-center gap-4">
               <button
                 onClick={() => setShowRegistrationForm(true)}
-                className="px-8 py-4 bg-emerald-600 text-white font-bold rounded-xl hover:bg-emerald-500 transition-all shadow-lg shadow-emerald-900/20 flex items-center gap-2"
+                className="px-8 py-4 bg-emerald-600 text-white font-bold rounded-xl hover:bg-emerald-500 transition-all shadow-lg shadow-emerald-600/20 flex items-center gap-2"
               >
                 <Heart className="w-5 h-5" />
                 Become a Volunteer
               </button>
               <a
                 href="#find-volunteer"
-                className="px-8 py-4 bg-white/10 text-white font-bold rounded-xl hover:bg-white/20 transition-all backdrop-blur-sm border border-white/10 flex items-center gap-2"
+                className="px-8 py-4 bg-white text-gray-700 font-bold rounded-xl hover:bg-gray-50 transition-all border border-gray-200 flex items-center gap-2 shadow-sm"
               >
                 <Search className="w-5 h-5" />
                 Find Volunteers
