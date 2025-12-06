@@ -74,23 +74,23 @@ export default function PrivacyPage() {
   return (
     <div className="min-h-screen bg-slate-50">
       {/* Hero Section */}
-      <section className="relative py-20 overflow-hidden bg-gradient-to-br from-emerald-50 via-white to-teal-50">
-        <div className="absolute inset-0 opacity-20">
+      <section className="relative py-20 overflow-hidden bg-gradient-to-br from-slate-900 to-slate-800">
+        <div className="absolute inset-0 opacity-10">
           <div className="absolute top-0 left-0 w-full h-full bg-[url('https://www.transparenttextures.com/patterns/cubes.png')]"></div>
         </div>
         <div className="container mx-auto px-4 relative z-10">
-          <div className="max-w-3xl mx-auto text-center">
-            <div className="inline-flex items-center gap-2 px-4 py-2 bg-emerald-100 rounded-full text-sm font-semibold mb-8 border border-emerald-200">
-              <Shield className="w-4 h-4 text-emerald-600" />
-              <span className="text-emerald-700">Your Privacy Matters</span>
+          <div className="max-w-3xl mx-auto text-center text-white">
+            <div className="inline-flex items-center gap-2 px-4 py-2 bg-white/10 rounded-full text-sm font-semibold mb-8 backdrop-blur-md border border-white/20">
+              <Shield className="w-4 h-4 text-emerald-400" />
+              <span className="text-emerald-100">Your Privacy Matters</span>
             </div>
-            <h1 className="text-5xl md:text-6xl font-bold mb-6 tracking-tight text-gray-900">
+            <h1 className="text-5xl md:text-6xl font-bold mb-6 tracking-tight">
               Privacy Policy
             </h1>
-            <p className="text-xl text-gray-600 mb-4 leading-relaxed">
+            <p className="text-xl text-slate-300 mb-4 leading-relaxed">
               How we collect, use, and protect your information
             </p>
-            <p className="text-sm text-gray-500">
+            <p className="text-sm text-slate-400">
               Last updated: January 2025
             </p>
           </div>

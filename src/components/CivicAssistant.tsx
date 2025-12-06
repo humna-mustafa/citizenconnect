@@ -97,7 +97,6 @@ export default function CivicAssistant() {
         whileHover={{ scale: 1.1 }}
         whileTap={{ scale: 0.9 }}
         onClick={() => setIsOpen(true)}
-        aria-label="Open Civic Assistant chat"
         className={classNames(
           "fixed bottom-6 right-6 z-50 p-4 rounded-full shadow-2xl text-white transition-all duration-300",
           isOpen ? "scale-0 opacity-0" : "bg-gradient-to-r from-emerald-600 to-teal-600 scale-100 opacity-100"

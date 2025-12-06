@@ -236,20 +236,20 @@ export default function BloodBankPage() {
   return (
     <div className="min-h-screen bg-slate-50">
       {/* Hero Section */}
-      <section className="relative py-20 overflow-hidden bg-gradient-to-br from-red-50 via-pink-50 to-rose-50">
-        <div className="absolute inset-0 opacity-30">
+      <section className="relative py-20 overflow-hidden bg-gradient-to-br from-red-900 to-slate-900">
+        <div className="absolute inset-0 opacity-20">
           <div className="absolute top-0 left-0 w-full h-full bg-[url('https://www.transparenttextures.com/patterns/cubes.png')]"></div>
         </div>
-        <div className="absolute top-20 right-20 w-72 h-72 bg-red-200 rounded-full blur-3xl opacity-30 animate-pulse"></div>
-        <div className="absolute bottom-10 left-10 w-96 h-96 bg-pink-200 rounded-full blur-3xl opacity-20 animate-pulse delay-700"></div>
+        <div className="absolute top-20 right-20 w-72 h-72 bg-red-600 rounded-full blur-3xl opacity-20 animate-pulse"></div>
+        <div className="absolute bottom-10 left-10 w-96 h-96 bg-red-500 rounded-full blur-3xl opacity-10 animate-pulse delay-700"></div>
         
         <div className="container mx-auto px-4 relative z-10">
-          <div className="max-w-3xl mx-auto text-center">
-            <div className="w-24 h-24 bg-red-100 rounded-full flex items-center justify-center mx-auto mb-8 border border-red-200 shadow-xl shadow-red-200/50">
-              <Droplets className="w-12 h-12 text-red-600" />
+          <div className="max-w-3xl mx-auto text-center text-white">
+            <div className="w-24 h-24 bg-white/10 rounded-full flex items-center justify-center mx-auto mb-8 backdrop-blur-md border border-white/20 shadow-2xl shadow-red-900/50">
+              <Droplets className="w-12 h-12 text-red-400" />
             </div>
-            <h1 className="text-5xl md:text-6xl font-bold mb-6 tracking-tight text-gray-900">Blood Bank</h1>
-            <p className="text-xl text-gray-600 mb-10 leading-relaxed">
+            <h1 className="text-5xl md:text-6xl font-bold mb-6 tracking-tight">Blood Bank</h1>
+            <p className="text-xl text-red-100 mb-10 leading-relaxed">
               Find blood donors, request blood, or register as a donor. <br className="hidden md:block" />
               Every drop counts in saving a life.
             </p>
@@ -261,9 +261,9 @@ export default function BloodBankPage() {
                 { value: '25+', label: 'Lives Saved' },
                 { value: '24/7', label: 'Available' },
               ].map((stat, index) => (
-                <div key={index} className="bg-white/80 backdrop-blur-md rounded-2xl p-6 border border-red-100 hover:bg-white transition-all shadow-sm">
-                  <div className="text-3xl md:text-4xl font-bold text-red-600 mb-2">{stat.value}</div>
-                  <div className="text-sm text-gray-600 font-medium">{stat.label}</div>
+                <div key={index} className="bg-white/5 backdrop-blur-md rounded-2xl p-6 border border-white/10 hover:bg-white/10 transition-all">
+                  <div className="text-3xl md:text-4xl font-bold text-white mb-2">{stat.value}</div>
+                  <div className="text-sm text-red-200 font-medium">{stat.label}</div>
                 </div>
               ))}
             </div>

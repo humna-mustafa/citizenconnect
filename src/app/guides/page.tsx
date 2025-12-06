@@ -210,21 +210,21 @@ function GuidesPageContent() {
   return (
     <div className="min-h-screen bg-slate-50">
       {/* Hero Section */}
-      <section className="relative py-20 overflow-hidden bg-gradient-to-br from-emerald-50 via-white to-teal-50">
-        <div className="absolute inset-0 opacity-30">
+      <section className="relative py-20 overflow-hidden bg-gradient-to-br from-emerald-900 to-slate-900">
+        <div className="absolute inset-0 opacity-20">
           <div className="absolute top-0 left-0 w-full h-full bg-[url('https://www.transparenttextures.com/patterns/cubes.png')]"></div>
         </div>
-        <div className="absolute top-20 right-20 w-72 h-72 bg-emerald-500 rounded-full blur-3xl opacity-10 animate-pulse"></div>
-        <div className="absolute bottom-10 left-10 w-96 h-96 bg-teal-500 rounded-full blur-3xl opacity-5 animate-pulse delay-700"></div>
+        <div className="absolute top-20 right-20 w-72 h-72 bg-emerald-500 rounded-full blur-3xl opacity-20 animate-pulse"></div>
+        <div className="absolute bottom-10 left-10 w-96 h-96 bg-teal-500 rounded-full blur-3xl opacity-10 animate-pulse delay-700"></div>
         
         <div className="container mx-auto px-4 relative z-10">
-          <div className="max-w-3xl mx-auto text-center">
-            <div className="inline-flex items-center gap-2 px-4 py-2 bg-emerald-100 rounded-full text-sm font-semibold mb-8 border border-emerald-200 shadow-sm">
-              <BookOpen className="w-4 h-4 text-emerald-600" />
-              <span className="text-emerald-700">Knowledge Base</span>
+          <div className="max-w-3xl mx-auto text-center text-white">
+            <div className="inline-flex items-center gap-2 px-4 py-2 bg-white/10 rounded-full text-sm font-semibold mb-8 backdrop-blur-md border border-white/20 shadow-lg">
+              <BookOpen className="w-4 h-4 text-emerald-400" />
+              <span className="text-emerald-100">Knowledge Base</span>
             </div>
-            <h1 className="text-5xl md:text-6xl font-bold mb-6 tracking-tight text-gray-900">Issue Guides</h1>
-            <p className="text-xl text-gray-600 mb-10 leading-relaxed">
+            <h1 className="text-5xl md:text-6xl font-bold mb-6 tracking-tight">Issue Guides</h1>
+            <p className="text-xl text-emerald-100 mb-10 leading-relaxed">
               Find step-by-step solutions for civic issues. Search by category or keyword to get started.
             </p>
             <div className="max-w-2xl mx-auto">

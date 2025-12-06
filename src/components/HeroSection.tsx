@@ -4,13 +4,15 @@ import { ArrowRight, Heart, AlertTriangle, FileText, Users, Droplets, HandHeart 
 
 export default function HeroSection() {
   return (
-    <section className="relative min-h-[90vh] flex items-center overflow-hidden bg-gradient-to-br from-gray-50 via-white to-green-50">
+    <section className="relative min-h-[90vh] flex items-center overflow-hidden bg-gradient-to-br from-emerald-50 via-white to-teal-50">
       {/* Background Pattern */}
-      <div className="absolute inset-0 bg-[radial-gradient(circle_at_30%_20%,rgba(34,197,94,0.08),transparent_50%),radial-gradient(circle_at_70%_80%,rgba(59,130,246,0.06),transparent_50%)]" />
+      <div className="absolute inset-0 opacity-30">
+        <div className="absolute top-0 left-0 w-full h-full bg-[url('https://www.transparenttextures.com/patterns/cubes.png')]"></div>
+      </div>
       
       {/* Decorative Elements */}
-      <div className="absolute top-20 right-10 w-72 h-72 bg-green-500/10 rounded-full blur-3xl animate-pulse" />
-      <div className="absolute bottom-20 left-10 w-96 h-96 bg-blue-500/8 rounded-full blur-3xl animate-pulse delay-1000" />
+      <div className="absolute top-20 right-10 w-72 h-72 bg-emerald-200 rounded-full blur-3xl opacity-40 animate-pulse" />
+      <div className="absolute bottom-20 left-10 w-96 h-96 bg-teal-200 rounded-full blur-3xl opacity-30 animate-pulse delay-1000" />
       
       <div className="container mx-auto px-4 relative z-10">
         <div className="grid lg:grid-cols-2 gap-12 items-center">
@@ -35,14 +37,14 @@ export default function HeroSection() {
             <div className="flex flex-wrap gap-4 justify-center lg:justify-start animate-in fade-in slide-in-from-bottom-8 delay-400">
               <Link
                 href="/guides"
-                className="px-6 py-3 bg-green-600 text-white font-semibold rounded-xl shadow-lg shadow-green-600/20 hover:shadow-xl hover:shadow-green-600/30 transition-all hover:-translate-y-0.5 flex items-center gap-2"
+                className="px-6 py-3 bg-emerald-600 text-white font-semibold rounded-xl shadow-lg shadow-emerald-600/20 hover:shadow-xl hover:shadow-emerald-600/30 transition-all hover:-translate-y-0.5 flex items-center gap-2"
               >
                 <FileText className="w-5 h-5" />
                 Browse Guides
               </Link>
               <Link
                 href="/blood-bank"
-                className="px-6 py-3 bg-white text-gray-700 font-semibold rounded-xl border border-gray-200 shadow-sm hover:bg-gray-50 hover:border-gray-300 transition-all flex items-center gap-2"
+                className="px-6 py-3 bg-white text-gray-700 font-semibold rounded-xl border border-gray-200 hover:bg-gray-50 transition-all flex items-center gap-2 shadow-sm"
               >
                 <Heart className="w-5 h-5 text-red-500" />
                 Find Blood Donor
@@ -57,12 +59,12 @@ export default function HeroSection() {
             </div>
           </div>
 
-          {/* Right Content - Glassmorphism Cards */}
+          {/* Right Content - Cards */}
           <div className="hidden lg:block relative h-[600px] w-full animate-in fade-in slide-in-from-right-8 delay-500">
             {/* Card 1: Community Impact */}
-            <div className="absolute top-10 right-10 bg-white/80 backdrop-blur-md border border-gray-200 p-6 rounded-2xl shadow-xl w-72 transform hover:scale-105 transition-all duration-500 animate-float">
+            <div className="absolute top-10 right-10 bg-white border border-gray-100 p-6 rounded-2xl shadow-xl w-72 transform hover:scale-105 transition-all duration-500 animate-float">
               <div className="flex items-center gap-4 mb-4">
-                <div className="w-12 h-12 bg-green-100 rounded-xl flex items-center justify-center text-green-600">
+                <div className="w-12 h-12 bg-emerald-100 rounded-xl flex items-center justify-center text-emerald-600">
                   <Users className="w-6 h-6" />
                 </div>
                 <div>
@@ -72,14 +74,14 @@ export default function HeroSection() {
               </div>
               <div className="space-y-2">
                 <div className="h-2 bg-gray-100 rounded-full overflow-hidden">
-                  <div className="h-full bg-green-500 w-3/4"></div>
+                  <div className="h-full bg-emerald-500 w-3/4"></div>
                 </div>
                 <p className="text-xs text-gray-500 text-right">150+ Active Volunteers</p>
               </div>
             </div>
 
             {/* Card 2: Blood Bank */}
-            <div className="absolute top-40 left-10 bg-white/80 backdrop-blur-md border border-gray-200 p-6 rounded-2xl shadow-xl w-72 transform hover:scale-105 transition-all duration-500 animate-float delay-1000" style={{ animationDelay: '1s' }}>
+            <div className="absolute top-40 left-10 bg-white border border-gray-100 p-6 rounded-2xl shadow-xl w-72 transform hover:scale-105 transition-all duration-500 animate-float delay-1000" style={{ animationDelay: '1s' }}>
               <div className="flex items-center gap-4 mb-4">
                 <div className="w-12 h-12 bg-red-100 rounded-xl flex items-center justify-center text-red-500">
                   <Droplets className="w-6 h-6" />
@@ -100,9 +102,9 @@ export default function HeroSection() {
             </div>
 
             {/* Card 3: Donations */}
-            <div className="absolute bottom-20 right-20 bg-white/80 backdrop-blur-md border border-gray-200 p-6 rounded-2xl shadow-xl w-72 transform hover:scale-105 transition-all duration-500 animate-float delay-2000" style={{ animationDelay: '2s' }}>
+            <div className="absolute bottom-20 right-20 bg-white border border-gray-100 p-6 rounded-2xl shadow-xl w-72 transform hover:scale-105 transition-all duration-500 animate-float delay-2000" style={{ animationDelay: '2s' }}>
               <div className="flex items-center gap-4 mb-4">
-                <div className="w-12 h-12 bg-blue-100 rounded-xl flex items-center justify-center text-blue-600">
+                <div className="w-12 h-12 bg-blue-100 rounded-xl flex items-center justify-center text-blue-500">
                   <HandHeart className="w-6 h-6" />
                 </div>
                 <div>
@@ -111,7 +113,7 @@ export default function HeroSection() {
                 </div>
               </div>
               <div className="text-2xl font-bold text-gray-900 mb-1">PKR 100k+</div>
-              <p className="text-xs text-green-600">↑ Raised this month</p>
+              <p className="text-xs text-emerald-600">↑ Raised this month</p>
             </div>
           </div>
         </div>
@@ -125,9 +127,9 @@ export default function HeroSection() {
             {['Karachi', 'Lahore', 'Islamabad', 'Peshawar', 'Quetta', 'Multan'].map((city) => (
               <div 
                 key={city} 
-                className="w-full max-w-[160px] px-4 py-3 bg-white/80 backdrop-blur-sm border border-gray-200 rounded-xl text-center hover:bg-white hover:shadow-md transition-all duration-300 cursor-default group"
+                className="w-full max-w-[160px] px-4 py-3 bg-white border border-gray-200 rounded-xl text-center hover:bg-gray-50 transition-all duration-300 cursor-default group shadow-sm"
               >
-                <span className="text-lg font-semibold text-gray-700 group-hover:text-green-600 transition-colors">{city}</span>
+                <span className="text-lg font-semibold text-gray-700 group-hover:text-gray-900 transition-colors">{city}</span>
               </div>
             ))}
           </div>

@@ -223,35 +223,35 @@ export default function ProfilePage() {
   return (
     <div className="min-h-screen bg-slate-50">
       {/* Profile Header */}
-      <section className="bg-gradient-to-br from-emerald-50 via-white to-teal-50 py-16 relative overflow-hidden">
-        <div className="absolute inset-0 opacity-30">
-          <div className="absolute top-10 right-10 w-64 h-64 bg-emerald-200 rounded-full blur-3xl animate-pulse"></div>
-          <div className="absolute bottom-10 left-10 w-80 h-80 bg-teal-200 rounded-full blur-3xl animate-pulse delay-700"></div>
+      <section className="bg-gradient-to-br from-emerald-900 to-slate-900 py-16 relative overflow-hidden">
+        <div className="absolute inset-0 opacity-10">
+          <div className="absolute top-10 right-10 w-64 h-64 bg-emerald-500 rounded-full blur-3xl animate-pulse"></div>
+          <div className="absolute bottom-10 left-10 w-80 h-80 bg-teal-500 rounded-full blur-3xl animate-pulse delay-700"></div>
         </div>
         <div className="container mx-auto px-4 relative z-10">
           <div className="flex flex-col md:flex-row items-center gap-8">
             {/* Avatar */}
-            <div className="w-32 h-32 bg-emerald-600 rounded-3xl shadow-xl flex items-center justify-center text-5xl font-bold text-white ring-4 ring-emerald-200">
+            <div className="w-32 h-32 bg-white rounded-3xl shadow-xl flex items-center justify-center text-5xl font-bold text-emerald-600 ring-4 ring-white/20">
               {profile?.full_name?.split(' ').map(n => n[0]).join('').slice(0, 2) || user?.email?.[0].toUpperCase() || '?'}
             </div>
             
             {/* Info */}
-            <div className="text-center md:text-left flex-1">
-              <h1 className="text-3xl md:text-4xl font-bold mb-2 text-gray-900">
+            <div className="text-center md:text-left text-white flex-1">
+              <h1 className="text-3xl md:text-4xl font-bold mb-2">
                 {profile?.full_name || 'Welcome, User!'}
               </h1>
-              <p className="text-emerald-600 mb-4 font-medium">{user?.email}</p>
+              <p className="text-emerald-200 mb-4 font-medium">{user?.email}</p>
               <div className="flex flex-wrap justify-center md:justify-start gap-3">
-                <span className="px-4 py-1.5 bg-white rounded-full text-sm border border-gray-200 flex items-center gap-2 text-gray-700 shadow-sm">
-                  <MapPin className="w-4 h-4 text-emerald-600" />
+                <span className="px-4 py-1.5 bg-white/10 rounded-full text-sm backdrop-blur-sm border border-white/10 flex items-center gap-2">
+                  <MapPin className="w-4 h-4" />
                   {profile?.city || 'Pakistan'}
                 </span>
-                <span className="px-4 py-1.5 bg-white rounded-full text-sm border border-gray-200 flex items-center gap-2 capitalize text-gray-700 shadow-sm">
-                  <UserIcon className="w-4 h-4 text-emerald-600" />
+                <span className="px-4 py-1.5 bg-white/10 rounded-full text-sm backdrop-blur-sm border border-white/10 flex items-center gap-2 capitalize">
+                  <UserIcon className="w-4 h-4" />
                   {profile?.role || 'Citizen'}
                 </span>
                 {profile?.blood_group && (
-                  <span className="px-4 py-1.5 bg-red-50 rounded-full text-sm border border-red-200 flex items-center gap-2 text-red-700 shadow-sm">
+                  <span className="px-4 py-1.5 bg-red-500/20 rounded-full text-sm backdrop-blur-sm border border-red-500/20 flex items-center gap-2 text-red-100">
                     <Droplets className="w-4 h-4" />
                     {profile.blood_group}
                   </span>

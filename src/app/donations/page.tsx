@@ -217,21 +217,21 @@ export default function DonationsPage() {
   return (
     <div className="min-h-screen bg-slate-50">
       {/* Hero Section */}
-      <section className="relative py-20 overflow-hidden bg-gradient-to-br from-emerald-50 via-white to-teal-50">
-        <div className="absolute inset-0 opacity-30">
+      <section className="relative py-20 overflow-hidden bg-gradient-to-br from-emerald-900 to-slate-900">
+        <div className="absolute inset-0 opacity-20">
           <div className="absolute top-0 left-0 w-full h-full bg-[url('https://www.transparenttextures.com/patterns/cubes.png')]"></div>
         </div>
-        <div className="absolute top-20 right-20 w-72 h-72 bg-emerald-200 rounded-full blur-3xl opacity-30 animate-pulse"></div>
-        <div className="absolute bottom-10 left-10 w-96 h-96 bg-teal-200 rounded-full blur-3xl opacity-20 animate-pulse delay-700"></div>
+        <div className="absolute top-20 right-20 w-72 h-72 bg-emerald-500 rounded-full blur-3xl opacity-20 animate-pulse"></div>
+        <div className="absolute bottom-10 left-10 w-96 h-96 bg-teal-500 rounded-full blur-3xl opacity-10 animate-pulse delay-700"></div>
         
         <div className="container mx-auto px-4 relative z-10">
-          <div className="max-w-3xl mx-auto text-center">
-            <div className="inline-flex items-center gap-2 px-4 py-2 bg-emerald-100 rounded-full text-sm font-semibold mb-8 border border-emerald-200">
-              <Heart className="w-4 h-4 text-pink-500" />
-              <span className="text-emerald-700">100% Transparent Donations</span>
+          <div className="max-w-3xl mx-auto text-center text-white">
+            <div className="inline-flex items-center gap-2 px-4 py-2 bg-white/10 rounded-full text-sm font-semibold mb-8 backdrop-blur-md border border-white/20 shadow-lg">
+              <Heart className="w-4 h-4 text-pink-400" />
+              <span className="text-emerald-100">100% Transparent Donations</span>
             </div>
-            <h1 className="text-5xl md:text-6xl font-bold mb-6 tracking-tight text-gray-900">Support a Cause</h1>
-            <p className="text-xl text-gray-600 mb-10 leading-relaxed">
+            <h1 className="text-5xl md:text-6xl font-bold mb-6 tracking-tight">Support a Cause</h1>
+            <p className="text-xl text-emerald-100 mb-10 leading-relaxed">
               Every contribution matters. Help those in need with verified and transparent donation campaigns.
             </p>
             
@@ -242,9 +242,9 @@ export default function DonationsPage() {
                 { value: '25+', label: 'Lives Impacted' },
                 { value: '100%', label: 'Verified Cases' },
               ].map((stat, index) => (
-                <div key={index} className="bg-white/80 backdrop-blur-md rounded-2xl p-6 border border-emerald-100 hover:bg-white transition-all shadow-sm">
-                  <div className="text-3xl md:text-4xl font-bold text-emerald-600 mb-2">{stat.value}</div>
-                  <div className="text-sm text-gray-600 font-medium">{stat.label}</div>
+                <div key={index} className="bg-white/5 backdrop-blur-md rounded-2xl p-6 border border-white/10 hover:bg-white/10 transition-all">
+                  <div className="text-3xl md:text-4xl font-bold text-white mb-2">{stat.value}</div>
+                  <div className="text-sm text-emerald-200 font-medium">{stat.label}</div>
                 </div>
               ))}
             </div>
@@ -427,11 +427,11 @@ export default function DonationsPage() {
       </section>
 
       {/* How It Works */}
-      <section className="py-20 bg-gradient-to-br from-emerald-50 to-teal-50">
+      <section className="py-20 bg-slate-900 text-white">
         <div className="container mx-auto px-4">
           <div className="text-center mb-16">
-            <h2 className="text-3xl md:text-4xl font-bold mb-4 text-gray-900">How Donations Work</h2>
-            <p className="text-gray-600 max-w-2xl mx-auto">We ensure your donations reach the right people with complete transparency and security.</p>
+            <h2 className="text-3xl md:text-4xl font-bold mb-4">How Donations Work</h2>
+            <p className="text-slate-400 max-w-2xl mx-auto">We ensure your donations reach the right people with complete transparency and security.</p>
           </div>
           
           <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
@@ -442,14 +442,14 @@ export default function DonationsPage() {
               { step: '04', title: 'Track Impact', desc: 'See how your donation helps', icon: BarChart3 },
             ].map((item, index) => (
               <div key={index} className="relative group">
-                <div className="absolute -inset-4 bg-emerald-100/50 rounded-3xl opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
-                <div className="relative p-4 text-center bg-white rounded-2xl shadow-sm border border-gray-100">
-                  <div className="w-20 h-20 mx-auto bg-emerald-100 rounded-2xl flex items-center justify-center mb-6 text-emerald-600 group-hover:scale-110 transition-transform duration-300 border border-emerald-200">
+                <div className="absolute -inset-4 bg-white/5 rounded-3xl opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+                <div className="relative p-4 text-center">
+                  <div className="w-20 h-20 mx-auto bg-emerald-500/10 rounded-2xl flex items-center justify-center mb-6 text-emerald-500 group-hover:scale-110 transition-transform duration-300 border border-emerald-500/20">
                     <item.icon className="w-10 h-10" />
                   </div>
-                  <div className="text-sm font-bold text-emerald-600 mb-3 tracking-widest">STEP {item.step}</div>
-                  <h3 className="text-xl font-bold text-gray-900 mb-3">{item.title}</h3>
-                  <p className="text-gray-600 leading-relaxed">{item.desc}</p>
+                  <div className="text-sm font-bold text-emerald-500 mb-3 tracking-widest">STEP {item.step}</div>
+                  <h3 className="text-xl font-bold text-white mb-3">{item.title}</h3>
+                  <p className="text-slate-400 leading-relaxed">{item.desc}</p>
                 </div>
               </div>
             ))}
