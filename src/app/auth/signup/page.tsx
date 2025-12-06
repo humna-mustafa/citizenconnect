@@ -11,6 +11,7 @@ const initialState = {
 
 export default function SignUpPage() {
   const [state, formAction, isPending] = useActionState(signup, initialState)
+  const [supabaseTest, setSupabaseTest] = useState<string | null>(null)
   const [showPassword, setShowPassword] = useState(false)
   const [showConfirmPassword, setShowConfirmPassword] = useState(false)
   const [password, setPassword] = useState('')
@@ -103,6 +104,22 @@ export default function SignUpPage() {
     }
   }
 
+  // Development helper: test server-side Supabase connectivity
+  const runSupabaseTest = async () => {
+    try {
+      setSupabaseTest('testing...')
+      const res = await fetch('/api/supabase-test')
+      const json = await res.json()
+      if (!res.ok) {
+        setSupabaseTest(`Error: ${json?.error ?? res.statusText}`)
+      } else {
+        setSupabaseTest(`OK — rows: ${json.rows ?? 'n/a'}`)
+      }
+    } catch (err: any) {
+      setSupabaseTest(`Fetch failed: ${err?.message ?? err}`)
+    }
+  }
+
   return (
     <div className="min-h-screen flex items-center justify-center bg-slate-50 py-12 px-4 relative overflow-hidden">
       {/* Background Elements */}
@@ -150,6 +167,12 @@ export default function SignUpPage() {
           )}
 
           <form action={formAction} onSubmit={handleSubmit} className="space-y-5">
+            {process.env.NODE_ENV === 'development' && (
+              <div className="mb-4 text-sm">
+                <button type="button" onClick={runSupabaseTest} className="text-xs text-emerald-600 underline">Run Supabase connectivity test</button>
+                {supabaseTest && <p className="mt-2 text-xs text-slate-500">{supabaseTest}</p>}
+              </div>
+            )}
             <div>
               <label className="block text-sm font-semibold text-slate-700 mb-2">
                 Full Name <span className="text-red-500">*</span>

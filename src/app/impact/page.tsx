@@ -137,7 +137,7 @@ export default function ImpactPage() {
   ]
 
   return (
-    <div className="min-h-screen bg-background">
+    <div className="min-h-screen bg-gradient-to-b from-white via-emerald-50/30 to-white">
       {/* Academic Banner */}
       <section className="bg-gradient-to-r from-emerald-600 to-teal-600 py-3">
         <div className="container mx-auto px-4">
@@ -197,7 +197,7 @@ export default function ImpactPage() {
               },
               { 
                 icon: Heart, 
-                value: `PKR ${(stats.total_donation_amount / 1000).toFixed(0)}K+`, 
+                value: `PKR ${stats.total_donation_amount.toLocaleString()}+`, 
                 label: 'Donations Raised', 
                 color: 'from-pink-500 to-rose-600',
                 desc: 'For verified causes'
@@ -212,21 +212,21 @@ export default function ImpactPage() {
             ].map((stat, index) => (
               <div 
                 key={index} 
-                className="bg-card rounded-2xl p-6 shadow-xl border border-border hover:shadow-2xl transition-all group relative overflow-hidden"
+                className="bg-white rounded-2xl p-6 shadow-xl border border-emerald-100 hover:shadow-2xl transition-all group relative overflow-hidden"
               >
                 <div className={`absolute inset-0 bg-gradient-to-br ${stat.color} opacity-0 group-hover:opacity-5 transition-opacity`}></div>
                 <div className={`w-12 h-12 rounded-xl bg-gradient-to-br ${stat.color} flex items-center justify-center mb-4 shadow-lg`}>
                   <stat.icon className="w-6 h-6 text-white" />
                 </div>
-                <div className="text-3xl md:text-4xl font-bold text-foreground mb-1">
+                <div className="text-3xl md:text-4xl font-bold text-slate-900 mb-1">
                   {loading ? (
-                    <div className="h-10 w-20 bg-muted animate-pulse rounded"></div>
+                    <div className="h-10 w-20 bg-emerald-100 animate-pulse rounded"></div>
                   ) : (
                     typeof stat.value === 'number' ? stat.value.toLocaleString() : stat.value
                   )}
                 </div>
-                <div className="text-sm font-semibold text-foreground mb-1">{stat.label}</div>
-                <div className="text-xs text-muted-foreground">{stat.desc}</div>
+                <div className="text-sm font-semibold text-slate-900 mb-1">{stat.label}</div>
+                <div className="text-xs text-slate-500">{stat.desc}</div>
               </div>
             ))}
           </div>
@@ -234,30 +234,30 @@ export default function ImpactPage() {
       </section>
 
       {/* Impact Areas */}
-      <section className="py-20 bg-muted/30">
+      <section className="py-20 bg-emerald-50/50">
         <div className="container mx-auto px-4">
           <div className="text-center max-w-2xl mx-auto mb-16">
-            <h2 className="text-3xl font-bold text-foreground mb-4">Areas of Impact</h2>
-            <p className="text-muted-foreground">
+            <h2 className="text-3xl font-bold text-slate-900 mb-4">Areas of Impact</h2>
+            <p className="text-slate-600">
               CitizenConnect addresses critical civic needs through four key focus areas.
             </p>
           </div>
 
           <div className="grid md:grid-cols-2 gap-8 max-w-5xl mx-auto">
             {impactAreas.map((area, index) => (
-              <div key={index} className="bg-card rounded-2xl p-8 border border-border hover:shadow-lg transition-all group">
+              <div key={index} className="bg-white rounded-2xl p-8 border border-emerald-100 hover:shadow-lg transition-all group">
                 <div className="flex items-start gap-4">
                   <div className={`w-14 h-14 ${area.color} rounded-2xl flex items-center justify-center shrink-0 group-hover:scale-110 transition-transform`}>
                     <area.icon className="w-7 h-7 text-white" />
                   </div>
                   <div className="flex-1">
-                    <h3 className="text-xl font-bold text-foreground mb-2">{area.title}</h3>
-                    <p className="text-muted-foreground mb-4">{area.description}</p>
+                    <h3 className="text-xl font-bold text-slate-900 mb-2">{area.title}</h3>
+                    <p className="text-slate-600 mb-4">{area.description}</p>
                     <div className="flex items-center gap-2">
-                      <span className="text-3xl font-bold text-foreground">
+                      <span className="text-3xl font-bold text-slate-900">
                         {loading ? '...' : area.stat.toLocaleString()}
                       </span>
-                      <span className="text-sm text-muted-foreground">{area.label}</span>
+                      <span className="text-sm text-slate-500">{area.label}</span>
                     </div>
                   </div>
                 </div>
@@ -275,8 +275,8 @@ export default function ImpactPage() {
               <Globe className="w-4 h-4" />
               United Nations Sustainable Development Goals
             </div>
-            <h2 className="text-3xl font-bold text-foreground mb-4">Aligned with Global Goals</h2>
-            <p className="text-muted-foreground">
+            <h2 className="text-3xl font-bold text-slate-900 mb-4">Aligned with Global Goals</h2>
+            <p className="text-slate-600">
               CitizenConnect contributes to multiple UN Sustainable Development Goals, 
               demonstrating the global relevance of local civic action.
             </p>
@@ -286,13 +286,13 @@ export default function ImpactPage() {
             {sdgGoals.map((goal, index) => (
               <div 
                 key={index}
-                className="bg-card rounded-2xl p-6 border border-border hover:shadow-lg transition-all group flex-1 min-w-[200px] max-w-[280px]"
+                className="bg-white rounded-2xl p-6 border border-emerald-100 hover:shadow-lg transition-all group flex-1 min-w-[200px] max-w-[280px]"
               >
                 <div className="w-14 h-14 bg-gradient-to-br from-blue-500 to-blue-600 rounded-xl flex items-center justify-center mb-4 text-white font-bold text-xl group-hover:scale-110 transition-transform">
                   {goal.number}
                 </div>
-                <h3 className="font-bold text-foreground mb-2">{goal.title}</h3>
-                <p className="text-sm text-muted-foreground">{goal.desc}</p>
+                <h3 className="font-bold text-slate-900 mb-2">{goal.title}</h3>
+                <p className="text-sm text-slate-600">{goal.desc}</p>
               </div>
             ))}
           </div>
@@ -352,16 +352,16 @@ export default function ImpactPage() {
       </section>
 
       {/* Project Context */}
-      <section className="py-20 bg-gradient-to-br from-emerald-50 to-teal-50 dark:from-emerald-950/30 dark:to-teal-950/30">
+      <section className="py-20 bg-gradient-to-br from-emerald-50 to-teal-50">
         <div className="container mx-auto px-4">
           <div className="max-w-4xl mx-auto">
-            <div className="bg-white dark:bg-slate-900 rounded-3xl p-8 md:p-12 shadow-xl border border-emerald-100 dark:border-emerald-900">
+            <div className="bg-white rounded-3xl p-8 md:p-12 shadow-xl border border-emerald-100">
               <div className="text-center mb-8">
-                <div className="w-20 h-20 bg-emerald-100 dark:bg-emerald-900/50 rounded-full flex items-center justify-center mx-auto mb-6">
+                <div className="w-20 h-20 bg-emerald-100 rounded-full flex items-center justify-center mx-auto mb-6">
                   <GraduationCap className="w-10 h-10 text-emerald-600" />
                 </div>
-                <h2 className="text-3xl font-bold text-foreground mb-4">Academic Context</h2>
-                <p className="text-muted-foreground max-w-2xl mx-auto">
+                <h2 className="text-3xl font-bold text-slate-900 mb-4">Academic Context</h2>
+                <p className="text-slate-600 max-w-2xl mx-auto">
                   This project demonstrates how technology can drive meaningful social impact 
                   while fulfilling academic requirements for civic education.
                 </p>
@@ -369,34 +369,34 @@ export default function ImpactPage() {
 
               <div className="grid md:grid-cols-2 gap-8">
                 <div className="space-y-4">
-                  <h3 className="font-bold text-foreground text-lg">Course Details</h3>
+                  <h3 className="font-bold text-slate-900 text-lg">Course Details</h3>
                   <div className="space-y-3">
-                    <div className="flex items-center gap-3 p-3 bg-muted/50 rounded-xl">
+                    <div className="flex items-center gap-3 p-3 bg-emerald-50 rounded-xl">
                       <BookOpen className="w-5 h-5 text-emerald-600" />
                       <div>
-                        <p className="font-medium text-foreground">Course Name</p>
-                        <p className="text-sm text-muted-foreground">Civics and Community Engagement</p>
+                        <p className="font-medium text-slate-900">Course Name</p>
+                        <p className="text-sm text-slate-600">Civics and Community Engagement</p>
                       </div>
                     </div>
-                    <div className="flex items-center gap-3 p-3 bg-muted/50 rounded-xl">
+                    <div className="flex items-center gap-3 p-3 bg-emerald-50 rounded-xl">
                       <Award className="w-5 h-5 text-emerald-600" />
                       <div>
-                        <p className="font-medium text-foreground">Supervisor</p>
-                        <p className="text-sm text-muted-foreground">Prof. Ayesha Aqeel</p>
+                        <p className="font-medium text-slate-900">Supervisor</p>
+                        <p className="text-sm text-slate-600">Prof. Ayesha Aqeel</p>
                       </div>
                     </div>
-                    <div className="flex items-center gap-3 p-3 bg-muted/50 rounded-xl">
+                    <div className="flex items-center gap-3 p-3 bg-emerald-50 rounded-xl">
                       <Calendar className="w-5 h-5 text-emerald-600" />
                       <div>
-                        <p className="font-medium text-foreground">Semester</p>
-                        <p className="text-sm text-muted-foreground">Fall 2025</p>
+                        <p className="font-medium text-slate-900">Semester</p>
+                        <p className="text-sm text-slate-600">Fall 2025</p>
                       </div>
                     </div>
                   </div>
                 </div>
 
                 <div className="space-y-4">
-                  <h3 className="font-bold text-foreground text-lg">Project Objectives</h3>
+                  <h3 className="font-bold text-slate-900 text-lg">Project Objectives</h3>
                   <div className="space-y-2">
                     {[
                       'Apply civic knowledge through practical technology',
@@ -407,15 +407,15 @@ export default function ImpactPage() {
                     ].map((obj, i) => (
                       <div key={i} className="flex items-start gap-2">
                         <CheckCircle2 className="w-5 h-5 text-emerald-600 shrink-0 mt-0.5" />
-                        <p className="text-sm text-muted-foreground">{obj}</p>
+                        <p className="text-sm text-slate-600">{obj}</p>
                       </div>
                     ))}
                   </div>
                 </div>
               </div>
 
-              <div className="mt-8 pt-8 border-t border-border">
-                <h3 className="font-bold text-foreground text-lg mb-4 text-center">Development Team</h3>
+              <div className="mt-8 pt-8 border-t border-emerald-100">
+                <h3 className="font-bold text-slate-900 text-lg mb-4 text-center">Development Team</h3>
                 <div className="flex flex-wrap justify-center gap-4">
                   {[
                     { name: 'Humna Mustafa', roll: 'FA25-BSE-051', role: 'Lead Developer', highlight: true },
@@ -427,13 +427,13 @@ export default function ImpactPage() {
                       key={i} 
                       className={`px-4 py-3 rounded-xl text-center ${
                         member.highlight 
-                          ? 'bg-emerald-100 dark:bg-emerald-900/50 border-2 border-emerald-300 dark:border-emerald-700' 
-                          : 'bg-muted/50'
+                          ? 'bg-gradient-to-br from-emerald-100 to-teal-100 border-2 border-emerald-400 shadow-lg shadow-emerald-500/30 ring-2 ring-emerald-300/50' 
+                          : 'bg-emerald-50/50'
                       }`}
                     >
-                      <p className="font-bold text-foreground text-sm">{member.name}</p>
-                      <p className="text-xs text-muted-foreground">{member.roll}</p>
-                      <p className={`text-xs font-medium mt-1 ${member.highlight ? 'text-emerald-600' : 'text-primary'}`}>
+                      <p className={`font-bold text-sm ${member.highlight ? 'text-emerald-700' : 'text-slate-900'}`}>{member.name}</p>
+                      <p className="text-xs text-slate-500">{member.roll}</p>
+                      <p className={`text-xs font-medium mt-1 ${member.highlight ? 'text-emerald-600' : 'text-emerald-600'}`}>
                         {member.role}
                       </p>
                     </div>

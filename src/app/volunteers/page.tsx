@@ -295,9 +295,9 @@ export default function VolunteersPage() {
             {/* Quick Stats */}
             <div className="grid grid-cols-3 gap-6 max-w-2xl mx-auto">
               {[
-                { value: '5k+', label: 'Volunteers' },
-                { value: '100+', label: 'Events' },
-                { value: '10k+', label: 'Hours Given' },
+                { value: '50+', label: 'Volunteers' },
+                { value: '25+', label: 'Events' },
+                { value: '500+', label: 'Hours Given' },
               ].map((stat, index) => (
                 <div key={index} className="bg-white/5 backdrop-blur-xl rounded-2xl p-6 border border-white/10 hover:bg-white/10 transition-all">
                   <div className="text-3xl md:text-4xl font-bold text-white mb-2">{stat.value}</div>

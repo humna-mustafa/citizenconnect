@@ -94,6 +94,8 @@ export default function SearchBar({
           className={`w-full ${sizeClasses[size]} pl-12 pr-4 bg-background text-black border-2 border-input rounded-xl focus:border-primary focus:ring-4 focus:ring-primary/10 outline-none transition-all ${size === 'lg' ? 'shadow-xl' : 'shadow-md'}`}
         />
         <button
+          type="button"
+          aria-label="Search guides"
           onClick={() => handleSearch(query)}
           className={`absolute right-2 top-1/2 -translate-y-1/2 bg-primary text-primary-foreground rounded-lg font-semibold hover:shadow-lg transition-all ${
             size === 'lg' ? 'px-6 py-2.5' : 'px-4 py-2 text-sm'
@@ -114,6 +116,7 @@ export default function SearchBar({
               <button
                 key={index}
                 onClick={() => {
+                  // Immediately navigate to guides with the selected suggestion
                   setQuery(suggestion)
                   handleSearch(suggestion)
                 }}

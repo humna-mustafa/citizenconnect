@@ -29,10 +29,10 @@ export default function HeroSection() {
             <h1 className="text-5xl md:text-6xl font-bold text-white leading-tight mb-6 animate-in fade-in slide-in-from-bottom-5 delay-100">
               Empowering Pakistani Citizens
             </h1>
-            
+
             <p className="text-lg md:text-xl text-emerald-100/80 mb-8 max-w-xl mx-auto lg:mx-0 animate-in fade-in slide-in-from-bottom-6 delay-200">
-              Navigate government services with ease. Access step-by-step guides, connect with blood donors, 
-              find emergency help, and support verified campaigns. Let's build a stronger Pakistan together.
+              Your all‑in‑one platform for people across Pakistan. Access step‑by‑step guides, connect with verified blood donors,
+              get emergency help, and support verified campaigns — together we strengthen our communities.
             </p>
 
             {/* Search Bar */}
@@ -119,26 +119,27 @@ export default function HeroSection() {
                   <p className="text-xs text-blue-200/70">Impact Created</p>
                 </div>
               </div>
-              <div className="text-2xl font-bold text-white mb-1">PKR 100k+</div>
+              <div className="text-2xl font-bold text-white mb-1">PKR 100,000+</div>
               <p className="text-xs text-emerald-400">↑ Raised this month</p>
             </div>
           </div>
         </div>
 
         {/* Trusted By Section */}
-        <div className="mt-16 pt-16 border-t border-gray-200 relative">
-          <p className="mx-auto mb-8 text-sm font-medium uppercase tracking-wider relative z-20 inline-block bg-white/10 text-white px-4 py-2 rounded-full -mt-8">
-            Trusted by citizens across Pakistan
-          </p>
-          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4 justify-items-center mt-4">
-            {['Karachi', 'Lahore', 'Islamabad', 'Peshawar', 'Quetta', 'Multan'].map((city) => (
-              <div 
-                key={city}
-                className={`w-full max-w-[160px] px-4 py-3 border rounded-xl text-center transition-all duration-300 cursor-default group shadow-sm ${city === 'Multan' ? 'bg-emerald-600/10 border-emerald-500 text-emerald-100' : 'bg-white border-gray-200 text-gray-700 hover:bg-gray-50 group-hover:text-gray-900'}`}
-              >
-                <span className="text-lg font-semibold transition-colors">{city}</span>
-              </div>
-            ))}
+        <div className="mt-16 border-t border-white/10">
+          <div className="mx-auto max-w-4xl px-4 py-8 text-center bg-transparent backdrop-blur-sm rounded-xl">
+            <p className="text-slate-400 text-sm font-medium mb-4">Trusted by citizens across Pakistan</p>
+
+            <div className="flex flex-wrap justify-center gap-4 md:gap-6">
+              {['Karachi', 'Lahore', 'Islamabad', 'Peshawar', 'Quetta', 'Multan'].map((city) => (
+                <span
+                  key={city}
+                  className={`inline-flex items-center justify-center min-w-[110px] px-5 py-2.5 bg-white/10 border border-white/20 rounded-full text-white text-base font-medium transition-all duration-200 hover:bg-white/15 backdrop-blur-sm`}
+                >
+                  {city}
+                </span>
+              ))}
+            </div>
           </div>
         </div>
       </div>

@@ -24,7 +24,7 @@ const features = [
     icon: Coins,
     href: '/donations',
     color: 'text-amber-500 bg-amber-500/10',
-    stats: 'PKR 100K+ Raised'
+     stats: 'PKR 100,000+ Raised'
   },
   {
     title: 'Become a Volunteer',

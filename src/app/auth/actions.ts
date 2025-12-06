@@ -36,28 +36,33 @@ export async function signup(prevState: any, formData: FormData) {
   if (password !== confirmPassword) {
     return { error: 'Passwords do not match' }
   }
+  try {
+    const supabase = await createClient()
 
-  const supabase = await createClient()
-
-  const { error } = await supabase.auth.signUp({
-    email,
-    password,
-    options: {
-      data: {
-        full_name: fullName,
-        phone,
-        city,
-        role,
+    const { error } = await supabase.auth.signUp({
+      email,
+      password,
+      options: {
+        data: {
+          full_name: fullName,
+          phone,
+          city,
+          role,
+        },
+        emailRedirectTo: `${origin}/auth/callback`,
       },
-      emailRedirectTo: `${origin}/auth/callback`,
-    },
-  })
+    })
 
-  if (error) {
-    return { error: error.message }
+    if (error) {
+      console.error('Signup error (supabase):', error)
+      return { error: error.message || 'Signup failed' }
+    }
+
+    return { success: 'Check your email to continue sign in process' }
+  } catch (err: any) {
+    console.error('Unexpected signup error:', err?.message ?? err)
+    return { error: 'An unexpected error occurred while creating your account. Check server logs.' }
   }
-
-  return { success: 'Check your email to continue sign in process' }
 }
 
 export async function signout() {
