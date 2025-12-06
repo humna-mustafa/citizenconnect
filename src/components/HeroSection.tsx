@@ -126,17 +126,17 @@ export default function HeroSection() {
         </div>
 
         {/* Trusted By Section */}
-        <div className="mt-16 pt-16 border-t border-gray-200">
-          <p className="text-center text-gray-500 mb-8 text-sm font-medium uppercase tracking-wider">
+        <div className="mt-16 pt-16 border-t border-gray-200 relative">
+          <p className="mx-auto mb-8 text-sm font-medium uppercase tracking-wider relative z-20 inline-block bg-white/10 text-white px-4 py-2 rounded-full -mt-8">
             Trusted by citizens across Pakistan
           </p>
-          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4 justify-items-center">
+          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4 justify-items-center mt-4">
             {['Karachi', 'Lahore', 'Islamabad', 'Peshawar', 'Quetta', 'Multan'].map((city) => (
               <div 
-                key={city} 
-                className="w-full max-w-[160px] px-4 py-3 bg-white border border-gray-200 rounded-xl text-center hover:bg-gray-50 transition-all duration-300 cursor-default group shadow-sm"
+                key={city}
+                className={`w-full max-w-[160px] px-4 py-3 border rounded-xl text-center transition-all duration-300 cursor-default group shadow-sm ${city === 'Multan' ? 'bg-emerald-600/10 border-emerald-500 text-emerald-100' : 'bg-white border-gray-200 text-gray-700 hover:bg-gray-50 group-hover:text-gray-900'}`}
               >
-                <span className="text-lg font-semibold text-gray-700 group-hover:text-gray-900 transition-colors">{city}</span>
+                <span className="text-lg font-semibold transition-colors">{city}</span>
               </div>
             ))}
           </div>
