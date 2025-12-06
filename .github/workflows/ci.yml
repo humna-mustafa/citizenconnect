@@ -1,0 +1,37 @@
+name: CI
+
+on:
+  push:
+    branches: [ master ]
+  pull_request:
+    branches: [ master ]
+  schedule:
+    - cron: '0 3 * * 1' # weekly Monday 03:00 UTC
+
+jobs:
+  audit-and-build:
+    name: Audit & Build
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Use Node.js 20
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Run npm audit (fail on High+)
+        run: |
+          echo "Running npm audit (failing on high severity)..."
+          npm audit --audit-level=high || {
+            echo "Vulnerabilities of severity >= high detected. See audit report above.";
+            exit 1;
+          }
+
+      - name: Build (verify)
+        run: npm run build
