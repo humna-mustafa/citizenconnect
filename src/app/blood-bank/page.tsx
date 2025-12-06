@@ -263,7 +263,7 @@ export default function BloodBankPage() {
               ].map((stat, index) => (
                 <div key={index} className="bg-white/5 backdrop-blur-md rounded-2xl p-6 border border-white/10 hover:bg-white/10 transition-all">
                   <div className="text-3xl md:text-4xl font-bold text-white mb-2">{stat.value}</div>
-                  <div className="text-sm text-red-200 font-medium">{stat.label}</div>
+                  <div className="text-sm text-emerald-200 font-medium">{stat.label}</div>
                 </div>
               ))}
             </div>

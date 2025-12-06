@@ -24,7 +24,7 @@ export default function HeroSection() {
             </h1>
             
             <p className="text-lg md:text-xl text-gray-600 mb-8 max-w-xl mx-auto lg:mx-0 animate-in fade-in slide-in-from-bottom-6 delay-200">
-              Everything you need to make a difference. Access step-by-step guides, connect with blood donors, 
+              Navigate government services with ease. Access step-by-step guides, connect with blood donors, 
               find emergency help, and support verified campaigns. Let's build a stronger Pakistan together.
             </p>
 
@@ -76,7 +76,7 @@ export default function HeroSection() {
                 <div className="h-2 bg-gray-100 rounded-full overflow-hidden">
                   <div className="h-full bg-emerald-500 w-3/4"></div>
                 </div>
-                <p className="text-xs text-gray-500 text-right">150+ Active Volunteers</p>
+                <p className="text-xs text-gray-500 text-right">15+ Active Volunteers</p>
               </div>
             </div>
 
