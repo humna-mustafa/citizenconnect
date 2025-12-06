@@ -217,21 +217,31 @@ export default function DonationsPage() {
   return (
     <div className="min-h-screen bg-slate-50">
       {/* Hero Section */}
-      <section className="relative py-20 overflow-hidden bg-gradient-to-br from-emerald-600 via-teal-600 to-cyan-600">
-        <div className="absolute inset-0 opacity-20">
+      <section className="relative py-20 overflow-hidden bg-gradient-to-br from-slate-900 via-blue-950 to-slate-900">
+        {/* Gradient Mesh Background */}
+        <div className="absolute inset-0">
+          <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top_right,_var(--tw-gradient-stops))] from-blue-900/40 via-transparent to-transparent"></div>
+          <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_bottom_left,_var(--tw-gradient-stops))] from-indigo-900/30 via-transparent to-transparent"></div>
+        </div>
+        
+        {/* Subtle Pattern Overlay */}
+        <div className="absolute inset-0 opacity-10">
           <div className="absolute top-0 left-0 w-full h-full bg-[url('https://www.transparenttextures.com/patterns/cubes.png')]"></div>
         </div>
-        <div className="absolute top-20 right-20 w-72 h-72 bg-white rounded-full blur-3xl opacity-20 animate-pulse"></div>
-        <div className="absolute bottom-10 left-10 w-96 h-96 bg-emerald-400 rounded-full blur-3xl opacity-20 animate-pulse delay-700"></div>
+        
+        {/* Decorative Blur Elements */}
+        <div className="absolute top-20 right-20 w-72 h-72 bg-blue-500 rounded-full blur-3xl opacity-20 animate-pulse"></div>
+        <div className="absolute bottom-10 left-10 w-96 h-96 bg-indigo-500 rounded-full blur-3xl opacity-15 animate-pulse delay-700"></div>
+        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[500px] h-[500px] bg-blue-600 rounded-full blur-3xl opacity-10"></div>
         
         <div className="container mx-auto px-4 relative z-10">
           <div className="max-w-3xl mx-auto text-center text-white">
-            <div className="inline-flex items-center gap-2 px-4 py-2 bg-white/10 rounded-full text-sm font-semibold mb-8 backdrop-blur-md border border-white/20 shadow-lg">
-              <Heart className="w-4 h-4 text-white" />
-              <span className="text-emerald-100">100% Transparent Donations</span>
+            <div className="inline-flex items-center gap-2 px-4 py-2 bg-white/10 backdrop-blur-xl rounded-full text-sm font-semibold mb-8 border border-white/20 shadow-lg">
+              <Heart className="w-4 h-4 text-blue-400" />
+              <span className="text-blue-100/80">100% Transparent Donations</span>
             </div>
             <h1 className="text-5xl md:text-6xl font-bold mb-6 tracking-tight">Support a Cause</h1>
-            <p className="text-xl text-emerald-100 mb-10 leading-relaxed">
+            <p className="text-xl text-blue-100/80 mb-10 leading-relaxed">
               Every contribution matters. Help those in need with verified and transparent donation campaigns.
             </p>
             
@@ -242,9 +252,9 @@ export default function DonationsPage() {
                 { value: '25+', label: 'Lives Impacted' },
                 { value: '100%', label: 'Verified Cases' },
               ].map((stat, index) => (
-                <div key={index} className="bg-white/5 backdrop-blur-md rounded-2xl p-6 border border-white/10 hover:bg-white/10 transition-all">
+                <div key={index} className="bg-white/5 backdrop-blur-xl rounded-2xl p-6 border border-white/10 hover:bg-white/10 transition-all">
                   <div className="text-3xl md:text-4xl font-bold text-white mb-2">{stat.value}</div>
-                  <div className="text-sm text-emerald-200 font-medium">{stat.label}</div>
+                  <div className="text-sm text-blue-200/70 font-medium">{stat.label}</div>
                 </div>
               ))}
             </div>
