@@ -214,8 +214,14 @@ export default function ReportIssuePage() {
       <div className="container mx-auto px-4">
         {/* Community Stats Banner */}
         <div className="max-w-5xl mx-auto mb-10">
-          <div className="bg-gradient-to-r from-emerald-600 to-teal-600 rounded-2xl p-6 text-white">
-            <div className="flex flex-col md:flex-row items-center justify-between gap-6">
+          <div className="relative overflow-hidden bg-gradient-to-br from-emerald-600 via-teal-600 to-cyan-600 rounded-2xl p-6 text-white">
+            <div className="absolute inset-0 opacity-20">
+              <div className="absolute top-0 left-0 w-full h-full bg-[url('https://www.transparenttextures.com/patterns/cubes.png')]"></div>
+            </div>
+            <div className="absolute top-[-50px] right-[-50px] w-40 h-40 bg-white rounded-full blur-3xl opacity-20 animate-pulse"></div>
+            <div className="absolute bottom-[-50px] left-[-50px] w-40 h-40 bg-emerald-400 rounded-full blur-3xl opacity-20 animate-pulse delay-700"></div>
+            
+            <div className="relative z-10 flex flex-col md:flex-row items-center justify-between gap-6">
               <div>
                 <h2 className="text-xl font-bold mb-1">Community-Powered Issue Resolution</h2>
                 <p className="text-emerald-100 text-sm">Our volunteer mentors help resolve community issues</p>

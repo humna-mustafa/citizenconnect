@@ -223,11 +223,13 @@ export default function ProfilePage() {
   return (
     <div className="min-h-screen bg-slate-50">
       {/* Profile Header */}
-      <section className="bg-gradient-to-br from-emerald-900 to-slate-900 py-16 relative overflow-hidden">
-        <div className="absolute inset-0 opacity-10">
-          <div className="absolute top-10 right-10 w-64 h-64 bg-emerald-500 rounded-full blur-3xl animate-pulse"></div>
-          <div className="absolute bottom-10 left-10 w-80 h-80 bg-teal-500 rounded-full blur-3xl animate-pulse delay-700"></div>
+      <section className="relative py-16 overflow-hidden bg-gradient-to-br from-emerald-600 via-teal-600 to-cyan-600">
+        <div className="absolute inset-0 opacity-20">
+          <div className="absolute top-0 left-0 w-full h-full bg-[url('https://www.transparenttextures.com/patterns/cubes.png')]"></div>
         </div>
+        <div className="absolute top-20 right-20 w-72 h-72 bg-white rounded-full blur-3xl opacity-20 animate-pulse"></div>
+        <div className="absolute bottom-10 left-10 w-96 h-96 bg-emerald-400 rounded-full blur-3xl opacity-20 animate-pulse delay-700"></div>
+
         <div className="container mx-auto px-4 relative z-10">
           <div className="flex flex-col md:flex-row items-center gap-8">
             {/* Avatar */}
@@ -240,7 +242,7 @@ export default function ProfilePage() {
               <h1 className="text-3xl md:text-4xl font-bold mb-2">
                 {profile?.full_name || 'Welcome, User!'}
               </h1>
-              <p className="text-emerald-200 mb-4 font-medium">{user?.email}</p>
+              <p className="text-emerald-100 mb-4 font-medium">{user?.email}</p>
               <div className="flex flex-wrap justify-center md:justify-start gap-3">
                 <span className="px-4 py-1.5 bg-white/10 rounded-full text-sm backdrop-blur-sm border border-white/10 flex items-center gap-2">
                   <MapPin className="w-4 h-4" />

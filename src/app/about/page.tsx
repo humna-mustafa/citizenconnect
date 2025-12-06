@@ -79,13 +79,17 @@ export default function AboutPage() {
       </section>
 
       {/* Hero Section */}
-      <section className="relative py-20 overflow-hidden bg-primary">
-        <div className="absolute inset-0 bg-[url('/grid.svg')] opacity-10"></div>
-        <div className="absolute inset-0 bg-gradient-to-b from-primary/50 to-primary"></div>
+      <section className="relative py-20 overflow-hidden bg-gradient-to-br from-emerald-600 via-teal-600 to-cyan-600">
+        <div className="absolute inset-0 opacity-20">
+          <div className="absolute top-0 left-0 w-full h-full bg-[url('https://www.transparenttextures.com/patterns/cubes.png')]"></div>
+        </div>
+        <div className="absolute top-20 right-20 w-72 h-72 bg-white rounded-full blur-3xl opacity-20 animate-pulse"></div>
+        <div className="absolute bottom-10 left-10 w-96 h-96 bg-emerald-400 rounded-full blur-3xl opacity-20 animate-pulse delay-700"></div>
+
         <div className="container mx-auto px-4 relative z-10">
-          <div className="max-w-3xl mx-auto text-center text-primary-foreground">
+          <div className="max-w-3xl mx-auto text-center text-white">
             <h1 className="text-4xl md:text-6xl font-bold mb-6 tracking-tight">About CitizenConnect</h1>
-            <p className="text-xl text-primary-foreground/90 leading-relaxed">
+            <p className="text-xl text-emerald-100 leading-relaxed">
               Empowering Pakistani citizens with simplified access to government services, 
               emergency help, and community support.
             </p>

@@ -209,11 +209,12 @@ export default function GuideDetailPage() {
       </div>
 
       {/* Hero */}
-      <section className="bg-gradient-to-br from-emerald-900 to-slate-900 py-16 relative overflow-hidden">
+      <section className="relative py-16 overflow-hidden bg-gradient-to-br from-emerald-600 via-teal-600 to-cyan-600">
         <div className="absolute inset-0 opacity-20">
           <div className="absolute top-0 left-0 w-full h-full bg-[url('https://www.transparenttextures.com/patterns/cubes.png')]"></div>
         </div>
-        <div className="absolute top-20 right-20 w-72 h-72 bg-emerald-500 rounded-full blur-3xl opacity-20 animate-pulse"></div>
+        <div className="absolute top-20 right-20 w-72 h-72 bg-white rounded-full blur-3xl opacity-20 animate-pulse"></div>
+        <div className="absolute bottom-10 left-10 w-96 h-96 bg-emerald-400 rounded-full blur-3xl opacity-20 animate-pulse delay-700"></div>
         
         <div className="container mx-auto px-4 relative z-10">
           <div className="max-w-4xl">
@@ -221,19 +222,19 @@ export default function GuideDetailPage() {
               {guide.category}
             </span>
             <h1 className="text-3xl md:text-5xl font-bold text-white mb-6 leading-tight">{guide.title}</h1>
-            <p className="text-xl text-slate-300 mb-8 leading-relaxed max-w-3xl">{guide.description}</p>
+            <p className="text-xl text-emerald-100 mb-8 leading-relaxed max-w-3xl">{guide.description}</p>
             
             <div className="flex flex-wrap gap-6 text-white/90 text-sm font-medium">
               <span className="flex items-center gap-2 bg-white/5 px-4 py-2 rounded-lg border border-white/10">
-                <Clock className="w-4 h-4 text-emerald-400" />
+                <Clock className="w-4 h-4 text-white" />
                 {guide.estimated_time}
               </span>
               <span className="flex items-center gap-2 bg-white/5 px-4 py-2 rounded-lg border border-white/10">
-                <Coins className="w-4 h-4 text-emerald-400" />
+                <Coins className="w-4 h-4 text-white" />
                 {guide.fees}
               </span>
               <span className="flex items-center gap-2 bg-white/5 px-4 py-2 rounded-lg border border-white/10">
-                <Eye className="w-4 h-4 text-emerald-400" />
+                <Eye className="w-4 h-4 text-white" />
                 {guide.views.toLocaleString()} views
               </span>
             </div>

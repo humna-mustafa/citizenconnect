@@ -5,16 +5,23 @@ import { Home, Search, ArrowLeft, HelpCircle } from 'lucide-react'
 
 export default function NotFound() {
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-900 to-emerald-900 flex items-center justify-center px-4">
-      <div className="text-center">
+    <div className="min-h-screen bg-gradient-to-br from-emerald-600 via-teal-600 to-cyan-600 flex items-center justify-center px-4 relative overflow-hidden">
+      {/* Background Elements */}
+      <div className="absolute inset-0 opacity-20">
+        <div className="absolute top-0 left-0 w-full h-full bg-[url('https://www.transparenttextures.com/patterns/cubes.png')]"></div>
+      </div>
+      <div className="absolute top-20 right-20 w-72 h-72 bg-white rounded-full blur-3xl opacity-20 animate-pulse"></div>
+      <div className="absolute bottom-10 left-10 w-96 h-96 bg-emerald-400 rounded-full blur-3xl opacity-20 animate-pulse delay-700"></div>
+
+      <div className="text-center relative z-10">
         {/* 404 Number */}
         <div className="relative mb-8">
           <h1 className="text-[150px] md:text-[200px] font-bold text-white/10 leading-none select-none">
             404
           </h1>
           <div className="absolute inset-0 flex items-center justify-center">
-            <div className="w-32 h-32 md:w-40 md:h-40 bg-emerald-500/20 rounded-full flex items-center justify-center backdrop-blur-sm border border-emerald-500/30">
-              <Search className="w-16 h-16 md:w-20 md:h-20 text-emerald-400" />
+            <div className="w-32 h-32 md:w-40 md:h-40 bg-white/20 rounded-full flex items-center justify-center backdrop-blur-sm border border-white/30">
+              <Search className="w-16 h-16 md:w-20 md:h-20 text-white" />
             </div>
           </div>
         </div>
@@ -23,7 +30,7 @@ export default function NotFound() {
         <h2 className="text-3xl md:text-4xl font-bold text-white mb-4">
           Page Not Found
         </h2>
-        <p className="text-lg text-slate-300 mb-8 max-w-md mx-auto">
+        <p className="text-lg text-emerald-100 mb-8 max-w-md mx-auto">
           Sorry, the page you're looking for doesn't exist or has been moved. 
           Let's get you back on track.
         </p>

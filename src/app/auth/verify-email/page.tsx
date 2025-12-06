@@ -6,9 +6,10 @@ export default function VerifyEmailPage() {
     <div className="min-h-screen flex items-center justify-center bg-slate-50 py-12 px-4 relative overflow-hidden">
       {/* Background Elements */}
       <div className="absolute inset-0 z-0">
-        <div className="absolute top-0 left-0 w-full h-96 bg-gradient-to-b from-emerald-900 to-slate-900"></div>
-        <div className="absolute top-20 right-20 w-72 h-72 bg-emerald-500 rounded-full blur-3xl opacity-20 animate-pulse"></div>
-        <div className="absolute top-40 left-20 w-60 h-60 bg-teal-500 rounded-full blur-3xl opacity-20 animate-pulse delay-700"></div>
+        <div className="absolute top-0 left-0 w-full h-96 bg-gradient-to-br from-emerald-600 via-teal-600 to-cyan-600"></div>
+        <div className="absolute top-0 left-0 w-full h-full bg-[url('https://www.transparenttextures.com/patterns/cubes.png')] opacity-20"></div>
+        <div className="absolute top-20 right-20 w-72 h-72 bg-white rounded-full blur-3xl opacity-20 animate-pulse"></div>
+        <div className="absolute top-40 left-20 w-60 h-60 bg-emerald-400 rounded-full blur-3xl opacity-20 animate-pulse delay-700"></div>
       </div>
 
       <div className="w-full max-w-md text-center relative z-10">

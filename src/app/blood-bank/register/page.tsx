@@ -113,10 +113,13 @@ export default function BloodBankRegisterPage() {
   return (
     <div className="min-h-screen bg-slate-50">
       {/* Hero */}
-      <section className="relative py-16 overflow-hidden bg-gradient-to-br from-red-900 to-slate-900">
+      <section className="relative py-16 overflow-hidden bg-gradient-to-br from-emerald-600 via-teal-600 to-cyan-600">
         <div className="absolute inset-0 opacity-20">
-          <div className="absolute top-20 right-20 w-72 h-72 bg-red-500 rounded-full blur-3xl animate-pulse"></div>
+          <div className="absolute top-0 left-0 w-full h-full bg-[url('https://www.transparenttextures.com/patterns/cubes.png')]"></div>
         </div>
+        <div className="absolute top-20 right-20 w-72 h-72 bg-white rounded-full blur-3xl opacity-20 animate-pulse"></div>
+        <div className="absolute bottom-10 left-10 w-96 h-96 bg-emerald-400 rounded-full blur-3xl opacity-20 animate-pulse delay-700"></div>
+
         <div className="container mx-auto px-4 relative z-10">
           <Link
             href="/blood-bank"
@@ -127,13 +130,13 @@ export default function BloodBankRegisterPage() {
           </Link>
           <div className="max-w-2xl">
             <div className="inline-flex items-center gap-2 px-4 py-2 bg-white/10 rounded-full text-sm font-semibold mb-6 backdrop-blur-md border border-white/20">
-              <Heart className="w-4 h-4 text-red-400 animate-pulse" />
-              <span className="text-red-100">Save Lives</span>
+              <Heart className="w-4 h-4 text-white animate-pulse" />
+              <span className="text-emerald-100">Save Lives</span>
             </div>
             <h1 className="text-4xl md:text-5xl font-bold text-white mb-4">
               Register as Blood Donor
             </h1>
-            <p className="text-xl text-slate-300">
+            <p className="text-xl text-emerald-100">
               Join our network of life-savers. Your blood donation can save up to 3 lives.
             </p>
           </div>
