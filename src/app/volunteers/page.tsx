@@ -263,47 +263,42 @@ export default function VolunteersPage() {
   return (
     <div className="min-h-screen bg-slate-50">
       {/* Hero Section */}
-      <section className="relative py-20 overflow-hidden bg-gradient-to-br from-slate-900 via-purple-950 to-slate-900">
+      <section className="relative py-20 overflow-hidden bg-gradient-to-b from-slate-900 via-slate-800 to-slate-900">
         {/* Gradient Mesh Background */}
         <div className="absolute inset-0">
-          <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top_right,_var(--tw-gradient-stops))] from-purple-900/40 via-transparent to-transparent"></div>
-          <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_bottom_left,_var(--tw-gradient-stops))] from-violet-900/30 via-transparent to-transparent"></div>
+          <div className="absolute inset-0 bg-[radial-gradient(at_40%_20%,_rgba(168,85,247,0.15)_0px,_transparent_50%)]"></div>
+          <div className="absolute inset-0 bg-[radial-gradient(at_80%_0%,_rgba(139,92,246,0.1)_0px,_transparent_50%)]"></div>
         </div>
         
         {/* Subtle Pattern Overlay */}
         <div className="absolute inset-0 opacity-10">
           <div className="absolute top-0 left-0 w-full h-full bg-[url('https://www.transparenttextures.com/patterns/cubes.png')]"></div>
         </div>
-        
-        {/* Decorative Blur Elements */}
-        <div className="absolute top-20 right-20 w-72 h-72 bg-purple-500 rounded-full blur-3xl opacity-20 animate-pulse"></div>
-        <div className="absolute bottom-10 left-10 w-96 h-96 bg-violet-500 rounded-full blur-3xl opacity-15 animate-pulse delay-700"></div>
-        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[500px] h-[500px] bg-purple-600 rounded-full blur-3xl opacity-10"></div>
 
         <div className="container mx-auto px-4 relative z-10">
           <div className="max-w-3xl mx-auto text-center text-white">
-            <div className="inline-flex items-center gap-2 px-4 py-2 bg-white/10 backdrop-blur-xl rounded-full text-sm font-medium mb-6 border border-white/20">
+            <div className="inline-flex items-center gap-2 px-4 py-2 bg-white/5 backdrop-blur-md rounded-full text-sm font-medium mb-6 border border-white/10">
               <Handshake className="w-4 h-4 text-purple-400" />
-              <span className="text-purple-100/80">Join 15+ Active Volunteers</span>
+              <span className="text-purple-300">Join 15+ Active Volunteers</span>
             </div>
-            <h1 className="text-4xl md:text-5xl font-bold mb-6 leading-tight">
+            <h1 className="text-4xl md:text-5xl font-bold mb-6 leading-tight text-white">
               Volunteer Network
             </h1>
-            <p className="text-xl text-purple-100/80 mb-10 leading-relaxed">
+            <p className="text-xl text-slate-300 mb-10 leading-relaxed">
               Connect with volunteers or become one yourself. Make a difference in your community through your skills and time.
             </p>
             
             <div className="flex flex-wrap justify-center gap-4">
               <button
                 onClick={() => setShowRegistrationForm(true)}
-                className="px-8 py-4 bg-purple-500 text-white font-bold rounded-xl hover:bg-purple-400 transition-all shadow-lg shadow-purple-500/30 flex items-center gap-2"
+                className="px-8 py-4 bg-emerald-500 text-white font-bold rounded-xl hover:bg-emerald-600 transition-all shadow-lg shadow-emerald-500/30 flex items-center gap-2"
               >
                 <Heart className="w-5 h-5" />
                 Become a Volunteer
               </button>
               <a
                 href="#find-volunteer"
-                className="px-8 py-4 bg-white/10 backdrop-blur-xl text-white font-bold rounded-xl hover:bg-white/20 transition-all border border-white/20 flex items-center gap-2"
+                className="px-8 py-4 bg-white/10 backdrop-blur-md text-white font-bold rounded-xl hover:bg-white/20 transition-all border border-white/10 flex items-center gap-2"
               >
                 <Search className="w-5 h-5" />
                 Find Volunteers

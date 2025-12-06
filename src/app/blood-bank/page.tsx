@@ -236,11 +236,11 @@ export default function BloodBankPage() {
   return (
     <div className="min-h-screen bg-slate-50">
       {/* Hero Section */}
-      <section className="relative py-20 overflow-hidden bg-gradient-to-br from-slate-900 via-red-950 to-slate-900">
+      <section className="relative py-20 overflow-hidden bg-gradient-to-b from-slate-900 via-slate-800 to-slate-900">
         {/* Gradient Mesh Background */}
         <div className="absolute inset-0">
-          <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top_right,_var(--tw-gradient-stops))] from-red-900/40 via-transparent to-transparent"></div>
-          <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_bottom_left,_var(--tw-gradient-stops))] from-rose-900/30 via-transparent to-transparent"></div>
+          <div className="absolute inset-0 bg-[radial-gradient(at_40%_20%,_rgba(239,68,68,0.15)_0px,_transparent_50%)]"></div>
+          <div className="absolute inset-0 bg-[radial-gradient(at_80%_0%,_rgba(244,63,94,0.1)_0px,_transparent_50%)]"></div>
         </div>
         
         {/* Subtle Pattern Overlay */}
@@ -248,18 +248,13 @@ export default function BloodBankPage() {
           <div className="absolute top-0 left-0 w-full h-full bg-[url('https://www.transparenttextures.com/patterns/cubes.png')]"></div>
         </div>
         
-        {/* Decorative Blur Elements */}
-        <div className="absolute top-20 right-20 w-72 h-72 bg-red-500 rounded-full blur-3xl opacity-20 animate-pulse"></div>
-        <div className="absolute bottom-10 left-10 w-96 h-96 bg-rose-500 rounded-full blur-3xl opacity-15 animate-pulse delay-700"></div>
-        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[500px] h-[500px] bg-red-600 rounded-full blur-3xl opacity-10"></div>
-        
         <div className="container mx-auto px-4 relative z-10">
           <div className="max-w-3xl mx-auto text-center text-white">
-            <div className="w-24 h-24 bg-white/10 backdrop-blur-xl rounded-full flex items-center justify-center mx-auto mb-8 border border-white/20 shadow-2xl shadow-red-900/50">
-              <Droplets className="w-12 h-12 text-red-400" />
+            <div className="w-24 h-24 bg-white/5 backdrop-blur-md rounded-full flex items-center justify-center mx-auto mb-8 border border-white/10 shadow-2xl">
+              <Droplets className="w-12 h-12 text-red-500" />
             </div>
-            <h1 className="text-5xl md:text-6xl font-bold mb-6 tracking-tight">Blood Bank</h1>
-            <p className="text-xl text-red-100/80 mb-10 leading-relaxed">
+            <h1 className="text-5xl md:text-6xl font-bold mb-6 tracking-tight text-white">Blood Bank</h1>
+            <p className="text-xl text-slate-300 mb-10 leading-relaxed">
               Find blood donors, request blood, or register as a donor. <br className="hidden md:block" />
               Every drop counts in saving a life.
             </p>
@@ -271,9 +266,9 @@ export default function BloodBankPage() {
                 { value: '25+', label: 'Lives Saved' },
                 { value: '24/7', label: 'Available' },
               ].map((stat, index) => (
-                <div key={index} className="bg-white/5 backdrop-blur-xl rounded-2xl p-6 border border-white/10 hover:bg-white/10 transition-all">
+                <div key={index} className="bg-white/5 backdrop-blur-md rounded-2xl p-6 border border-white/10 hover:bg-white/10 transition-all">
                   <div className="text-3xl md:text-4xl font-bold text-white mb-2">{stat.value}</div>
-                  <div className="text-sm text-red-200/70 font-medium">{stat.label}</div>
+                  <div className="text-sm text-slate-400 font-medium">{stat.label}</div>
                 </div>
               ))}
             </div>
