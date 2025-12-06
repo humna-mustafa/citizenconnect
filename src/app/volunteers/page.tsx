@@ -21,7 +21,8 @@ import {
   Truck, 
   Siren,
   Filter,
-  Loader2
+  Loader2,
+  HeartHandshake
 } from 'lucide-react'
 
 interface Volunteer {
@@ -283,7 +284,7 @@ export default function VolunteersPage() {
         <div className="container mx-auto px-4 relative z-10">
           <div className="max-w-3xl mx-auto text-center text-white">
             <div className="w-24 h-24 bg-white/10 backdrop-blur-xl rounded-full flex items-center justify-center mx-auto mb-8 border border-white/20 shadow-2xl shadow-purple-900/50">
-              <HandHeart className="w-12 h-12 text-purple-400" />
+              <HeartHandshake className="w-12 h-12 text-purple-400" />
             </div>
             <h1 className="text-5xl md:text-6xl font-bold mb-6 tracking-tight">Join Our Community</h1>
             <p className="text-xl text-purple-100/80 mb-10 leading-relaxed">
